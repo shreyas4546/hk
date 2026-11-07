@@ -1,0 +1,6 @@
+{
+  "name": "HackIgnite 1.0",
+  "description": "National Level 24-Hour Hackathon - Beyond Innovation. Futuristic cosmic hackathon platform with immersive 3D space aesthetics and registration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
