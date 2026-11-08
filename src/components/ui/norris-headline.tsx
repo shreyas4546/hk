@@ -15,21 +15,17 @@ function processText(text: string, counter: { index: number }) {
   return tokens.map((token, tIdx) => {
     if (!token) return null;
 
-    // Handle whitespace token
+    // Handle whitespace token: allows natural line wrapping between words
     if (/^\s+$/.test(token)) {
-      return Array.from(token).map((_, sIdx) => {
-        const curIndex = counter.index++;
-        return (
-          <span
-            key={`sp-${tIdx}-${sIdx}`}
-            className="norris-space inline-block"
-            data-char=" "
-            style={{ "--index": curIndex } as React.CSSProperties}
-          >
-            &nbsp;
-          </span>
-        );
-      });
+      counter.index += token.length;
+      return (
+        <span
+          key={`sp-${tIdx}`}
+          className="norris-space inline"
+        >
+          {" "}
+        </span>
+      );
     }
 
     // Word token: wrap word so it never breaks in the middle across responsive lines
@@ -111,9 +107,8 @@ export const NorrisHeadline: React.FC<NorrisHeadlineProps> = ({
 
   return (
     <Tag
-      className={`norris norris-headline cursor-pointer select-none transition-colors duration-200 ${
-        isActive ? "is-active" : ""
-      } ${className}`}
+      className={`norris norris-headline cursor-pointer select-none transition-colors duration-200 ${isActive ? "is-active" : ""
+        } ${className}`}
       style={
         {
           "--animation-time": `${animationTime}ms`,
