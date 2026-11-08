@@ -13,9 +13,8 @@ import {
   ArrowRight,
   Globe,
   Smartphone,
-  Trophy,
 } from "lucide-react";
-import { OFFICIAL_RULES, TRACKS, PRIZE_DETAILS } from "../data/eventData";
+import { OFFICIAL_RULES, TRACKS } from "../data/eventData";
 import NorrisHeadline from "./ui/norris-headline";
 
 interface TracksRulesSectionProps {
@@ -234,50 +233,6 @@ export default function TracksRulesSection({ onOpenRegister }: TracksRulesSectio
                 </div>
               );
             })}
-          </div>
-
-          {/* =========================================================================
-              ONE HACKATHON. ONE SHARED PRIZE POOL (CENTRAL SHARED EVENT BOUNTY)
-              ========================================================================= */}
-          <div className="mt-8 sm:mt-10 relative rounded-3xl bg-gradient-to-b from-[#07131C] via-[#04080D] to-[#07131C] border border-[#00C8E8]/40 p-6 sm:p-8 lg:p-9 shadow-[0_0_35px_rgba(0,200,232,0.15)] backdrop-blur-xl overflow-hidden">
-            {/* Subtle Electric Cyan Ambient Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 max-w-xl h-36 bg-[#00C8E8]/08 blur-[90px] pointer-events-none rounded-full" />
-
-            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10 text-center lg:text-left">
-              {/* Left Content: Badge, Heading & Supporting Text */}
-              <div className="flex-1 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00C8E8]/10 border border-[#00C8E8]/30 text-[11px] sm:text-xs font-mono text-[#8DEBFF] mb-3 shadow-[0_0_12px_rgba(0,200,232,0.12)]">
-                  <Trophy className="w-3.5 h-3.5 text-[#00C8E8]" />
-                  <span className="tracking-widest font-semibold uppercase">{PRIZE_DETAILS.placesToConquer}</span>
-                </div>
-
-                <h4 className="font-['Space_Grotesk'] font-bold text-xl sm:text-2xl lg:text-3xl text-white tracking-tight uppercase leading-tight mb-2.5">
-                  ONE HACKATHON. <span className="cyan-turquoise-text">ONE SHARED PRIZE POOL.</span>
-                </h4>
-
-                <p className="text-xs sm:text-sm text-[#A4B6BF] font-['Inter',sans-serif] leading-relaxed">
-                  {PRIZE_DETAILS.supportingText}
-                </p>
-              </div>
-
-              {/* Right Content: Prominent ₹40,000 Amount */}
-              <div className="flex flex-col items-center lg:items-end justify-center shrink-0 lg:pl-8 lg:border-l lg:border-white/10">
-                <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#8DEBFF]/80 mb-1">
-                  TOTAL EVENT REWARD POOL
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xs sm:text-sm font-['Space_Grotesk'] font-medium text-[#7E939E] lowercase self-center lg:self-baseline pb-1">
-                    (up to)
-                  </span>
-                  <span className="font-['Space_Grotesk'] font-black text-4xl sm:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-[#00C8E8] via-[#8DEBFF] to-[#F3F8FA] tracking-tight drop-shadow-[0_0_30px_rgba(0,200,232,0.45)]">
-                    ₹40,000
-                  </span>
-                </div>
-                <span className="text-[11px] font-mono text-[#A4B6BF] mt-1">
-                  Shared across both tracks
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       )}
