@@ -1,132 +1,273 @@
-import React, { useState } from "react";
-import { ArrowRight, Calendar, MapPin, Sparkles, Trophy } from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { ArrowRight, Calendar, MapPin, Play } from "lucide-react";
 import { EVENT_DETAILS } from "../data/eventData";
-import AstronautCanvas from "./AstronautCanvas";
+import FocusText from "./ui/focus-text";
+import NorrisHeadline from "./ui/norris-headline";
 
 interface HeroSectionProps {
   onOpenRegister: () => void;
 }
 
 export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const heroRef = useRef<HTMLElement | null>(null);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { clientX, clientY, currentTarget } = e;
-    const { width, height, left, top } = currentTarget.getBoundingClientRect();
-    const x = (clientX - left - width / 2) / (width / 2);
-    const y = (clientY - top - height / 2) / (height / 2);
-    setMousePos({ x, y });
+  // Interaction & motion states
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0, active: false });
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+
+  // Check device capabilities and motion preferences
+  useEffect(() => {
+    const touch = window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setIsTouchDevice(touch);
+    setPrefersReducedMotion(reducedMotion);
+
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleMotionChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    motionQuery.addEventListener("change", handleMotionChange);
+
+    return () => motionQuery.removeEventListener("change", handleMotionChange);
+  }, []);
+
+  // Handle video autoplay and fallback detection
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setAutoplayBlocked(false);
+        })
+        .catch(() => {
+          setAutoplayBlocked(true);
+        });
+    }
+  }, []);
+
+  // Mouse move handler for restrained parallax & subtle cursor lighting on desktop
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (isTouchDevice || prefersReducedMotion) return;
+      const hero = heroRef.current;
+      if (!hero) return;
+
+      const rect = hero.getBoundingClientRect();
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+
+      // Normalized coordinates from -1 to 1
+      const normX = (clientX - rect.width / 2) / (rect.width / 2);
+      const normY = (clientY - rect.height / 2) / (rect.height / 2);
+
+      // Restrained parallax: ±5px horizontal, ±3px vertical
+      setParallax({
+        x: Math.max(-5, Math.min(5, normX * 5)),
+        y: Math.max(-3, Math.min(3, normY * 3)),
+      });
+
+      setCursorPos({
+        x: clientX,
+        y: clientY,
+        active: true,
+      });
+    },
+    [isTouchDevice, prefersReducedMotion]
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    setParallax({ x: 0, y: 0 });
+    setCursorPos((prev) => ({ ...prev, active: false }));
+  }, []);
+
+  const handleManualPlay = () => {
+    if (videoRef.current) {
+      videoRef.current.play().then(() => setAutoplayBlocked(false));
+    }
   };
 
-  const handleMouseLeave = () => {
-    setMousePos({ x: 0, y: 0 });
+  const handleScrollToOverview = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const overviewSection = document.querySelector("#overview");
+    if (overviewSection) {
+      overviewSection.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
     <section
       id="hero"
+      ref={heroRef}
+      data-zero-gravity-exclude="true"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative min-h-[92vh] sm:min-h-screen flex flex-col justify-between pt-24 sm:pt-28 pb-12 sm:pb-16 px-3 sm:px-6 lg:px-8 overflow-hidden select-none"
+      className="relative z-10 w-full flex flex-col lg:min-h-screen lg:flex-row lg:items-center overflow-hidden bg-[#050708] select-none pt-16 lg:pt-0"
     >
-      {/* Background Radial Blue Nebulae */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[850px] h-[450px] bg-gradient-to-b from-[#20CFFF]/15 via-[#168BFF]/10 to-transparent blur-[120px] pointer-events-none rounded-full" />
-      <div className="absolute -top-32 -left-32 w-72 sm:w-96 h-72 sm:h-96 bg-[#168BFF]/15 blur-[100px] pointer-events-none rounded-full" />
-      <div className="absolute top-1/2 -right-32 w-72 sm:w-96 h-72 sm:h-96 bg-[#20CFFF]/10 blur-[120px] pointer-events-none rounded-full" />
+      {/* =========================================================================
+          ASTRONAUT VISUAL (MOBILE UPPER AREA) & DESKTOP CINEMATIC BACKGROUND
+          ========================================================================= */}
+      <div className="relative w-full h-[270px] xs:h-[300px] sm:h-[340px] lg:absolute lg:inset-0 lg:w-full lg:h-full lg:max-h-none overflow-hidden pointer-events-none z-0">
+        {/* Poster Image for zero layout-shift */}
+        <img
+          src="/videos/hero-poster.jpg"
+          alt="HackIgnite Astronaut in Deep Space"
+          className={`hero-media-cover absolute inset-0 w-full h-full transition-opacity duration-500 ease-out ${isVideoLoaded ? "opacity-0" : "opacity-100"
+            }`}
+          loading="eager"
+          decoding="async"
+        />
 
-      {/* Margins: Futuristic Numerical Step Markers (01, 02) */}
-      <div className="hidden lg:flex flex-col items-center gap-6 absolute right-6 xl:right-10 top-1/3 text-xs font-mono tracking-widest text-[#9AAFC1]/60">
-        <span className="text-[#8DEBFF] font-bold">01</span>
-        <div className="w-[1px] h-16 bg-gradient-to-b from-[#20CFFF] to-transparent" />
-        <span>02</span>
+        {/* Real-Time Seamless 4.88s Crossfaded Loop Video */}
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/videos/hero-poster.jpg"
+          onLoadedData={() => setIsVideoLoaded(true)}
+          onCanPlay={() => setIsVideoLoaded(true)}
+          aria-hidden="true"
+          className="hero-media-cover w-full h-full"
+          style={{
+            transform:
+              !prefersReducedMotion && !isTouchDevice
+                ? `translate3d(${-parallax.x * 0.35}px, ${-parallax.y * 0.25}px, 0) scale(1.02)`
+                : "none",
+            transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          <source src="/videos/hackignite-hero-loop.mp4" type="video/mp4" />
+        </video>
+
+        {/* Desktop directional overlay: dark on left for text readability, clear on right for astronaut */}
+        <div className="hidden lg:block absolute inset-0 bg-gradient-to-r from-[#050708] via-[#050708]/85 to-transparent via-50% z-10" />
+
+        {/* Mobile bottom gradient: smooth gradual dissolve into content background below */}
+        <div className="lg:hidden absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#050708] via-[#050708]/80 to-transparent z-10" />
+
+        {/* Top subtle shadow under header */}
+        <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-[#050708]/80 to-transparent z-10" />
+
+        {/* Desktop bottom section transition gradient */}
+        <div className="hidden lg:block absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-[#050708] to-transparent z-10" />
+
+        {/* Subtle cyan ambient atmospheric glow behind astronaut */}
+        <div className="absolute right-4 sm:right-10 top-1/4 w-60 sm:w-96 h-60 sm:h-96 bg-gradient-to-br from-[#00C8E8]/10 via-[#19D8E8]/05 to-transparent rounded-full blur-[90px] pointer-events-none z-10" />
       </div>
 
-      <div className="max-w-7xl mx-auto w-full relative z-10 flex-1 flex flex-col items-center text-center">
-        {/* Top Kicker / Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full cosmic-glass border border-[#20CFFF]/30 text-[11px] sm:text-xs md:text-sm font-medium text-[#8DEBFF] mb-4 sm:mb-6 shadow-[0_0_20px_rgba(32,207,255,0.2)]">
-          <Sparkles className="w-3.5 h-3.5 text-[#20CFFF] shrink-0" />
-          <span>A National Level 24-Hour Hackathon</span>
-          <span className="text-white/40">·</span>
-          <span className="text-white/80">Season 1.0</span>
-        </div>
+      {/* Desktop Cursor-Reactive Subtle Glow (fine pointer only) */}
+      {cursorPos.active && !isTouchDevice && !prefersReducedMotion && (
+        <div
+          className="hidden lg:block absolute pointer-events-none transition-opacity duration-300 z-10"
+          style={{
+            left: cursorPos.x,
+            top: cursorPos.y,
+            width: "500px",
+            height: "500px",
+            transform: "translate(-50%, -50%)",
+            background:
+              "radial-gradient(circle, rgba(0, 200, 232, 0.08) 0%, rgba(9, 35, 43, 0.02) 50%, transparent 70%)",
+          }}
+        />
+      )}
 
-        {/* Massive Futuristic Display Title with Styled Tech Split */}
-        <div className="relative mb-2 sm:mb-3 w-full">
-          <h1 className="font-display font-black text-[clamp(2.2rem,7.5vw,6.5rem)] tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-[#F5FAFF] to-[#8DEBFF] uppercase drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)] leading-[1.05]">
-            HACK<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#20CFFF] to-[#168BFF]">IGNITE</span>
+      {/* =========================================================================
+          HERO CONTENT CONTAINER
+          ========================================================================= */}
+      <div className="relative z-20 w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-3 pb-12 sm:pt-4 sm:pb-16 lg:py-24 flex items-center">
+        <div
+          className="w-full max-w-xl lg:max-w-2xl xl:max-w-3xl text-left"
+          style={{
+            transform:
+              !prefersReducedMotion && !isTouchDevice
+                ? `translate3d(${parallax.x}px, ${parallax.y}px, 0)`
+                : "none",
+            transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          {/* Eyebrow Label: NATIONAL LEVEL HACKATHON · 2026 */}
+          <div className="hero-animate-1 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#07131C]/85 backdrop-blur-md border border-[#00C8E8]/30 text-[11px] sm:text-xs font-mono tracking-wider text-[#8DEBFF] mb-2.5 sm:mb-3 shadow-[0_0_16px_rgba(0,200,232,0.12)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
+            <span className="font-bold tracking-widest text-[#F3F8FA]">
+              NATIONAL LEVEL HACKATHON
+            </span>
+            <span className="text-[#00C8E8]/40">·</span>
+            <span className="tracking-widest text-[#8DEBFF]">
+              2026
+            </span>
+          </div>
+
+          {/* Main Heading: THE FUTURE ISN'T BUILT. IT'S INVENTED. */}
+          <h1 className="hero-animate-2 font-['Space_Grotesk'] font-bold text-[31px] xs:text-[33px] sm:text-[38px] lg:text-6xl xl:text-[4.75rem] tracking-tight text-[#F3F8FA] uppercase leading-[1.12] lg:leading-[1.08] mb-3 sm:mb-4 lg:mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
+            <NorrisHeadline as="span">THE FUTURE ISN'T BUILT.</NorrisHeadline>
+            <br />
+            <FocusText text="IT'S INVENTED." className="mt-1" />
           </h1>
-          {/* Subtle horizontal laser tech line across the title */}
-          <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-gradient-to-r from-transparent via-[#20CFFF]/40 to-transparent pointer-events-none" />
-        </div>
 
-        {/* Tagline */}
-        <p className="font-display text-[clamp(0.95rem,2.8vw,1.75rem)] font-bold tracking-[0.18em] sm:tracking-[0.2em] text-[#8DEBFF] uppercase mb-4 sm:mb-5 cyan-glow">
-          {EVENT_DETAILS.tagline}
-        </p>
+          {/* Supporting Description: A 24-hour innovation challenge to solve real-world problems through technology. */}
+          <p className="hero-animate-3 text-sm sm:text-base lg:text-lg text-[#A4B6BF] font-normal leading-relaxed max-w-xl mb-5 sm:mb-6 lg:mb-8 font-['Inter',sans-serif]">
+            A 24-hour innovation challenge to solve real-world problems through technology.
+          </p>
 
-        {/* Event Quick-Meta Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-[#9AAFC1] mb-6 sm:mb-8 font-medium max-w-2xl px-2">
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <Calendar className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#20CFFF]" />
-            <span>{EVENT_DETAILS.dates}</span>
-          </div>
-          <span className="text-white/20 hidden sm:inline">|</span>
-          <div className="flex items-center gap-1.5 text-center">
-            <MapPin className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#20CFFF] shrink-0" />
-            <span className="truncate max-w-[280px] sm:max-w-none">{EVENT_DETAILS.venue}</span>
-          </div>
-          <span className="text-white/20 hidden sm:inline">|</span>
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <Trophy className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#20CFFF]" />
-            <span className="text-white font-semibold">{EVENT_DETAILS.prizePool}</span>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 z-20 mb-6 sm:mb-8 w-full px-4">
-          <button
-            onClick={onOpenRegister}
-            className="group w-full sm:w-auto px-7 sm:px-8 py-3.5 min-h-[44px] text-sm sm:text-base font-bold text-white bg-gradient-to-r from-[#168BFF] via-[#20CFFF] to-[#168BFF] bg-[length:200%_auto] hover:bg-[position:right_center] rounded-full cyan-btn-glow transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-          >
-            <span>REGISTER NOW</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-          <a
-            href="#tracks"
-            className="w-full sm:w-auto px-7 sm:px-8 py-3.5 min-h-[44px] text-sm sm:text-base font-semibold text-[#F5FAFF] cosmic-glass rounded-full hover:border-[#20CFFF]/60 hover:text-[#8DEBFF] transition-all duration-300 hover:scale-105 flex items-center justify-center"
-          >
-            EXPLORE TRACKS
-          </a>
-        </div>
-
-        {/* Centerpiece: Real-time 3D Astronaut Canvas & Atmospheric Curved Earth Horizon */}
-        <div className="relative w-full max-w-4xl mx-auto h-[320px] sm:h-[400px] md:h-[460px] lg:h-[500px] flex items-center justify-center">
-          {/* Floating Left Hologram HUD card matching reference */}
-          <div className="absolute left-2 sm:left-4 top-2 sm:top-6 z-20 max-w-[180px] sm:max-w-[220px] p-3 rounded-xl cosmic-glass border border-[#20CFFF]/30 text-left shadow-[0_8px_30px_rgba(0,0,0,0.6)] hidden md:block">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[10px] font-mono text-[#20CFFF] uppercase tracking-wider">#1 Arena</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#20CFFF]" />
+          {/* Event Dates & Venue: 12–13 DECEMBER 2026 • JCET, HUBBALLI */}
+          <div className="hero-animate-4 flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-5 text-xs sm:text-sm text-[#A4B6BF] font-mono mb-6 sm:mb-7 lg:mb-9">
+            <div className="flex items-center gap-2 shrink-0">
+              <Calendar className="w-4 h-4 text-[#00C8E8] shrink-0" />
+              <span className="text-[#F3F8FA] font-semibold tracking-wide uppercase">
+                {EVENT_DETAILS.dates.toUpperCase()}
+              </span>
             </div>
-            <h4 className="text-xs sm:text-sm font-bold text-white mb-1">National Innovation</h4>
-            <p className="text-[11px] text-[#9AAFC1] leading-relaxed">
-              Real-time interactive 3D space telemetry. 24-hour sprint in AI, Web3, and defense.
-            </p>
-          </div>
-
-          {/* Genuine Real-Time 3D Astronaut Three.js Scene */}
-          <div className="relative z-10 w-full h-full max-w-lg mx-auto">
-            <AstronautCanvas />
-          </div>
-
-          {/* Curved Glowing Blue Planet Horizon at bottom */}
-          <div className="absolute -bottom-20 sm:-bottom-28 left-1/2 -translate-x-1/2 w-[160%] max-w-[1200px] h-[200px] sm:h-[280px] pointer-events-none z-0">
-            {/* Luminous Curved Horizon Line */}
-            <div className="w-full h-full rounded-[50%] bg-gradient-to-t from-[#07111D] via-[#0A1724]/90 to-transparent border-t-2 border-[#20CFFF] shadow-[0_-15px_60px_rgba(32,207,255,0.5),0_-30px_120px_rgba(22,139,255,0.35)] relative overflow-hidden">
-              <div className="absolute inset-0 bg-radial from-[#20CFFF]/30 via-transparent to-transparent" />
+            <span className="text-white/20 hidden xs:inline">•</span>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-[#19D8E8] shrink-0" />
+              <span className="text-[#A4B6BF] tracking-wide uppercase whitespace-normal">
+                {EVENT_DETAILS.shortVenue}
+              </span>
             </div>
+          </div>
+
+          {/* Call-to-Action Buttons: REGISTER YOUR TEAM & EXPLORE THE EVENT */}
+          <div className="hero-animate-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+            {/* Primary CTA */}
+            <button
+              onClick={onOpenRegister}
+              className="w-full sm:w-auto h-[50px] sm:h-[52px] px-8 text-xs sm:text-sm font-bold font-['Space_Grotesk'] uppercase tracking-wider text-[#050708] bg-gradient-to-r from-[#00C8E8] via-[#19D8E8] to-[#00C8E8] bg-[length:200%_auto] hover:bg-[position:right_center] rounded-xl sm:rounded-full cyan-btn-glow transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>REGISTER YOUR TEAM</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            {/* Secondary CTA */}
+            <a
+              href="#overview"
+              onClick={handleScrollToOverview}
+              className="w-full sm:w-auto h-[46px] sm:h-[52px] px-7 sm:px-8 text-xs sm:text-sm font-semibold font-['Space_Grotesk'] tracking-wider text-[#F3F8FA] border border-[#00C8E8]/30 bg-[#07131C]/50 hover:bg-[#07131C]/80 rounded-xl sm:rounded-full hover:border-[#00C8E8] hover:text-[#8DEBFF] transition-all duration-300 flex items-center justify-center cursor-pointer"
+            >
+              EXPLORE THE EVENT
+            </a>
           </div>
         </div>
       </div>
+
+      {/* Autoplay Fallback Trigger */}
+      {autoplayBlocked && (
+        <button
+          onClick={handleManualPlay}
+          className="absolute bottom-4 right-4 z-30 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#07131C]/90 backdrop-blur-md border border-[#00C8E8]/40 text-xs font-mono text-[#8DEBFF] hover:bg-[#09232B] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.25)] cursor-pointer"
+          aria-label="Play background cinematic video"
+        >
+          <Play className="w-3.5 h-3.5 text-[#00C8E8] fill-[#00C8E8]" />
+          <span>PLAY CINEMATIC</span>
+        </button>
+      )}
     </section>
   );
 }

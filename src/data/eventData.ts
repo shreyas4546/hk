@@ -1,26 +1,3 @@
-export interface Track {
-  id: string;
-  name: string;
-  code: string;
-  category: string;
-  tagline: string;
-  description: string;
-  image: string;
-  status: string;
-  technologies: string[];
-  prize: string;
-}
-
-export interface TimelineEvent {
-  step: string;
-  time: string;
-  date: string;
-  title: string;
-  phase: string;
-  description: string;
-  isMilestone?: boolean;
-}
-
 export interface FAQItem {
   id: string;
   question: string;
@@ -31,207 +8,344 @@ export interface FAQItem {
 export const EVENT_DETAILS = {
   name: "HACKIGNITE 1.0",
   edition: "1.0",
-  tagline: "BEYOND INNOVATION.",
-  subtitle: "A National Level 24-Hour Hackathon",
-  dates: "November 15–16, 2026",
-  mode: "Hybrid (On-Campus Arena & Global Metaverse Stream)",
-  venue: "Center for Innovation & Technology Arena, Main Campus",
-  registrationFee: "₹0 Free Entry (Selected Teams)",
-  teamSize: "2 – 4 Builders",
-  prizePool: "₹2,50,000+",
-  participantsExpected: "500+ Innovators",
-  registrationDeadline: "November 10, 2026",
-  countdownTarget: "2026-11-15T09:00:00",
-  contactEmail: "hackignite@campus.edu",
-  contactPhone: "+91 (800) 422-5446",
+  category: "National Level Hackathon",
+  duration: "24 Hours of coding",
+  durationShort: "24 Hours",
+  tagline: "THINK • BUILD • INNOVATE • IMPACT",
+  description: "A 24-Hour Innovation Challenge to Solve Real-World Problems through Technology.",
+  dates: "12–13 December 2026",
+  datesShort: "12–13 DEC 2026",
+  venue: "JCET, Hubballi",
+  venueFull: "Jain College of Engineering and Technology, Hubballi",
+  shortVenue: "JCET, HUBBALLI",
+  institution: "Jain College of Engineering and Technology, Hubballi",
+  address: "404/4/5, Hebballi Road, Sai Nagar, Unkal, Hubballi – 580031",
+  department: "Department of Computer Science and Engineering (CSE/AI&ML)",
+  registrationFee: "₹2,000 per team",
+  registrationFeeAmount: "₹2,000",
+  feeNote: "Team entry fee (₹2,000 per team)",
+  competitionHighlight: "5 Places to Conquer",
+  coordinator: "Aditya R H",
+  contactPhone: "7022951232",
+  contactPhoneFormatted: "+91 70229 51232",
+  // 12 December 2026 at 9:30 AM IST (Asia/Kolkata)
+  countdownTarget: "2026-12-12T09:30:00+05:30",
+  coordinates: {
+    lat: 15.3934,
+    lng: 75.1232,
+    googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Jain+College+of+Engineering+and+Technology+Hubballi",
+    directionsUrl: "https://www.google.com/maps/dir/?api=1&destination=Jain+College+of+Engineering+and+Technology+Hubballi",
+    embedUrl: "https://maps.google.com/maps?q=Jain%20College%20of%20Engineering%20and%20Technology%20Hubballi&t=&z=15&ie=UTF8&iwloc=&output=embed",
+  },
 };
 
-export const TRACKS: Track[] = [
+export const PILLARS = [
   {
-    id: "ai-intelligence",
-    name: "Artificial Intelligence & Agents",
-    code: "TRACK-01",
-    category: "AI & ML",
-    tagline: "Autonomous systems, LLMs & Cognitive Computing",
-    description: "Engineer the next leap in autonomous agents, multi-modal reasoning models, real-time edge intelligence, and humane AI systems.",
-    image: "/src/assets/images/track_ai_astronaut_1794046418232.jpg",
-    status: "Neural Matrix",
-    technologies: ["Gemini API", "PyTorch", "LangChain", "Vector DBs", "Edge AI"],
-    prize: "₹75,000 + Cloud Grants",
+    num: "01",
+    title: "THINK",
+    desc: "Explore challenges and develop meaningful ideas.",
   },
   {
-    id: "web3-systems",
-    name: "Web3 & Distributed Systems",
-    code: "TRACK-02",
-    category: "Web3",
-    tagline: "Decentralized protocols, Zero-Knowledge & High-Throughput",
-    description: "Architect tamper-proof protocols, zero-knowledge verifications, decentralized identity, and next-generation decentralized infrastructure.",
-    image: "/src/assets/images/track_web3_astronaut_1794046418410.jpg",
-    status: "Digital Speed",
-    technologies: ["Solidity", "Rust", "Zero Knowledge", "IPFS", "Smart Contracts"],
-    prize: "₹75,000 + Grant Bounty",
+    num: "02",
+    title: "BUILD",
+    desc: "Turn ideas into working solutions.",
   },
   {
-    id: "cyber-defense",
-    name: "Cybersecurity & Critical Defense",
-    code: "TRACK-03",
-    category: "Cybersecurity",
-    tagline: "Automated threat hunting, Cloud resilience & Cryptography",
-    description: "Fortify planetary digital infrastructure through predictive threat discovery, quantum-resistant encryption, and automated exploit containment.",
-    image: "/src/assets/images/track_cyber_astronaut_1794046419586.jpg",
-    status: "Radiant Shield",
-    technologies: ["eBPF", "Post-Quantum", "SIEM Automations", "Sandboxing", "Rust"],
-    prize: "₹50,000 + Security Hardware",
+    num: "03",
+    title: "INNOVATE",
+    desc: "Approach real-world problems creatively.",
   },
   {
-    id: "open-innovation",
-    name: "Open Cosmic Innovation",
-    code: "TRACK-04",
-    category: "Open Track",
-    tagline: "HealthTech, Climate Solutions, FinTech & Space Exploration",
-    description: "Tackle ambitious multidisciplinary bottlenecks across clean energy, planetary observation, assistive robotics, and digital governance.",
-    image: "/src/assets/images/hero_astronaut_floating_1794046417639.jpg",
-    status: "Limitless Horizon",
-    technologies: ["IoT Sensors", "Next.js", "Robotics", "CleanTech", "APIs"],
-    prize: "₹50,000 + Incubation Support",
+    num: "04",
+    title: "IMPACT",
+    desc: "Build technology with practical purpose.",
   },
 ];
 
-export const TIMELINE: TimelineEvent[] = [
+export interface ScheduleItem {
+  id: string;
+  timeRange: string;
+  activity: string;
+  description: string;
+  type: "registration" | "coding" | "food" | "checkpoint" | "ceremony";
+  startHour: number;
+  startMinute: number;
+  endHour: number;
+  endMinute: number;
+  note?: string;
+}
+
+export interface DaySchedule {
+  dayNumber: number;
+  dayLabel: string;
+  dateStr: string;
+  dateIso: string;
+  events: ScheduleItem[];
+}
+
+export const OFFICIAL_SCHEDULE: DaySchedule[] = [
   {
-    step: "01",
-    date: "OCT 15 – NOV 10",
-    time: "23:59 IST",
-    title: "Registration & Idea Submission",
-    phase: "Phase 1: Screening",
-    description: "Submit your team roster and problem statement synopsis. Online preliminary screening and shortlisted teams announced on rolling basis.",
+    dayNumber: 1,
+    dayLabel: "DAY 01",
+    dateStr: "12 DECEMBER 2026",
+    dateIso: "2026-12-12",
+    events: [
+      {
+        id: "d1-1",
+        timeRange: "09:30 AM – 10:30 AM",
+        activity: "Registration",
+        description: "Participant check-in, identity verification, welcome kit distribution, and hack station allotment.",
+        type: "registration",
+        startHour: 9,
+        startMinute: 30,
+        endHour: 10,
+        endMinute: 30,
+      },
+      {
+        id: "d1-2",
+        timeRange: "11:30 AM",
+        activity: "Coding Begins",
+        description: "Official kickoff! The 24-hour innovation clock starts. Teams initiate architecture and sprint development.",
+        type: "coding",
+        startHour: 11,
+        startMinute: 30,
+        endHour: 13,
+        endMinute: 0,
+      },
+      {
+        id: "d1-3",
+        timeRange: "01:00 PM – 02:30 PM",
+        activity: "Lunch",
+        description: "Catered lunch break on campus. Fuel up and sync with teammates.",
+        type: "food",
+        startHour: 13,
+        startMinute: 0,
+        endHour: 14,
+        endMinute: 30,
+      },
+      {
+        id: "d1-4",
+        timeRange: "06:00 PM – 07:30 PM",
+        activity: "Checkpoint 1",
+        description: "Initial milestone review. Mentors review problem framing, data schema, and technical approach.",
+        type: "checkpoint",
+        startHour: 18,
+        startMinute: 0,
+        endHour: 19,
+        endMinute: 30,
+      },
+      {
+        id: "d1-5",
+        timeRange: "08:00 PM – 09:30 PM",
+        activity: "Dinner",
+        description: "Evening dinner on campus. Re-energize for the night-long development phase.",
+        type: "food",
+        startHour: 20,
+        startMinute: 0,
+        endHour: 21,
+        endMinute: 30,
+      },
+    ],
   },
   {
-    step: "02",
-    date: "NOV 15",
-    time: "08:30 AM",
-    title: "Check-in & Kit Distribution",
-    phase: "Phase 2: Arrival",
-    description: "Registration confirmation, participant badges, cosmic swag packs, and high-speed network credentials assigned.",
+    dayNumber: 2,
+    dayLabel: "DAY 02",
+    dateStr: "13 DECEMBER 2026",
+    dateIso: "2026-12-13",
+    events: [
+      {
+        id: "d2-1",
+        timeRange: "01:00 AM – 01:30 AM",
+        activity: "Refreshment Break",
+        description: "Midnight coffee and quick refreshments to keep momentum high.",
+        type: "food",
+        startHour: 1,
+        startMinute: 0,
+        endHour: 1,
+        endMinute: 30,
+        note: "Early-morning refreshment break (Pending organizer re-verification)",
+      },
+      {
+        id: "d2-2",
+        timeRange: "05:30 AM – 07:00 AM",
+        activity: "Checkpoint 2",
+        description: "Dawn milestone evaluation. Mentors review working prototype integration and feature completion.",
+        type: "checkpoint",
+        startHour: 5,
+        startMinute: 30,
+        endHour: 7,
+        endMinute: 0,
+      },
+      {
+        id: "d2-3",
+        timeRange: "07:30 AM – 08:30 AM",
+        activity: "Breakfast",
+        description: "Morning breakfast served on campus. Final push before code freeze.",
+        type: "food",
+        startHour: 7,
+        startMinute: 30,
+        endHour: 8,
+        endMinute: 30,
+      },
+      {
+        id: "d2-4",
+        timeRange: "11:30 AM",
+        activity: "Coding Ends",
+        description: "24-hour coding window concludes! Hard code freeze; repository commits and demo links locked.",
+        type: "coding",
+        startHour: 11,
+        startMinute: 30,
+        endHour: 11,
+        endMinute: 30,
+      },
+      {
+        id: "d2-5",
+        timeRange: "Until 01:00 PM",
+        activity: "Prize Distribution and Event Closure",
+        description: "Final team demonstrations, jury evaluation, award ceremony, and valedictory closure.",
+        type: "ceremony",
+        startHour: 11,
+        startMinute: 30,
+        endHour: 13,
+        endMinute: 0,
+      },
+    ],
+  },
+];
+
+export const OFFICIAL_RULES = [
+  {
+    id: "rule-1",
+    title: "Team Composition",
+    summary: "Strictly 2 to 4 members per participating team.",
+    detail: "Every team must register with a designated team lead. Inter-college and inter-branch teams are welcomed.",
+    badge: "TEAM SPECS",
   },
   {
-    step: "03",
-    date: "NOV 15",
-    time: "09:30 AM",
-    title: "Opening Ceremony & Problem Reveal",
-    phase: "Phase 2: Launch",
-    description: "Keynote address, sponsor problem statements unveiled, rules briefing, and official countdown initialization.",
-    isMilestone: true,
+    id: "rule-2",
+    title: "24-Hour Sprint Window",
+    summary: "All project code and assets must be developed during the hackathon.",
+    detail: "Pre-existing complete projects or templates are strictly prohibited. Open-source libraries and APIs may be leveraged provided they are disclosed.",
+    badge: "CODE INTEGRITY",
   },
   {
-    step: "04",
-    date: "NOV 15",
-    time: "10:00 AM",
-    title: "Hacking Sprint Commences",
-    phase: "Phase 3: Orbit Sprint",
-    description: "24-hour non-stop countdown begins. High-energy coding, wireframing, and repository initialization.",
-    isMilestone: true,
+    id: "rule-3",
+    title: "100% Intellectual Property",
+    summary: "Participants retain full ownership of all code and intellectual property.",
+    detail: "All solutions, repositories, designs, and demonstrations created during HackIgnite 1.0 remain the exclusive property of participating teams.",
+    badge: "IP OWNERSHIP",
   },
   {
-    step: "05",
-    date: "NOV 15",
-    time: "05:00 PM",
-    title: "Checkpoint 1: Mentorship Review",
-    phase: "Phase 3: Validation",
-    description: "Industry mentors and domain experts visit team pods for 1:1 architectural feedback, API guidance, and pivot advice.",
+    id: "rule-4",
+    title: "On-Campus Venue Conduct",
+    summary: "Participants must adhere to the JCET Hubballi campus code of conduct.",
+    detail: "Teams must carry their valid college identity cards and development hardware. High-speed network, power hubs, and meals are provided on campus.",
+    badge: "CAMPUS CODE",
   },
   {
-    step: "06",
-    date: "NOV 16",
-    time: "01:00 AM",
-    title: "Midnight Cosmic Jam & Checkpoint 2",
-    phase: "Phase 3: Deep Space",
-    description: "Midnight coffee rush, mini gaming trivia challenges, energy snacks, and code repository progress audits.",
-  },
-  {
-    step: "07",
-    date: "NOV 16",
-    time: "10:00 AM",
-    title: "Code Freeze & Pitch Submissions",
-    phase: "Phase 4: Final Evaluation",
-    description: "Hard stop on commits. Project submission on Devfolio portal with demo video, live deployment link, and documentation.",
-    isMilestone: true,
-  },
-  {
-    step: "08",
-    date: "NOV 16",
-    time: "11:30 AM",
-    title: "Jury Pitching & Demo Arena",
-    phase: "Phase 4: Scrutiny",
-    description: "Top 15 shortlisted teams present 4-minute live pitches followed by 3-minute jury Q&A in the main amphitheater.",
-  },
-  {
-    step: "09",
-    date: "NOV 16",
-    time: "02:30 PM",
-    title: "Grand Award Ceremony",
-    phase: "Phase 5: Victory",
-    description: "Announcement of track champions, overall winner trophies, cash grants, and post-event networking mixer.",
-    isMilestone: true,
+    id: "rule-5",
+    title: "Evaluation & Demo",
+    summary: "Demonstrations evaluated on technical engineering, viability, and impact.",
+    detail: "Both checkpoints are mandatory for final pitch eligibility. Teams must demonstrate live functionality to the jury panel.",
+    badge: "JUDGING",
   },
 ];
 
 export const FAQS: FAQItem[] = [
   {
     id: "faq-1",
-    question: "Who is eligible to participate in HackIgnite 1.0?",
-    answer: "HackIgnite 1.0 is open to all enrolled undergraduate, graduate, and diploma students across universities and technical colleges nationwide. Inter-college teams and diverse skill-level squads are fully encouraged.",
-    category: "Eligibility",
+    question: "What is HackIgnite 1.0?",
+    answer:
+      "HackIgnite 1.0 is a national-level, 24-hour hackathon presented by the Department of Computer Science and Engineering (CSE/AI&ML) at Jain College of Engineering and Technology, Hubballi. It challenges participants to think, build, innovate, and create impactful technological solutions for real-world problems.",
+    category: "General",
   },
   {
     id: "faq-2",
-    question: "Is there any registration fee to participate?",
-    answer: "Zero. Registration is 100% free of cost. Shortlisted participants receive free entry, 24-hour high-speed Wi-Fi, full meals, refreshments, midnight snacks, and exclusive merchandise.",
-    category: "Registration",
+    question: "When is the hackathon?",
+    answer:
+      "HackIgnite 1.0 is scheduled to take place on 12–13 December 2026. Registration check-in begins at 09:30 AM IST on 12 December 2026.",
+    category: "Schedule",
   },
   {
     id: "faq-3",
-    question: "What is the team size requirement?",
-    answer: "Teams must consist of 2 to 4 members. You can either form your complete squad prior to registration or find teammates in our dedicated Discord channels.",
-    category: "Teams",
+    question: "Where will the event take place?",
+    answer:
+      "The event will be hosted on-campus at Jain College of Engineering and Technology (JCET), Hubballi. The address is 404/4/5, Hebballi Road, Sai Nagar, Unkal, Hubballi – 580031.",
+    category: "Venue",
   },
   {
     id: "faq-4",
-    question: "What are the primary judging criteria?",
-    answer: "Projects are evaluated on 4 core pillars: Innovation & Originality (25%), Technical Complexity & Architecture (30%), Real-World Impact & Feasibility (25%), and Design / Pitch Clarity (20%).",
-    category: "Judging",
+    question: "How long is the hackathon?",
+    answer:
+      "HackIgnite 1.0 features 24 hours of continuous coding, commencing at 11:30 AM on 12 December and concluding at 11:30 AM on 13 December, followed by prize distribution until 01:00 PM.",
+    category: "Format",
   },
   {
     id: "faq-5",
-    question: "Can we build on a pre-existing project or codebase?",
-    answer: "No. All code, design assets, and functional logic must be authored during the official 24-hour hackathon window. Using open-source libraries, public APIs, and pre-trained foundation models is permitted.",
-    category: "Rules",
+    question: "What is the entry fee?",
+    answer:
+      "The entry fee is ₹2,000 per team.",
+    category: "Registration",
   },
   {
     id: "faq-6",
-    question: "What hardware and facilities will be provided at the venue?",
-    answer: "Each team pod will be equipped with dedicated power strips, uninterrupted high-speed LAN/Wi-Fi, quiet rest zones, 24/7 security, snacks, and technical support mentors.",
-    category: "Logistics",
+    question: "What is the permitted team size?",
+    answer:
+      "Each team must consist of 2 to 4 members.",
+    category: "Registration",
+  },
+  {
+    id: "faq-7",
+    question: "Who is organizing the event?",
+    answer:
+      "The event is organized by the Department of Computer Science and Engineering (CSE/AI&ML) at Jain College of Engineering and Technology, Hubballi.",
+    category: "Organizers",
+  },
+  {
+    id: "faq-8",
+    question: "Whom can participants contact for queries?",
+    answer:
+      "For any queries regarding HackIgnite 1.0, participants can contact Event Coordinator Aditya R H directly at 7022951232.",
+    category: "Contact",
   },
 ];
 
-export const OVERVIEW_STATS = [
-  { label: "Duration", value: "24h", subtext: "Non-stop sprint" },
-  { label: "Prize Pool", value: "₹2.5L+", subtext: "Cash & incubation" },
-  { label: "Team Size", value: "2 – 4", subtext: "Builders per squad" },
-  { label: "Entry Fee", value: "₹0", subtext: "Free for shortlists" },
-];
+export interface TrackItem {
+  id: string;
+  name: string;
+  category: string;
+  code: string;
+  status: string;
+  description: string;
+  technologies: string[];
+  prize: string;
+  image: string;
+}
 
-export const ORGANIZERS = {
-  institution: "National Institute of Science & Technology",
-  department: "Department of Computer Science & Engineering",
-  facultyAdvisors: [
-    { name: "Dr. A. R. Sharma", role: "Head of Dept & Chief Patron" },
-    { name: "Prof. K. Venkatesh", role: "Faculty Convener & IEEE Mentor" },
-  ],
-  studentCoordinators: [
-    { name: "Shreyas M.", role: "Lead Student Organizer" },
-    { name: "Ananya Iyer", role: "Head of Technical Ops" },
-    { name: "Rohan Deshmukh", role: "Head of Logistics & Sponsorship" },
-  ],
-};
+// Official competition tracks
+export const TRACKS: TrackItem[] = [
+  {
+    id: "web-development",
+    name: "Web Development",
+    category: "Official Track",
+    code: "TRK-01",
+    status: "Confirmed",
+    description:
+      "Architect responsive, high-performance web applications and decentralized digital experiences. Focus on modern frontend frameworks, scalable cloud architectures, interactive UI/UX, and robust backend APIs.",
+    technologies: ["React / Next.js", "Full-Stack APIs", "Tailwind CSS", "Node / Cloud", "Real-Time Systems"],
+    prize: "5 Places to Conquer",
+    image: "/assets/cards/track-web-dev.jpg",
+  },
+  {
+    id: "app-development",
+    name: "App Development",
+    category: "Official Track",
+    code: "TRK-02",
+    status: "Confirmed",
+    description:
+      "Engineer intuitive, high-performance mobile applications across iOS, Android, or cross-platform ecosystems. Focus on sleek mobile user interfaces, offline-first local storage, device sensor integrations, and seamless cloud synchronization.",
+    technologies: ["React Native / Flutter", "Swift / Kotlin", "Mobile UX/UI", "Offline-First Sync", "Push & Device APIs"],
+    prize: "5 Places to Conquer",
+    image: "/assets/cards/track-app-dev.jpg",
+  },
+];

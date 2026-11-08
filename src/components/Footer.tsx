@@ -1,141 +1,225 @@
-import React from "react";
-import { Sparkles, ArrowUpRight } from "lucide-react";
-import { EVENT_DETAILS, ORGANIZERS } from "../data/eventData";
+import React, { useMemo } from "react";
+import {
+  Calendar,
+  MapPin,
+  CreditCard,
+  User,
+  Phone,
+  ChevronRight,
+} from "lucide-react";
 
 export default function Footer() {
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     const el = document.querySelector(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    } else if (id === "#about") {
+      const fallback = document.querySelector("#overview");
+      if (fallback) fallback.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
+  // 128 Bubbles exactly as in the original reference Codepen:
+  // - for (var i = 0; i < 128; i++)
+  // style=`--size:${2+Math.random()*4}rem; --distance:${6+Math.random()*4}rem; --position:${-5+Math.random()*110}%; --time:${2+Math.random()*2}s; --delay:${-1*(2+Math.random()*2)}s;`
+  // PROTECTED WAVE/BLOB EFFECT IMPLEMENTATION - UNTOUCHED
+  const bubbles = useMemo(() => {
+    return Array.from({ length: 128 }, () => ({
+      size: `${2 + Math.random() * 4}rem`,
+      distance: `${6 + Math.random() * 4}rem`,
+      position: `${-5 + Math.random() * 110}%`,
+      time: `${2 + Math.random() * 2}s`,
+      delay: `${-1 * (2 + Math.random() * 2)}s`,
+    }));
+  }, []);
+
   return (
-    <footer className="relative bg-[#030609] border-t border-[#20CFFF]/20 pt-16 pb-12 px-4 sm:px-6 lg:px-8 text-xs text-[#9AAFC1] z-10">
-      <div className="max-w-7xl mx-auto">
-        {/* Top Disclaimer / Intro Line matching Astrovue reference */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-8 border-b border-[#20CFFF]/15 gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[#8DEBFF] font-mono">DISCLAIMER</span>
-            <span className="text-white/20">·</span>
-            <span>All code authored during the 24h sprint remains 100% intellectual property of participating teams.</span>
-          </div>
+    <footer className="blob-footer">
+      {/* SVG Gooey Filter for Liquid Metaball Physics (PROTECTED - UNTOUCHED) */}
+      <svg
+        style={{ position: "fixed", top: "100vh", pointerEvents: "none", width: 0, height: 0, opacity: 0 }}
+        aria-hidden="true"
+      >
+        <defs>
+          <filter id="blob">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+              result="blob"
+            />
+          </filter>
+        </defs>
+      </svg>
 
-          <a
-            href="#hero"
-            onClick={(e) => scrollTo(e, "#hero")}
-            className="text-[#8DEBFF] hover:text-white flex items-center gap-1 font-mono group"
-          >
-            <span>BACK TO TOP</span>
-            <ArrowUpRight className="w-3.5 h-3.5 group-hover:-translate-y-0.5 transition-transform" />
-          </a>
-        </div>
+      {/* Bubbles Layer for Liquid Wave Upper Boundary (PROTECTED - UNTOUCHED) */}
+      <div className="bubbles">
+        {bubbles.map((b, i) => (
+          <div
+            key={i}
+            className="bubble"
+            style={
+              {
+                "--size": b.size,
+                "--distance": b.distance,
+                "--position": b.position,
+                "--time": b.time,
+                "--delay": b.delay,
+              } as React.CSSProperties
+            }
+          />
+        ))}
+      </div>
 
-        {/* Middle Navigation & Info Columns */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12">
-          {/* Col 1: Identity */}
-          <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded bg-[#20CFFF]/20 border border-[#20CFFF] flex items-center justify-center text-[#8DEBFF]">
-                <Sparkles className="w-3 h-3" />
+      {/* Balanced, Connected & Refined Footer Content */}
+      <div className="content relative pt-4 pb-4 sm:pt-5 sm:pb-5 px-4 sm:px-6 lg:px-8 text-[#04080D]">
+        {/* Subtle Atmospheric Top Highlight for Refined Visual Depth */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+
+        <div className="max-w-6xl mx-auto space-y-3.5 sm:space-y-4">
+          {/* Main 3-Column Content Layout with Balanced Proportions & Subtle Vertical Separators */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-start">
+            
+            {/* COLUMN 1 — HACKIGNITE IDENTITY (Desktop: 4 cols | Mobile: Order 1) */}
+            <div className="md:col-span-5 lg:col-span-4 space-y-2 md:border-r border-[#04080D]/12 md:pr-6">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#04080D] flex items-center justify-center font-['Space_Grotesk'] font-bold text-xs text-[#8DEBFF] shadow-sm shrink-0">
+                  HI
+                </div>
+                <div>
+                  <span className="font-['Space_Grotesk'] font-bold text-base sm:text-lg text-[#04080D] tracking-tight block leading-tight">
+                    HACKIGNITE 1.0
+                  </span>
+                  <span className="text-[11px] font-mono font-semibold text-[#04080D]/85 block leading-tight">
+                    24-Hour Innovation Challenge
+                  </span>
+                </div>
               </div>
-              <span className="font-display font-black text-base text-white tracking-wider">
-                HACK<span className="text-[#20CFFF]">IGNITE</span> 1.0
-              </span>
-            </div>
-            <p className="text-[11px] text-[#9AAFC1] leading-relaxed mb-4">
-              National Level 24-Hour Hackathon. Beyond Innovation. Uniting engineering minds to forge planetary breakthroughs.
-            </p>
-            <div className="text-[10px] font-mono text-[#20CFFF]">
-              HOST // {ORGANIZERS.institution}
-            </div>
-          </div>
 
-          {/* Col 2: Navigation Links */}
-          <div>
-            <div className="font-mono text-white text-xs font-bold uppercase tracking-wider mb-4">
-              NAVIGATION
-            </div>
-            <ul className="space-y-2">
-              <li>
-                <a href="#hero" onClick={(e) => scrollTo(e, "#hero")} className="hover:text-[#8DEBFF] transition-colors">
-                  Home Terminal
-                </a>
-              </li>
-              <li>
-                <a href="#overview" onClick={(e) => scrollTo(e, "#overview")} className="hover:text-[#8DEBFF] transition-colors">
-                  Event Brief
-                </a>
-              </li>
-              <li>
-                <a href="#tracks" onClick={(e) => scrollTo(e, "#tracks")} className="hover:text-[#8DEBFF] transition-colors">
-                  Technology Tracks
-                </a>
-              </li>
-              <li>
-                <a href="#mission" onClick={(e) => scrollTo(e, "#mission")} className="hover:text-[#8DEBFF] transition-colors">
-                  Mission Blueprint
-                </a>
-              </li>
-              <li>
-                <a href="#timeline" onClick={(e) => scrollTo(e, "#timeline")} className="hover:text-[#8DEBFF] transition-colors">
-                  Schedule Chronology
-                </a>
-              </li>
-              <li>
-                <a href="#faq" onClick={(e) => scrollTo(e, "#faq")} className="hover:text-[#8DEBFF] transition-colors">
-                  FAQ & Policies
-                </a>
-              </li>
-            </ul>
-          </div>
+              <p className="text-xs font-['Inter',sans-serif] text-[#04080D]/90 font-medium leading-relaxed max-w-sm">
+                Think. Build. Innovate. Impact.
+              </p>
 
-          {/* Col 3: Contact Details */}
-          <div>
-            <div className="font-mono text-white text-xs font-bold uppercase tracking-wider mb-4">
-              COMMUNICATION
-            </div>
-            <div className="space-y-3">
-              <div>
-                <div className="text-[10px] text-[#9AAFC1]">SUPPORT EMAIL</div>
-                <a href={`mailto:${EVENT_DETAILS.contactEmail}`} className="text-white hover:text-[#8DEBFF] font-mono transition-colors">
-                  {EVENT_DETAILS.contactEmail}
-                </a>
-              </div>
-              <div>
-                <div className="text-[10px] text-[#9AAFC1]">HELPLINE</div>
-                <div className="text-white font-mono">{EVENT_DETAILS.contactPhone}</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-[#9AAFC1]">OPERATIONS</div>
-                <div className="text-white font-mono">24/7 Continuous Support</div>
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#04080D]/10 text-[9.5px] font-mono font-bold text-[#04080D] tracking-wider uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#04080D]" />
+                <span>National Level Hackathon</span>
               </div>
             </div>
+
+            {/* COLUMN 2 — QUICK NAVIGATION (Desktop: 3 cols | Mobile: Order 2) */}
+            <div className="md:col-span-3 lg:col-span-3 space-y-2 md:border-r border-[#04080D]/12 md:pr-4">
+              <div className="text-[10.5px] font-mono font-bold tracking-wider text-[#04080D] uppercase flex items-center gap-1.5 mb-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#04080D]" />
+                <span>Quick Navigation</span>
+              </div>
+
+              {/* Mobile: 2-column compact grid | Desktop: Clean vertical stack */}
+              <div className="grid grid-cols-2 md:grid-cols-1 gap-1">
+                {[
+                  { label: "About the Event", href: "#overview" },
+                  { label: "Tracks & Rules", href: "#tracks-rules" },
+                  { label: "Event Schedule", href: "#schedule" },
+                  { label: "FAQs", href: "#faq" },
+                ].map((link, idx) => (
+                  <a
+                    key={idx}
+                    href={link.href}
+                    onClick={(e) => scrollTo(e, link.href)}
+                    className="group inline-flex items-center gap-1 text-xs font-medium text-[#04080D]/90 hover:text-white transition-all py-0.5 px-1 -ml-1 rounded hover:bg-[#04080D]/10 cursor-pointer"
+                  >
+                    <ChevronRight className="w-3 h-3 text-[#04080D]/60 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <span className="font-['Inter',sans-serif]">{link.label}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* COLUMN 3 — EVENT INFORMATION (Desktop: 5 cols | Mobile: Order 3) */}
+            <div className="md:col-span-4 lg:col-span-5 space-y-2">
+              <div className="text-[10.5px] font-mono font-bold tracking-wider text-[#04080D] uppercase flex items-center gap-1.5 mb-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#04080D]" />
+                <span>Event Information</span>
+              </div>
+
+              <div className="space-y-1.5 text-xs text-[#04080D]/90 font-['Inter',sans-serif]">
+                <div className="flex items-start gap-2">
+                  <Calendar className="w-3.5 h-3.5 text-[#04080D] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Date</span>
+                    <span className="font-semibold text-[#04080D]">12–13 December 2026</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-[#04080D] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Venue</span>
+                    <span className="font-semibold text-[#04080D] leading-tight block">
+                      Jain College of Engineering and Technology, Hubballi
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <CreditCard className="w-3.5 h-3.5 text-[#04080D] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Entry Fee</span>
+                    <span className="font-semibold text-[#04080D]">₹2,000 per team</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <User className="w-3.5 h-3.5 text-[#04080D] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Coordinator & Contact</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-[#04080D]">Aditya R H</span>
+                      <span className="text-[#04080D]/40">·</span>
+                      <a
+                        href="tel:+917022951232"
+                        className="font-mono font-bold text-[#04080D] hover:text-white underline underline-offset-2 decoration-[#04080D]/40 transition-colors inline-flex items-center gap-1"
+                        title="Call Coordinator Aditya R H"
+                      >
+                        <Phone className="w-3 h-3 inline" />
+                        <span>+91 70229 51232</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          {/* Col 4: Venue & Ecosystem */}
-          <div>
-            <div className="font-mono text-white text-xs font-bold uppercase tracking-wider mb-4">
-              CAMPUS ARENA
+          {/* AREA D — BOTTOM FOOTER ROW */}
+          <div className="pt-2.5 sm:pt-3 border-t border-[#04080D]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-3 text-[11px] sm:text-xs text-[#04080D]/90 sm:pr-64 lg:pr-72 pr-16">
+            {/* Left / Mobile Order 5: Copyright */}
+            <div className="font-medium text-[10.5px] sm:text-xs text-[#04080D]/80">
+              © 2026 HackIgnite 1.0. All rights reserved.
             </div>
-            <p className="text-[11px] leading-relaxed mb-3">
-              {EVENT_DETAILS.venue}
-            </p>
-            <div className="p-3 rounded-lg bg-[#07111D] border border-[#20CFFF]/20 text-[10px] font-mono text-[#8DEBFF]">
-              SYSTEMS: ONLINE <br />
-              NETWORK: 10 Gbps FIBER
-            </div>
-          </div>
-        </div>
 
-        {/* Bottom Copyright & Status */}
-        <div className="pt-8 border-t border-[#20CFFF]/15 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]">
-          <div>
-            © 2026 {EVENT_DETAILS.name}. Department of Computer Science & Engineering. All rights reserved.
-          </div>
-          <div className="flex items-center gap-4 text-xs font-mono text-[#8DEBFF]">
-            <span>STABLE RELEASE</span>
-            <span>·</span>
-            <span>HYBRID METAVERSE READY</span>
+            {/* Right / Mobile Order 6: Developer Credit with LinkedIn (Guaranteed Completely Visible) */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-0.5 sm:gap-1.5 text-[10.5px] sm:text-xs font-['Inter',sans-serif] max-w-[210px] sm:max-w-none">
+              <span className="text-[#04080D]/75">Website crafted by</span>
+              <a
+                href="https://www.linkedin.com/in/shreyas-ugargol-69a2762b6/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-[#04080D] hover:text-white underline underline-offset-2 decoration-[#04080D]/40 hover:decoration-white inline-flex items-center gap-1 transition-all group font-mono"
+                title="Shreyas Ugargol LinkedIn Profile"
+              >
+                <span>SHREYAS UGARGOL</span>
+                <svg
+                  className="w-3.5 h-3.5 fill-current opacity-85 group-hover:opacity-100 group-hover:scale-110 transition-all shrink-0"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.25V10.9H6.46M7.86 6.54a1.64 1.64 0 0 0-1.66 1.64 1.66 1.66 0 0 0 1.66 1.66 1.64 1.64 0 0 0 1.64-1.66 1.64 1.64 0 0 0-1.64-1.64Z" />
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
       </div>

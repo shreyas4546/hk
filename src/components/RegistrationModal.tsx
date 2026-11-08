@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, CheckCircle, Sparkles, AlertCircle, Copy, Check } from "lucide-react";
-import { TRACKS, EVENT_DETAILS } from "../data/eventData";
+import { EVENT_DETAILS, TRACKS } from "../data/eventData";
 import { validateRegistration, RegistrationPayload } from "../utils/rules";
 
 interface RegistrationModalProps {
@@ -20,7 +20,7 @@ export default function RegistrationModal({
     leadEmail: "",
     leadPhone: "",
     college: "",
-    trackId: preSelectedTrackId || "ai-intelligence",
+    trackId: preSelectedTrackId || "open-innovation",
     memberCount: 4,
     projectSynopsis: "",
     githubUrl: "",
@@ -47,7 +47,6 @@ export default function RegistrationModal({
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
-    // Clear field-specific error on edit
     if (errors[name]) {
       setErrors((prev) => {
         const updated = { ...prev };
@@ -66,7 +65,6 @@ export default function RegistrationModal({
       return;
     }
 
-    // Generate deterministic ticket / registration ID
     const randomHex = Math.random().toString(36).substring(2, 7).toUpperCase();
     const regId = `HACKIGNITE-2026-${randomHex}`;
     setRegistrationId(regId);
@@ -91,11 +89,11 @@ export default function RegistrationModal({
       aria-labelledby="modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-2xl my-8 rounded-2xl cosmic-glass border border-[#20CFFF]/40 p-6 sm:p-8 shadow-[0_0_50px_rgba(32,207,255,0.25)] text-left">
+      <div className="relative w-full max-w-2xl my-8 rounded-2xl bg-[#07131C]/95 border border-[#00C8E8]/30 p-6 sm:p-8 shadow-[0_0_50px_rgba(0,200,232,0.2)] text-left">
         {/* Close Button */}
         <button
           onClick={resetForm}
-          className="absolute top-5 right-5 p-2 text-[#9AAFC1] hover:text-white rounded-lg hover:bg-[#07111D] transition-colors"
+          className="absolute top-5 right-5 p-2 text-[#A4B6BF] hover:text-white rounded-lg hover:bg-[#050708] transition-colors"
           aria-label="Close registration modal"
         >
           <X className="w-5 h-5" />
@@ -104,15 +102,15 @@ export default function RegistrationModal({
         {!isSubmitted ? (
           <>
             <div className="mb-6">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#07111D] border border-[#20CFFF]/30 text-xs font-mono text-[#8DEBFF] mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#20CFFF]" />
-                <span>OFFICIAL PORTAL // FREE ENTRY</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#050708] border border-[#00C8E8]/30 text-xs font-mono text-[#8DEBFF] mb-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#00C8E8]" />
+                <span>OFFICIAL PORTAL // ENTRY FEE: ₹2,000 PER TEAM</span>
               </div>
-              <h2 id="modal-title" className="font-display font-black text-2xl sm:text-3xl text-white">
+              <h2 id="modal-title" className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-[#F3F8FA]">
                 REGISTER YOUR TEAM
               </h2>
-              <p className="text-xs sm:text-sm text-[#9AAFC1] mt-1">
-                Enter your squad roster for {EVENT_DETAILS.name}. Preliminary screening on rolling basis.
+              <p className="text-xs sm:text-sm text-[#A4B6BF] mt-1 font-['Inter',sans-serif]">
+                Enter your team details for {EVENT_DETAILS.name} ({EVENT_DETAILS.dates} at {EVENT_DETAILS.shortVenue}).
               </p>
             </div>
 
@@ -130,8 +128,8 @@ export default function RegistrationModal({
                     required
                     value={formData.teamName}
                     onChange={handleChange}
-                    placeholder="e.g. CyberNovas"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#07111D] border border-[#20CFFF]/30 text-white text-sm focus:outline-none focus:border-[#20CFFF] focus:ring-1 focus:ring-[#20CFFF] placeholder-[#9AAFC1]/40"
+                    placeholder="e.g. Ignite Builders"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
                   />
                   {errors.teamName && (
                     <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
@@ -143,18 +141,18 @@ export default function RegistrationModal({
                 {/* Team Size */}
                 <div>
                   <label htmlFor="memberCount" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                    Team Size (2 – 4 Members) *
+                    Team Size (Members) *
                   </label>
                   <select
                     id="memberCount"
                     name="memberCount"
                     value={formData.memberCount}
                     onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#07111D] border border-[#20CFFF]/30 text-white text-sm focus:outline-none focus:border-[#20CFFF] focus:ring-1 focus:ring-[#20CFFF]"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8]"
                   >
-                    <option value={2}>2 Members (Minimum)</option>
+                    <option value={2}>2 Members</option>
                     <option value={3}>3 Members</option>
-                    <option value={4}>4 Members (Full Squad)</option>
+                    <option value={4}>4 Members</option>
                   </select>
                 </div>
               </div>
@@ -172,8 +170,8 @@ export default function RegistrationModal({
                     required
                     value={formData.leadName}
                     onChange={handleChange}
-                    placeholder="e.g. Alex Rivera"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#07111D] border border-[#20CFFF]/30 text-white text-sm focus:outline-none focus:border-[#20CFFF] focus:ring-1 focus:ring-[#20CFFF] placeholder-[#9AAFC1]/40"
+                    placeholder="e.g. Rahul Sharma"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
                   />
                   {errors.leadName && (
                     <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
@@ -194,8 +192,8 @@ export default function RegistrationModal({
                     required
                     value={formData.leadEmail}
                     onChange={handleChange}
-                    placeholder="alex@example.com"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#07111D] border border-[#20CFFF]/30 text-white text-sm focus:outline-none focus:border-[#20CFFF] focus:ring-1 focus:ring-[#20CFFF] placeholder-[#9AAFC1]/40"
+                    placeholder="lead@example.com"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
                   />
                   {errors.leadEmail && (
                     <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
@@ -219,7 +217,7 @@ export default function RegistrationModal({
                     value={formData.leadPhone}
                     onChange={handleChange}
                     placeholder="+91 98765 43210"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#07111D] border border-[#20CFFF]/30 text-white text-sm focus:outline-none focus:border-[#20CFFF] focus:ring-1 focus:ring-[#20CFFF] placeholder-[#9AAFC1]/40"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
                   />
                   {errors.leadPhone && (
                     <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
@@ -240,8 +238,8 @@ export default function RegistrationModal({
                     required
                     value={formData.college}
                     onChange={handleChange}
-                    placeholder="Institute name"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#07111D] border border-[#20CFFF]/30 text-white text-sm focus:outline-none focus:border-[#20CFFF] focus:ring-1 focus:ring-[#20CFFF] placeholder-[#9AAFC1]/40"
+                    placeholder="Institute / College name"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
                   />
                   {errors.college && (
                     <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
@@ -251,30 +249,10 @@ export default function RegistrationModal({
                 </div>
               </div>
 
-              {/* Track Choice */}
-              <div>
-                <label htmlFor="trackId" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                  Preferred Hackathon Track *
-                </label>
-                <select
-                  id="trackId"
-                  name="trackId"
-                  value={formData.trackId}
-                  onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#07111D] border border-[#20CFFF]/30 text-white text-sm focus:outline-none focus:border-[#20CFFF] focus:ring-1 focus:ring-[#20CFFF]"
-                >
-                  {TRACKS.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name} ({t.category})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* Project Synopsis */}
               <div>
                 <label htmlFor="projectSynopsis" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                  Brief Project Concept / Idea Synopsis *
+                  Brief Project Concept / Problem Statement Synopsis *
                 </label>
                 <textarea
                   id="projectSynopsis"
@@ -283,8 +261,8 @@ export default function RegistrationModal({
                   required
                   value={formData.projectSynopsis}
                   onChange={handleChange}
-                  placeholder="Summarize the core problem you want to solve, target users, and proposed technical architecture (min 15 characters)..."
-                  className="w-full px-3.5 py-2 rounded-lg bg-[#07111D] border border-[#20CFFF]/30 text-white text-sm focus:outline-none focus:border-[#20CFFF] focus:ring-1 focus:ring-[#20CFFF] placeholder-[#9AAFC1]/40"
+                  placeholder="Summarize the challenge your team will solve, technologies proposed, and the practical impact (min 15 characters)..."
+                  className="w-full px-3.5 py-2 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40 font-['Inter',sans-serif]"
                 />
                 {errors.projectSynopsis && (
                   <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
@@ -301,10 +279,10 @@ export default function RegistrationModal({
                   type="checkbox"
                   checked={formData.agreedToTerms}
                   onChange={handleChange}
-                  className="mt-1 w-4 h-4 rounded bg-[#07111D] border-[#20CFFF]/40 text-[#20CFFF] focus:ring-[#20CFFF]"
+                  className="mt-1 w-4 h-4 rounded bg-[#050708] border-white/30 text-[#00C8E8] focus:ring-[#00C8E8]"
                 />
-                <label htmlFor="agreedToTerms" className="text-xs text-[#9AAFC1] leading-relaxed">
-                  I confirm that all team members are active students and agree to abide by the HackIgnite Code of Conduct and author original work during the 24-hour sprint.
+                <label htmlFor="agreedToTerms" className="text-xs text-[#A4B6BF] leading-relaxed">
+                  I confirm that all team members are active students and agree to abide by the HackIgnite 1.0 Code of Conduct and submit original work during the 24-hour sprint.
                 </label>
               </div>
               {errors.agreedToTerms && (
@@ -318,13 +296,13 @@ export default function RegistrationModal({
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 py-2.5 rounded-lg text-xs font-medium text-[#9AAFC1] hover:text-white transition-colors"
+                  className="px-5 py-2.5 rounded-lg text-xs font-medium text-[#A4B6BF] hover:text-white transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full text-sm font-bold text-white bg-gradient-to-r from-[#168BFF] to-[#20CFFF] cyan-btn-glow transition-all hover:scale-105 active:scale-95"
+                  className="px-7 py-2.5 rounded-full text-xs sm:text-sm font-bold font-['Space_Grotesk'] uppercase tracking-wider text-[#050708] bg-gradient-to-r from-[#00C8E8] to-[#19D8E8] cyan-btn-glow transition-all hover:scale-105 active:scale-95"
                 >
                   Submit Registration
                 </button>
@@ -332,56 +310,54 @@ export default function RegistrationModal({
             </form>
           </>
         ) : (
-          /* Confirmation Boarding Pass View */
+          /* Confirmation Pass View */
           <div className="text-center py-6 animate-in zoom-in-95 duration-300">
-            <div className="w-16 h-16 rounded-full bg-[#20CFFF]/20 border border-[#20CFFF] flex items-center justify-center mx-auto mb-4 text-[#8DEBFF] shadow-[0_0_25px_rgba(32,207,255,0.4)]">
-              <CheckCircle className="w-8 h-8 text-[#20CFFF]" />
+            <div className="w-16 h-16 rounded-full bg-[#00C8E8]/20 border border-[#00C8E8] flex items-center justify-center mx-auto mb-4 text-[#8DEBFF] shadow-[0_0_25px_rgba(0,200,232,0.35)]">
+              <CheckCircle className="w-8 h-8 text-[#00C8E8]" />
             </div>
 
-            <h3 className="font-display font-black text-2xl sm:text-3xl text-white mb-2">
-              REGISTRATION CONFIRMED
+            <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-white mb-2">
+              REGISTRATION LOGGED
             </h3>
-            <p className="text-sm text-[#9AAFC1] max-w-md mx-auto mb-6">
-              Welcome aboard, Team <span className="text-white font-bold">{formData.teamName}</span>! Your application for HackIgnite 1.0 has been logged.
+            <p className="text-sm text-[#A4B6BF] max-w-md mx-auto mb-6 font-['Inter',sans-serif]">
+              Team <span className="text-white font-bold">{formData.teamName}</span> is registered for HackIgnite 1.0. Please keep your Registration ID for event-day check-in.
             </p>
 
-            {/* Boarding Pass Box */}
-            <div className="p-6 rounded-xl bg-[#07111D] border border-[#20CFFF]/40 text-left max-w-lg mx-auto mb-6 relative overflow-hidden">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#20CFFF]/20">
-                <span className="text-[10px] font-mono text-[#8DEBFF]">COSMIC BOARDING PASS</span>
-                <span className="text-[10px] font-mono text-[#20CFFF] font-bold">VERIFIED SQUAD</span>
+            {/* Pass Box */}
+            <div className="p-6 rounded-xl bg-[#050708] border border-[#00C8E8]/40 text-left max-w-lg mx-auto mb-6 relative overflow-hidden">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+                <span className="text-[10px] font-mono text-[#8DEBFF] uppercase tracking-wider">OFFICIAL PASS</span>
+                <span className="text-[10px] font-mono text-[#00C8E8] font-bold">VERIFIED TEAM</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-xs mb-4">
                 <div>
-                  <div className="text-[#9AAFC1] text-[10px]">Team Name</div>
+                  <div className="text-[#A4B6BF] text-[10px]">Team Name</div>
                   <div className="font-bold text-white font-mono">{formData.teamName}</div>
                 </div>
                 <div>
-                  <div className="text-[#9AAFC1] text-[10px]">Team Size</div>
+                  <div className="text-[#A4B6BF] text-[10px]">Team Size</div>
                   <div className="font-bold text-white font-mono">{formData.memberCount} Members</div>
                 </div>
                 <div>
-                  <div className="text-[#9AAFC1] text-[10px]">Track Choice</div>
-                  <div className="font-bold text-[#8DEBFF]">
-                    {TRACKS.find((t) => t.id === formData.trackId)?.name || formData.trackId}
-                  </div>
+                  <div className="text-[#A4B6BF] text-[10px]">Entry Fee</div>
+                  <div className="font-bold text-[#00C8E8] font-mono">₹2,000 per team</div>
                 </div>
                 <div>
-                  <div className="text-[#9AAFC1] text-[10px]">Institution</div>
+                  <div className="text-[#A4B6BF] text-[10px]">Institution</div>
                   <div className="font-bold text-white truncate">{formData.college}</div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#20CFFF]/20 flex items-center justify-between">
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-[#9AAFC1]">Registration ID</div>
-                  <div className="font-mono text-sm font-bold text-[#20CFFF]">{registrationId}</div>
+                  <div className="text-[10px] text-[#A4B6BF]">Registration ID</div>
+                  <div className="font-mono text-sm font-bold text-[#8DEBFF]">{registrationId}</div>
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyId}
-                  className="px-3 py-1.5 rounded bg-[#0A1724] border border-[#20CFFF]/30 text-xs font-mono text-[#8DEBFF] hover:bg-[#20CFFF]/20 transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded bg-[#07131C] border border-[#00C8E8]/30 text-xs font-mono text-[#8DEBFF] hover:bg-[#00C8E8]/20 transition-colors flex items-center gap-1.5"
                 >
                   {copied ? (
                     <>
@@ -400,7 +376,7 @@ export default function RegistrationModal({
 
             <button
               onClick={resetForm}
-              className="px-8 py-3 rounded-full text-sm font-bold text-white bg-gradient-to-r from-[#168BFF] to-[#20CFFF] cyan-btn-glow hover:scale-105 transition-all"
+              className="px-8 py-3 rounded-full text-xs sm:text-sm font-bold font-['Space_Grotesk'] uppercase tracking-wider text-[#050708] bg-gradient-to-r from-[#00C8E8] to-[#19D8E8] cyan-btn-glow hover:scale-105 transition-all"
             >
               Done & Return to Event
             </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Sparkles, Menu, X, ArrowUpRight } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { motion } from "motion/react";
 
 interface NavbarProps {
   onOpenRegister: () => void;
@@ -8,27 +9,63 @@ interface NavbarProps {
 export default function Navbar({ onOpenRegister }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const [activeSection, setActiveSection] = useState<string>("#hero");
 
   const navLinks = [
     { label: "Home", href: "#hero" },
     { label: "About", href: "#overview" },
-    { label: "Tracks", href: "#tracks" },
-    { label: "Mission", href: "#mission" },
-    { label: "Timeline", href: "#timeline" },
+    { label: "Tracks & Rules", href: "#tracks-rules" },
+    { label: "Schedule", href: "#schedule" },
+    { label: "Pillars", href: "#pillars" },
+    { label: "Register", href: "#register" },
+    { label: "Venue", href: "#venue" },
     { label: "FAQ", href: "#faq" },
+    { label: "Contact", href: "#contact" },
+    { label: "Sponsors", href: "#sponsors" },
   ];
+
+  useEffect(() => {
+    const sectionIds = navLinks.map((l) => l.href.substring(1));
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+
+      // Check if user has scrolled near bottom of page (activate #sponsors)
+      const docHeight = document.documentElement.scrollHeight;
+      const scrollBottom = window.innerHeight + window.scrollY;
+      if (scrollBottom >= docHeight - 100) {
+        setActiveSection("#sponsors");
+        return;
+      }
+
+      // Detection threshold: 180px below viewport top
+      const scrollPos = window.scrollY + 180;
+      let currentActive = "#hero";
+
+      for (let i = 0; i < sectionIds.length; i++) {
+        const id = sectionIds[i];
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          if (top <= scrollPos) {
+            currentActive = `#${id}`;
+          }
+        }
+      }
+
+      setActiveSection(currentActive);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial check on mount
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    setActiveSection(href);
     setMobileMenuOpen(false);
+
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -37,93 +74,135 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 flex items-center ${
         isScrolled
-          ? "py-3 bg-[#030609]/80 backdrop-blur-md border-b border-[#20CFFF]/20 shadow-[0_4px_30px_rgba(0,0,0,0.8)]"
-          : "py-5 bg-transparent"
+          ? "bg-[#050708]/85 backdrop-blur-xl border-b border-[#00C8E8]/20 shadow-[0_8px_32px_rgba(0,0,0,0.85)]"
+          : "bg-[#050708]/35 backdrop-blur-md border-b border-white/5"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-8">
-          {/* Zone 1: Brand wordmark & emblem */}
+      {/* Bottom glowing animated accent highlight on navbar boundary */}
+      <div
+        className={`absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#00C8E8]/50 to-transparent pointer-events-none transition-opacity duration-300 ${
+          isScrolled ? "opacity-100" : "opacity-30"
+        }`}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex items-center justify-between">
+          {/* Logo & Brand */}
           <a
             href="#hero"
             onClick={(e) => handleNavClick(e, "#hero")}
-            className="flex items-center gap-2.5 group whitespace-nowrap shrink-0"
+            className="flex items-center gap-2.5 group whitespace-nowrap shrink-0 cursor-pointer"
             aria-label="HackIgnite 1.0 Home"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#20CFFF] to-[#168BFF] p-[1px] shadow-[0_0_15px_rgba(32,207,255,0.4)]">
-              <div className="w-full h-full bg-[#07111D] rounded-lg flex items-center justify-center group-hover:bg-[#0A1724] transition-colors">
-                <Sparkles className="w-4 h-4 text-[#8DEBFF] transition-transform duration-300 group-hover:scale-110" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00C8E8] to-[#19D8E8] p-[1.5px] shadow-[0_0_12px_rgba(0,200,232,0.3)]">
+              <div className="w-full h-full bg-[#07131C] rounded-[7px] flex items-center justify-center group-hover:bg-[#09232B] transition-colors">
+                <span className="font-['Space_Grotesk'] font-bold text-xs text-[#00C8E8] tracking-tight">HI</span>
               </div>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-display font-black text-lg sm:text-xl tracking-wider text-white">
-                HACK<span className="text-[#20CFFF]">IGNITE</span>
+              <span className="font-['Space_Grotesk'] font-bold text-base sm:text-lg lg:text-xl tracking-tight text-[#F3F8FA]">
+                HACK<span className="text-[#00C8E8]">IGNITE</span>
               </span>
-              <span className="text-xs font-mono font-semibold text-[#8DEBFF]/80">1.0</span>
+              <span className="text-[10px] sm:text-xs font-mono font-semibold text-[#8DEBFF]/90 tracking-wider">1.0</span>
             </div>
           </a>
 
-          {/* Zone 2: Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#9AAFC1]">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                className="hover:text-[#8DEBFF] hover:drop-shadow-[0_0_8px_rgba(32,207,255,0.6)] transition-all whitespace-nowrap shrink-0"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          {/* Zone 3: Primary Action & Mobile Menu Toggle */}
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={onOpenRegister}
-              className="relative group px-5 py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-[#168BFF] to-[#20CFFF] rounded-full cyan-btn-glow transition-all duration-300 hover:scale-105 active:scale-95 whitespace-nowrap shrink-0 flex items-center gap-1.5"
-            >
-              <span>Register Now</span>
-              <ArrowUpRight className="w-3.5 h-3.5 text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </button>
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-[#9AAFC1] hover:text-white rounded-lg hover:bg-[#0A1724] border border-[#20CFFF]/20 transition-colors"
-              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="md:hidden mt-3 p-4 rounded-xl cosmic-glass border border-[#20CFFF]/30 animate-in fade-in slide-in-from-top-2 duration-200">
-            <nav className="flex flex-col gap-3">
-              {navLinks.map((link) => (
+          {/* Desktop Navigation Links with Traveling Active Indicator Line */}
+          <nav className="hidden md:flex items-center gap-0.5 lg:gap-1.5 text-xs lg:text-[13px] font-medium">
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.href;
+              return (
                 <a
                   key={link.label}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className="px-3 py-2 text-sm font-medium text-[#9AAFC1] hover:text-[#8DEBFF] hover:bg-[#0A1724]/60 rounded-lg transition-colors"
+                  className={`relative px-2.5 lg:px-3 py-1.5 rounded-full font-['Inter',sans-serif] tracking-wide transition-colors duration-200 cursor-pointer ${
+                    isActive
+                      ? "text-[#8DEBFF] font-semibold"
+                      : "text-[#A4B6BF] hover:text-white"
+                  }`}
                 >
-                  {link.label}
+                  {/* Active Traveling Glowing Line Indicator */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavLine"
+                      className="absolute -bottom-1 inset-x-2 h-[2px] bg-gradient-to-r from-[#00C8E8] via-[#8DEBFF] to-[#00C8E8] rounded-full shadow-[0_0_10px_rgba(0,200,232,0.9)]"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+
+                  {/* Active Traveling Ambient Pill Glow */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavPill"
+                      className="absolute inset-0 bg-[#00C8E8]/10 rounded-full -z-10 border border-[#00C8E8]/20"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+
+                  <span className="relative z-10">{link.label}</span>
                 </a>
-              ))}
-              <div className="pt-2 border-t border-[#20CFFF]/20">
+              );
+            })}
+          </nav>
+
+          {/* Right Action / Mobile Toggle */}
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Desktop Register Button */}
+            <button
+              onClick={onOpenRegister}
+              className="hidden md:inline-flex items-center justify-center px-5 py-2 text-xs font-bold font-['Space_Grotesk'] uppercase tracking-wider text-[#050708] bg-gradient-to-r from-[#00C8E8] via-[#19D8E8] to-[#00C8E8] bg-[length:200%_auto] hover:bg-[position:right_center] rounded-full cyan-btn-glow transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
+            >
+              REGISTER NOW
+            </button>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#A4B6BF] hover:text-[#F3F8FA] rounded-lg hover:bg-[#07131C] border border-[#00C8E8]/20 transition-colors cursor-pointer"
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5 text-[#F3F8FA]" /> : <Menu className="w-5 h-5 text-[#F3F8FA]" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation Drawer with Active Section Highlighting */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mt-2 p-3.5 rounded-xl bg-[#07131C]/98 backdrop-blur-2xl border border-[#00C8E8]/30 shadow-[0_12px_40px_rgba(0,0,0,0.9)] animate-in fade-in slide-in-from-top-2 duration-200">
+            <nav className="flex flex-col gap-1">
+              {navLinks.map((link) => {
+                const isActive = activeSection === link.href;
+                return (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
+                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-all font-['Inter',sans-serif] flex items-center justify-between cursor-pointer ${
+                      isActive
+                        ? "bg-[#00C8E8]/15 text-[#8DEBFF] font-semibold border-l-2 border-[#00C8E8] shadow-[inset_0_0_12px_rgba(0,200,232,0.15)]"
+                        : "text-[#A4B6BF] hover:text-[#F3F8FA] hover:bg-[#050708]/60"
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] shadow-[0_0_8px_#00C8E8]" />
+                    )}
+                  </a>
+                );
+              })}
+              <div className="pt-2.5 mt-1 border-t border-white/10">
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     onOpenRegister();
                   }}
-                  className="w-full py-2.5 text-center text-sm font-semibold text-white bg-gradient-to-r from-[#168BFF] to-[#20CFFF] rounded-lg cyan-btn-glow"
+                  className="w-full py-2.5 text-center text-xs font-bold font-['Space_Grotesk'] uppercase tracking-wider text-[#050708] bg-gradient-to-r from-[#00C8E8] to-[#19D8E8] rounded-lg cyan-btn-glow cursor-pointer"
                 >
-                  Register Now
+                  REGISTER NOW
                 </button>
               </div>
             </nav>
