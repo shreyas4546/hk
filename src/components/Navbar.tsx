@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { motion } from "motion/react";
+import HackIgniteLogo from "./ui/HackIgniteLogo";
 
 interface NavbarProps {
   onOpenRegister: () => void;
@@ -106,24 +107,14 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex items-center justify-between">
-          {/* Logo & Brand */}
+          {/* Logo & Brand (Living Cyber Emblem) */}
           <a
             href="#hero"
             onClick={(e) => handleNavClick(e, "#hero")}
-            className="flex items-center gap-2.5 group whitespace-nowrap shrink-0 cursor-pointer"
+            className="cursor-pointer"
             aria-label="HackIgnite 1.0 Home"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00C8E8] to-[#19D8E8] p-[1.5px] shadow-[0_0_12px_rgba(0,200,232,0.3)]">
-              <div className="w-full h-full bg-[#07131C] rounded-[7px] flex items-center justify-center group-hover:bg-[#09232B] transition-colors">
-                <span className="font-['Space_Grotesk'] font-bold text-xs text-[#00C8E8] tracking-tight">HI</span>
-              </div>
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-['Space_Grotesk'] font-bold text-base sm:text-lg lg:text-xl tracking-tight text-[#F3F8FA]">
-                HACK<span className="text-[#00C8E8]">IGNITE</span>
-              </span>
-              <span className="text-[10px] sm:text-xs font-mono font-semibold text-[#8DEBFF]/90 tracking-wider">1.0</span>
-            </div>
+            <HackIgniteLogo size="md" />
           </a>
 
           {/* Desktop Navigation Links with Traveling Active Indicator Line */}

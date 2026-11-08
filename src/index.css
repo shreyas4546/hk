@@ -1250,3 +1250,52 @@
     transform: scale(1) translateY(0);
   }
 }
+
+/* =========================================================================
+   HACKIGNITE ALIVE LOGO ANIMATIONS (GPU ACCELERATED)
+   ========================================================================= */
+@keyframes logoAuraPulse {
+  0%, 100% {
+    transform: scale(0.94);
+    opacity: 0.35;
+    filter: blur(8px);
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+    filter: blur(14px);
+  }
+}
+
+@keyframes logoOrbitSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes logoFlameShimmer {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px rgba(0, 200, 232, 0.7));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(0, 200, 232, 0.95)) drop-shadow(0 0 20px rgba(25, 216, 232, 0.6));
+  }
+}
+
+.logo-aura-alive {
+  animation: logoAuraPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform, opacity, filter;
+}
+
+.logo-orbit-alive {
+  animation: logoOrbitSpin 7s linear infinite;
+  will-change: transform;
+}
+
+.logo-flame-alive {
+  animation: logoFlameShimmer 3s ease-in-out infinite;
+  will-change: filter;
+}

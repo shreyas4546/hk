@@ -85,8 +85,16 @@ export default function Footer() {
             {/* COLUMN 1 — HACKIGNITE IDENTITY (Desktop: 4 cols | Mobile: Order 1) */}
             <div className="md:col-span-5 lg:col-span-4 space-y-2 md:border-r border-[#04080D]/12 md:pr-6">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#04080D] flex items-center justify-center font-['Space_Grotesk'] font-bold text-xs text-[#8DEBFF] shadow-sm shrink-0">
-                  HI
+                <div className="relative w-8 h-8 rounded-lg bg-[#04080D] flex items-center justify-center p-1 shadow-sm shrink-0 border border-[#04080D]/20 overflow-hidden">
+                  <picture>
+                    <source srcSet="/assets/logo/hackignite-emblem.webp" type="image/webp" />
+                    <img
+                      src="/assets/logo/hackignite-emblem.png"
+                      alt="HackIgnite 1.0"
+                      className="w-full h-full object-contain"
+                      loading="lazy"
+                    />
+                  </picture>
                 </div>
                 <div>
                   <span className="font-['Space_Grotesk'] font-bold text-base sm:text-lg text-[#04080D] tracking-tight block leading-tight">
