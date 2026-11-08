@@ -25,6 +25,10 @@ export const EVENT_DETAILS = {
   registrationFeeAmount: "₹2,000",
   feeNote: "Team entry fee (₹2,000 per team)",
   competitionHighlight: "5 Places to Conquer",
+  prizePool: "Up to ₹40,000",
+  totalPrizePool: "Up to ₹40,000",
+  prizePoolScope: "Entire hackathon (Shared across Web Development and App Development tracks)",
+  prizePoolAllocation: "Shared across both tracks",
   coordinator: "Aditya R H",
   contactPhone: "7022951232",
   contactPhoneFormatted: "+91 70229 51232",
@@ -37,6 +41,21 @@ export const EVENT_DETAILS = {
     directionsUrl: "https://www.google.com/maps/dir/?api=1&destination=Jain+College+of+Engineering+and+Technology+Hubballi",
     embedUrl: "https://maps.google.com/maps?q=Jain%20College%20of%20Engineering%20and%20Technology%20Hubballi&t=&z=15&ie=UTF8&iwloc=&output=embed",
   },
+};
+
+// Single Source of Truth for HackIgnite 1.0 Prize Pool
+export const PRIZE_DETAILS = {
+  event: "HACKIGNITE 1.0",
+  totalPrizePool: "Up to ₹40,000",
+  amountNumber: 40000,
+  scope: "Entire hackathon",
+  competitionTracks: ["Web Development", "App Development"],
+  allocation: "Shared across both tracks",
+  placesToConquer: "5 Places to Conquer",
+  heading: "ONE HACKATHON. ONE SHARED PRIZE POOL.",
+  mainAmount: "UP TO ₹40,000",
+  supportingText:
+    "A common prize pool for HackIgnite 1.0, shared across both Web Development and App Development tracks.",
 };
 
 export const PILLARS = [
@@ -307,6 +326,13 @@ export const FAQS: FAQItem[] = [
     answer:
       "For any queries regarding HackIgnite 1.0, participants can contact Event Coordinator Aditya R H directly at 7022951232.",
     category: "Contact",
+  },
+  {
+    id: "faq-9",
+    question: "Is the ₹40,000 prize pool available separately for both tracks?",
+    answer:
+      "No. HackIgnite 1.0 has one shared prize pool of up to ₹40,000 across the Web Development and App Development tracks. ₹40,000 is not allocated separately to each track.",
+    category: "Prizes",
   },
 ];
 

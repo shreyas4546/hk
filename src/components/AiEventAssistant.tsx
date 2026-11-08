@@ -51,9 +51,17 @@ function getGroundedAnswer(query: string): string {
     return `The official entry fee is ₹2,000 per team. This is the complete team registration fee for HackIgnite 1.0.`;
   }
 
-  // 3b. Prize Pool & Awards
+  // 3b. Prize Pool - Track Separation Query (Shared Pool Clarification)
+  if (
+    (q.includes("separate") || q.includes("each track") || q.includes("both tracks") || q.includes("per track") || q.includes("individually") || q.includes("individual")) &&
+    (q.includes("prize") || q.includes("pool") || q.includes("40,000") || q.includes("40000") || q.includes("bounty") || q.includes("award") || q.includes("money"))
+  ) {
+    return `No. HackIgnite 1.0 has one shared prize pool of up to ₹40,000 across the Web Development and App Development tracks. ₹40,000 is not allocated separately to each track.`;
+  }
+
+  // 3c. General Prize Pool & Awards
   if (q.includes("prize") || q.includes("award") || q.includes("pool") || q.includes("cash") || q.includes("conquer") || q.includes("bounty") || q.includes("reward") || q.includes("winner") || q.includes("money")) {
-    return `HackIgnite 1.0 features a total prize pool of up to ₹40,000! Teams compete for cash honors and trophies across the 5 Places to Conquer podium categories: Winner (#01 Champion), Runner Up (#02 Excellence in Engineering), Second Runner Up (#03 Outstanding Innovation), Best Development (#04 Architecture & Code Rigor), and Best Project (#05 Complete Viability & Impact).`;
+    return `HackIgnite 1.0 features one shared prize pool of up to ₹40,000 across both the Web Development and App Development tracks! Teams compete for cash honors and trophies across the 5 Places to Conquer podium categories: Winner (#01 Champion), Runner Up (#02 Excellence in Engineering), Second Runner Up (#03 Outstanding Innovation), Best Development (#04 Architecture & Code Rigor), and Best Project (#05 Complete Viability & Impact). The ₹40,000 pool is common to the entire event, not allocated separately per track.`;
   }
 
   // 4. Coding Start
@@ -83,7 +91,7 @@ function getGroundedAnswer(query: string): string {
 
   // 9. Tracks
   if (q.includes("track") || q.includes("challenge") || q.includes("problem statement") || q.includes("domain") || q.includes("web") || q.includes("app")) {
-    return `HackIgnite 1.0 features two official competition tracks: 1) Web Development (modern frontend architectures, scalable cloud APIs, and full-stack web platforms) and 2) App Development (iOS, Android, and cross-platform mobile ecosystems). Both tracks compete for the 5 Places to Conquer awards!`;
+    return `HackIgnite 1.0 features two official competition tracks: 1) Web Development (modern frontend architectures, scalable cloud APIs, and full-stack web platforms) and 2) App Development (iOS, Android, and cross-platform mobile ecosystems). Both tracks share the common event prize pool of up to ₹40,000 and compete together for the 5 Places to Conquer awards!`;
   }
 
   // 10. Organizers / College
