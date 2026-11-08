@@ -1,7 +1,25 @@
-import React, { useState } from "react";
-import { X, CheckCircle, Sparkles, AlertCircle, Copy, Check } from "lucide-react";
-import { EVENT_DETAILS, TRACKS } from "../data/eventData";
-import { validateRegistration, RegistrationPayload } from "../utils/rules";
+import React, { useState, useEffect } from "react";
+import {
+  X,
+  ExternalLink,
+  Copy,
+  Check,
+  Sparkles,
+  QrCode,
+  ShieldCheck,
+  Trophy,
+  Coffee,
+  Award,
+  Users,
+  Flame,
+  Zap,
+  ArrowRight,
+  Clock,
+  Phone,
+  Share2,
+} from "lucide-react";
+import { EVENT_DETAILS, UNSTOP_REGISTRATION } from "../data/eventData";
+import { soundEffects } from "../utils/soundEffects";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -12,376 +30,349 @@ interface RegistrationModalProps {
 export default function RegistrationModal({
   isOpen,
   onClose,
-  preSelectedTrackId,
 }: RegistrationModalProps) {
-  const [formData, setFormData] = useState<Partial<RegistrationPayload>>({
-    teamName: "",
-    leadName: "",
-    leadEmail: "",
-    leadPhone: "",
-    college: "",
-    trackId: preSelectedTrackId || "open-innovation",
-    memberCount: 4,
-    projectSynopsis: "",
-    githubUrl: "",
-    agreedToTerms: false,
-  });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [registrationId, setRegistrationId] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    soundEffects.playCrack(0.6);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value, type } = e.target;
-    if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData((prev) => ({ ...prev, [name]: checked }));
-    } else if (name === "memberCount") {
-      setFormData((prev) => ({ ...prev, [name]: parseInt(value, 10) || 2 }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-
-    if (errors[name]) {
-      setErrors((prev) => {
-        const updated = { ...prev };
-        delete updated[name];
-        return updated;
-      });
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = validateRegistration(formData);
-
-    if (!result.isValid) {
-      setErrors(result.errors);
-      return;
-    }
-
-    const randomHex = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const regId = `HACKIGNITE-2026-${randomHex}`;
-    setRegistrationId(regId);
-    setIsSubmitted(true);
-  };
-
-  const handleCopyId = () => {
-    navigator.clipboard.writeText(registrationId);
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(UNSTOP_REGISTRATION.url);
+    soundEffects.playVictoryChime();
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 2400);
   };
 
-  const resetForm = () => {
-    setIsSubmitted(false);
-    onClose();
+  const handleLaunchUnstop = () => {
+    soundEffects.playVictoryChime();
+    window.open(UNSTOP_REGISTRATION.url, "_blank", "noopener,noreferrer");
   };
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
+      aria-labelledby="unstop-portal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
-      <div className="relative w-full max-w-2xl my-8 rounded-2xl bg-[#07131C]/95 border border-[#00C8E8]/30 p-6 sm:p-8 shadow-[0_0_50px_rgba(0,200,232,0.2)] text-left">
-        {/* Close Button */}
-        <button
-          onClick={resetForm}
-          className="absolute top-5 right-5 p-2 text-[#A4B6BF] hover:text-white rounded-lg hover:bg-[#050708] transition-colors"
-          aria-label="Close registration modal"
-        >
-          <X className="w-5 h-5" />
-        </button>
+      {/* Modal Container */}
+      <div className="relative w-full max-w-4xl my-auto rounded-3xl bg-[#050B11]/95 border border-[#00C8E8]/40 shadow-[0_0_80px_rgba(0,200,232,0.3)] overflow-hidden text-left flex flex-col max-h-[94vh]">
+        {/* Ambient Top Glow Bar */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00C8E8] to-transparent shadow-[0_0_20px_#00C8E8]" />
 
-        {!isSubmitted ? (
-          <>
-            <div className="mb-6">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#050708] border border-[#00C8E8]/30 text-xs font-mono text-[#8DEBFF] mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#00C8E8]" />
-                <span>OFFICIAL PORTAL // ENTRY FEE: ₹2,000 PER TEAM</span>
-              </div>
-              <h2 id="modal-title" className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-[#F3F8FA]">
-                REGISTER YOUR TEAM
-              </h2>
-              <p className="text-xs sm:text-sm text-[#A4B6BF] mt-1 font-['Inter',sans-serif]">
-                Enter your team details for {EVENT_DETAILS.name} ({EVENT_DETAILS.dates} at {EVENT_DETAILS.shortVenue}).
-              </p>
-            </div>
+        {/* Modal Header */}
+        <div className="relative px-5 pt-5 pb-4 sm:px-8 sm:pt-7 sm:pb-5 border-b border-white/10 flex items-start justify-between gap-4 bg-gradient-to-b from-[#071724]/90 to-transparent">
+          <div>
+            {/* Live Status Pill & Sponsor Badge */}
+            <div className="flex flex-wrap items-center gap-2 mb-2 sm:mb-2.5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00C8E8]/15 border border-[#00C8E8]/40 text-[10px] sm:text-xs font-mono font-bold text-[#8DEBFF] shadow-[0_0_12px_rgba(0,200,232,0.25)]">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C8E8] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C8E8]" />
+                </span>
+                <span>OFFICIAL PORTAL // UNSTOP POWERED</span>
+              </span>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Team Name */}
-                <div>
-                  <label htmlFor="teamName" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                    Team Name *
-                  </label>
-                  <input
-                    id="teamName"
-                    name="teamName"
-                    type="text"
-                    required
-                    value={formData.teamName}
-                    onChange={handleChange}
-                    placeholder="e.g. Ignite Builders"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
-                  />
-                  {errors.teamName && (
-                    <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {errors.teamName}
-                    </p>
-                  )}
-                </div>
-
-                {/* Team Size */}
-                <div>
-                  <label htmlFor="memberCount" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                    Team Size (Members) *
-                  </label>
-                  <select
-                    id="memberCount"
-                    name="memberCount"
-                    value={formData.memberCount}
-                    onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8]"
-                  >
-                    <option value={2}>2 Members</option>
-                    <option value={3}>3 Members</option>
-                    <option value={4}>4 Members</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Lead Name */}
-                <div>
-                  <label htmlFor="leadName" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                    Team Lead Full Name *
-                  </label>
-                  <input
-                    id="leadName"
-                    name="leadName"
-                    type="text"
-                    required
-                    value={formData.leadName}
-                    onChange={handleChange}
-                    placeholder="e.g. Rahul Sharma"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
-                  />
-                  {errors.leadName && (
-                    <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {errors.leadName}
-                    </p>
-                  )}
-                </div>
-
-                {/* Lead Email */}
-                <div>
-                  <label htmlFor="leadEmail" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                    Lead Email Address *
-                  </label>
-                  <input
-                    id="leadEmail"
-                    name="leadEmail"
-                    type="email"
-                    required
-                    value={formData.leadEmail}
-                    onChange={handleChange}
-                    placeholder="lead@example.com"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
-                  />
-                  {errors.leadEmail && (
-                    <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {errors.leadEmail}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Phone */}
-                <div>
-                  <label htmlFor="leadPhone" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                    Contact Phone Number *
-                  </label>
-                  <input
-                    id="leadPhone"
-                    name="leadPhone"
-                    type="tel"
-                    required
-                    value={formData.leadPhone}
-                    onChange={handleChange}
-                    placeholder="+91 98765 43210"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
-                  />
-                  {errors.leadPhone && (
-                    <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {errors.leadPhone}
-                    </p>
-                  )}
-                </div>
-
-                {/* College / Institution */}
-                <div>
-                  <label htmlFor="college" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                    College / Institution *
-                  </label>
-                  <input
-                    id="college"
-                    name="college"
-                    type="text"
-                    required
-                    value={formData.college}
-                    onChange={handleChange}
-                    placeholder="Institute / College name"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40"
-                  />
-                  {errors.college && (
-                    <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {errors.college}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Project Synopsis */}
-              <div>
-                <label htmlFor="projectSynopsis" className="block text-xs font-semibold text-[#8DEBFF] mb-1">
-                  Brief Project Concept / Problem Statement Synopsis *
-                </label>
-                <textarea
-                  id="projectSynopsis"
-                  name="projectSynopsis"
-                  rows={3}
-                  required
-                  value={formData.projectSynopsis}
-                  onChange={handleChange}
-                  placeholder="Summarize the challenge your team will solve, technologies proposed, and the practical impact (min 15 characters)..."
-                  className="w-full px-3.5 py-2 rounded-lg bg-[#050708] border border-white/20 text-white text-sm focus:outline-none focus:border-[#00C8E8] focus:ring-1 focus:ring-[#00C8E8] placeholder-[#A4B6BF]/40 font-['Inter',sans-serif]"
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/95 text-[#1C4980] text-[11px] font-bold tracking-tight shadow-sm">
+                <img
+                  src="/assets/sponsors/unstop.svg"
+                  alt="Unstop Logo"
+                  className="h-3 w-auto inline-block object-contain"
                 />
-                {errors.projectSynopsis && (
-                  <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" /> {errors.projectSynopsis}
-                  </p>
-                )}
-              </div>
-
-              {/* Terms Checkbox */}
-              <div className="flex items-start gap-2.5 pt-2">
-                <input
-                  id="agreedToTerms"
-                  name="agreedToTerms"
-                  type="checkbox"
-                  checked={formData.agreedToTerms}
-                  onChange={handleChange}
-                  className="mt-1 w-4 h-4 rounded bg-[#050708] border-white/30 text-[#00C8E8] focus:ring-[#00C8E8]"
-                />
-                <label htmlFor="agreedToTerms" className="text-xs text-[#A4B6BF] leading-relaxed">
-                  I confirm that all team members are active students and agree to abide by the HackIgnite 1.0 Code of Conduct and submit original work during the 24-hour sprint.
-                </label>
-              </div>
-              {errors.agreedToTerms && (
-                <p className="text-xs text-rose-400 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> {errors.agreedToTerms}
-                </p>
-              )}
-
-              {/* Submit CTA */}
-              <div className="pt-4 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-5 py-2.5 rounded-lg text-xs font-medium text-[#A4B6BF] hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-7 py-2.5 rounded-full text-xs sm:text-sm font-bold font-['Space_Grotesk'] uppercase tracking-wider text-[#050708] bg-gradient-to-r from-[#00C8E8] to-[#19D8E8] cyan-btn-glow transition-all hover:scale-105 active:scale-95"
-                >
-                  Submit Registration
-                </button>
-              </div>
-            </form>
-          </>
-        ) : (
-          /* Confirmation Pass View */
-          <div className="text-center py-6 animate-in zoom-in-95 duration-300">
-            <div className="w-16 h-16 rounded-full bg-[#00C8E8]/20 border border-[#00C8E8] flex items-center justify-center mx-auto mb-4 text-[#8DEBFF] shadow-[0_0_25px_rgba(0,200,232,0.35)]">
-              <CheckCircle className="w-8 h-8 text-[#00C8E8]" />
-            </div>
-
-            <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-white mb-2">
-              REGISTRATION LOGGED
-            </h3>
-            <p className="text-sm text-[#A4B6BF] max-w-md mx-auto mb-6 font-['Inter',sans-serif]">
-              Team <span className="text-white font-bold">{formData.teamName}</span> is registered for HackIgnite 1.0. Please keep your Registration ID for event-day check-in.
-            </p>
-
-            {/* Pass Box */}
-            <div className="p-6 rounded-xl bg-[#050708] border border-[#00C8E8]/40 text-left max-w-lg mx-auto mb-6 relative overflow-hidden">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
-                <span className="text-[10px] font-mono text-[#8DEBFF] uppercase tracking-wider">OFFICIAL PASS</span>
-                <span className="text-[10px] font-mono text-[#00C8E8] font-bold">VERIFIED TEAM</span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs mb-4">
-                <div>
-                  <div className="text-[#A4B6BF] text-[10px]">Team Name</div>
-                  <div className="font-bold text-white font-mono">{formData.teamName}</div>
-                </div>
-                <div>
-                  <div className="text-[#A4B6BF] text-[10px]">Team Size</div>
-                  <div className="font-bold text-white font-mono">{formData.memberCount} Members</div>
-                </div>
-                <div>
-                  <div className="text-[#A4B6BF] text-[10px]">Entry Fee</div>
-                  <div className="font-bold text-[#00C8E8] font-mono">₹2,000 per team</div>
-                </div>
-                <div>
-                  <div className="text-[#A4B6BF] text-[10px]">Institution</div>
-                  <div className="font-bold text-white truncate">{formData.college}</div>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] text-[#A4B6BF]">Registration ID</div>
-                  <div className="font-mono text-sm font-bold text-[#8DEBFF]">{registrationId}</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCopyId}
-                  className="px-3 py-1.5 rounded bg-[#07131C] border border-[#00C8E8]/30 text-xs font-mono text-[#8DEBFF] hover:bg-[#00C8E8]/20 transition-colors flex items-center gap-1.5"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy ID</span>
-                    </>
-                  )}
-                </button>
+                <span className="font-mono text-[9px] uppercase tracking-wider text-[#1C4980]">
+                  OFFICIAL PARTNER
+                </span>
               </div>
             </div>
 
-            <button
-              onClick={resetForm}
-              className="px-8 py-3 rounded-full text-xs sm:text-sm font-bold font-['Space_Grotesk'] uppercase tracking-wider text-[#050708] bg-gradient-to-r from-[#00C8E8] to-[#19D8E8] cyan-btn-glow hover:scale-105 transition-all"
+            {/* Modal Title */}
+            <h2
+              id="unstop-portal-title"
+              className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl md:text-4xl text-[#F3F8FA] tracking-tight uppercase leading-tight"
             >
-              Done & Return to Event
-            </button>
+              REGISTER ON <span className="cyan-turquoise-text">UNSTOP</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-[#A4B6BF] font-['Inter',sans-serif] mt-1 max-w-xl">
+              Official registration for <strong className="text-white">HackIgnite 1.0</strong> (12–13 Dec 2026 at JCET Hubballi). Tap below to open Unstop directly, or scan the QR code from another device.
+            </p>
           </div>
-        )}
+
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="p-2.5 rounded-xl bg-white/5 hover:bg-[#00C8E8]/20 border border-white/10 hover:border-[#00C8E8]/60 text-[#A4B6BF] hover:text-[#8DEBFF] transition-all cursor-pointer shrink-0"
+            aria-label="Close registration modal"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Scrollable Modal Body */}
+        <div className="px-5 py-5 sm:px-8 sm:py-6 overflow-y-auto space-y-6 custom-scrollbar">
+          {/* Main Registration Grid: Mobile Action First on small screens, QR side-by-side on desktop */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            {/* Desktop Left / Mobile Bottom: Interactive Cyber QR Scanner (5 Cols) */}
+            <div className="order-2 lg:order-1 lg:col-span-5 rounded-2xl bg-[#07131C]/90 border border-[#00C8E8]/35 p-5 sm:p-6 flex flex-col items-center justify-between text-center relative group overflow-hidden shadow-[0_0_30px_rgba(0,200,232,0.15)]">
+              {/* Corner HUD reticles */}
+              <div className="hud-corner hud-corner-tl" />
+              <div className="hud-corner hud-corner-tr" />
+              <div className="hud-corner hud-corner-bl" />
+              <div className="hud-corner hud-corner-br" />
+
+              {/* Ambient radial glow */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#00C8E8]/10 blur-3xl pointer-events-none rounded-full" />
+
+              {/* QR Header Tag */}
+              <div className="w-full flex items-center justify-between mb-3 text-[10px] font-mono text-[#8DEBFF] uppercase tracking-wider">
+                <span className="flex items-center gap-1">
+                  <QrCode className="w-3.5 h-3.5 text-[#00C8E8]" />
+                  <span>FAST MOBILE SCAN</span>
+                </span>
+                <span className="text-[#A4B6BF]">100% SECURE</span>
+              </div>
+
+              {/* QR Code Frame with Animated Cyber Laser */}
+              <div
+                onClick={handleLaunchUnstop}
+                className="relative w-44 h-44 sm:w-52 sm:h-52 p-2 rounded-2xl bg-white shadow-[0_0_30px_rgba(0,200,232,0.35)] transition-transform duration-300 group-hover:scale-[1.02] flex items-center justify-center overflow-hidden border-2 border-[#00C8E8] cursor-pointer"
+                title="Click or scan to open Unstop registration"
+              >
+                {/* Laser scan line & trailing glow */}
+                <div className="qr-laser-line" />
+                <div className="qr-laser-trail" />
+
+                {/* Official Unstop QR Image */}
+                <img
+                  src={UNSTOP_REGISTRATION.qrImage}
+                  alt="HackIgnite 1.0 Unstop Official Registration QR Code"
+                  className="w-full h-full object-contain block"
+                />
+              </div>
+
+              {/* Instruction Below QR */}
+              <div className="mt-4 space-y-1">
+                <div className="text-xs sm:text-sm font-bold text-[#F3F8FA] font-['Space_Grotesk'] flex items-center justify-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#00C8E8]" />
+                  <span>POINT PHONE CAMERA TO SCAN</span>
+                </div>
+                <p className="text-[11px] text-[#A4B6BF] max-w-xs font-['Inter',sans-serif]">
+                  Scan with Google Lens, Paytm/GPay or your phone's camera to register instantly on mobile.
+                </p>
+              </div>
+            </div>
+
+            {/* Desktop Right / Mobile Top: Direct Link Launch & Value Highlights (7 Cols) */}
+            <div className="order-1 lg:order-2 lg:col-span-7 flex flex-col justify-between space-y-4">
+              {/* Urgency & Fee Card */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#071724] to-[#0A222E] border border-[#00C8E8]/40 shadow-[0_0_25px_rgba(0,200,232,0.15)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <div className="text-[10px] font-mono text-[#8DEBFF] uppercase tracking-widest flex items-center gap-1.5">
+                    <Flame className="w-3.5 h-3.5 text-[#00C8E8]" />
+                    <span>ALL-INCLUSIVE TEAM ENTRY</span>
+                  </div>
+                  <div className="font-['Space_Grotesk'] font-bold text-3xl sm:text-4xl text-white mt-1">
+                    <span className="cyan-turquoise-text">₹2,000</span>
+                    <span className="text-xs sm:text-sm font-mono text-[#A4B6BF] font-normal ml-2">
+                      / TEAM
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-[#A4B6BF] mt-1 font-mono">
+                    2–4 members · <span className="text-[#8DEBFF] font-semibold">₹500 per person</span>
+                  </div>
+                </div>
+
+                <div className="px-3.5 py-2.5 rounded-xl bg-[#050708]/85 border border-[#00C8E8]/30 sm:text-right shrink-0 w-full sm:w-auto">
+                  <div className="text-[9px] font-mono text-[#A4B6BF] uppercase tracking-wider">
+                    SHARED CASH POOL
+                  </div>
+                  <div className="text-lg sm:text-xl font-bold text-[#8DEBFF] font-['Space_Grotesk']">
+                    UP TO ₹40,000
+                  </div>
+                  <div className="text-[9px] font-mono text-[#00C8E8]">
+                    5 PODIUM PLACEMENTS
+                  </div>
+                </div>
+              </div>
+
+              {/* Direct Primary CTA Button */}
+              <div className="space-y-3">
+                <button
+                  onClick={handleLaunchUnstop}
+                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#00C8E8] via-[#19D8E8] to-[#00C8E8] bg-[length:200%_auto] hover:bg-[position:right_center] text-[#050708] font-['Space_Grotesk'] font-bold text-base sm:text-lg tracking-wide uppercase shadow-[0_0_30px_rgba(0,200,232,0.5)] hover:shadow-[0_0_45px_rgba(0,200,232,0.8)] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3 cursor-pointer group"
+                >
+                  <span>CONTINUE TO UNSTOP PORTAL</span>
+                  <ExternalLink className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
+                </button>
+
+                {/* Secondary Quick-Copy Link Button */}
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      readOnly
+                      value={UNSTOP_REGISTRATION.url}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#07131C] border border-white/10 text-xs font-mono text-[#8DEBFF]/90 select-all focus:outline-none focus:border-[#00C8E8]/60"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleCopyLink}
+                    className={`px-4 py-2.5 rounded-xl border text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                      copied
+                        ? "bg-[#00C8E8]/20 border-[#00C8E8] text-[#8DEBFF] shadow-[0_0_15px_rgba(0,200,232,0.3)]"
+                        : "bg-white/5 border-white/10 hover:border-[#00C8E8]/50 text-white hover:text-[#8DEBFF]"
+                    }`}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-[#00C8E8]" />
+                        <span>COPIED!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>COPY LINK</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Verified Trust Guarantees */}
+              <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-[#A4B6BF]">
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#00C8E8] shrink-0" />
+                  <span>Official Unstop Platform</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-[#00C8E8] shrink-0" />
+                  <span>Instant Team Confirmation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Value Stack & FOMO Drivers: "What Every Team Receives" */}
+          <div className="rounded-2xl bg-[#07131C]/60 border border-white/10 p-4 sm:p-5">
+            <div className="text-xs font-mono uppercase tracking-widest text-[#8DEBFF] mb-3 flex items-center gap-2">
+              <Trophy className="w-3.5 h-3.5 text-[#00C8E8]" />
+              <span>WHAT YOUR ₹2,000 ENTRY UNLOCKS</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="p-3 rounded-xl bg-[#050708]/80 border border-white/5 flex items-start gap-2.5">
+                <Trophy className="w-4 h-4 text-[#00C8E8] shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-white font-['Space_Grotesk']">
+                    Up to ₹40,000 Prize Pool
+                  </div>
+                  <div className="text-[10px] text-[#A4B6BF] leading-tight mt-0.5">
+                    Common cash rewards across Web & App tracks.
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#050708]/80 border border-white/5 flex items-start gap-2.5">
+                <Coffee className="w-4 h-4 text-[#00C8E8] shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-white font-['Space_Grotesk']">
+                    100% Free Meals & Coffee
+                  </div>
+                  <div className="text-[10px] text-[#A4B6BF] leading-tight mt-0.5">
+                    Lunch, dinner, breakfast, midnight snacks & energy.
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#050708]/80 border border-white/5 flex items-start gap-2.5">
+                <Award className="w-4 h-4 text-[#00C8E8] shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-white font-['Space_Grotesk']">
+                    Verified Certificates
+                  </div>
+                  <div className="text-[10px] text-[#A4B6BF] leading-tight mt-0.5">
+                    National credentials for all team members from JCET & Unstop.
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#050708]/80 border border-white/5 flex items-start gap-2.5">
+                <Zap className="w-4 h-4 text-[#00C8E8] shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-white font-['Space_Grotesk']">
+                    Gigabit Campus WiFi
+                  </div>
+                  <div className="text-[10px] text-[#A4B6BF] leading-tight mt-0.5">
+                    High-speed connectivity + dedicated power hubs.
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#050708]/80 border border-white/5 flex items-start gap-2.5">
+                <Users className="w-4 h-4 text-[#00C8E8] shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-white font-['Space_Grotesk']">
+                    Industry Mentors
+                  </div>
+                  <div className="text-[10px] text-[#A4B6BF] leading-tight mt-0.5">
+                    Direct architectural guidance & project review.
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#050708]/80 border border-white/5 flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-[#00C8E8] shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-white font-['Space_Grotesk']">
+                    Talent Scouting
+                  </div>
+                  <div className="text-[10px] text-[#A4B6BF] leading-tight mt-0.5">
+                    Direct visibility to recruiters and partner companies.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer Bar */}
+        <div className="px-5 py-3.5 sm:px-8 sm:py-4 border-t border-white/10 bg-[#03070B] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#A4B6BF]">
+          <div className="flex items-center gap-2 text-[11px] sm:text-xs">
+            <span className="w-2 h-2 rounded-full bg-[#00C8E8]" />
+            <span>Registration query?</span>
+            <a
+              href="tel:+917022951232"
+              className="text-[#8DEBFF] hover:underline font-mono font-bold inline-flex items-center gap-1"
+            >
+              <Phone className="w-3 h-3 inline" />
+              <span>Aditya R H (+91 70229 51232)</span>
+            </a>
+          </div>
+
+          <button
+            onClick={handleLaunchUnstop}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#00C8E8]/20 hover:bg-[#00C8E8]/30 border border-[#00C8E8]/50 text-[#8DEBFF] font-mono text-xs font-bold transition-all cursor-pointer"
+          >
+            <span>OPEN UNSTOP CHALLENGE</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ import {
   ChevronDown,
   Minimize2,
 } from "lucide-react";
-import { EVENT_DETAILS, OFFICIAL_SCHEDULE, OFFICIAL_RULES } from "../data/eventData";
+import { EVENT_DETAILS, OFFICIAL_SCHEDULE, OFFICIAL_RULES, UNSTOP_REGISTRATION } from "../data/eventData";
 
 interface Message {
   id: string;
@@ -49,6 +49,11 @@ function getGroundedAnswer(query: string): string {
   // 3. Entry Fee & Prize Pool
   if (q.includes("fee") || q.includes("entry") || q.includes("cost") || q.includes("registration fee")) {
     return `The official entry fee is ₹2,000 per team. This is the complete team registration fee for HackIgnite 1.0.`;
+  }
+
+  // 3a. Registration & Unstop Portal
+  if (q.includes("register") || q.includes("registration") || q.includes("apply") || q.includes("signup") || q.includes("sign up") || q.includes("unstop") || q.includes("qr")) {
+    return `You can register your team directly through the official Unstop portal at ${UNSTOP_REGISTRATION.url} or by clicking 'REGISTER NOW' anywhere on the website to scan the mobile QR code! Entry fee is ₹2,000 per team (up to 4 members).`;
   }
 
   // 3b. Prize Pool - Track Separation Query (Shared Pool Clarification)

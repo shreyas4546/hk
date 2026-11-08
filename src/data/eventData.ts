@@ -29,6 +29,8 @@ export const EVENT_DETAILS = {
   totalPrizePool: "Up to ₹40,000",
   prizePoolScope: "Entire hackathon (Shared across Web Development and App Development tracks)",
   prizePoolAllocation: "Shared across both tracks",
+  unstopUrl: "https://unstop.com/o/ozT1RUD?utm_medium=Share&utm_source=adityhan33581&utm_campaign=Online_coding_challenge",
+  unstopQr: "/assets/unstop-qr.jpg",
   coordinator: "Aditya R H",
   contactPhone: "7022951232",
   contactPhoneFormatted: "+91 70229 51232",
@@ -43,6 +45,62 @@ export const EVENT_DETAILS = {
   },
 };
 
+export interface TimelineItem {
+  step: string;
+  phase: string;
+  date: string;
+  time: string;
+  title: string;
+  description: string;
+  isMilestone?: boolean;
+}
+
+export const TIMELINE: TimelineItem[] = [
+  {
+    step: "01",
+    phase: "Phase 1: Screening",
+    date: "12 DEC 2026",
+    time: "09:30 AM",
+    title: "Registration & Welcome",
+    description: "Check-in, identity verification, and workstation allocation.",
+    isMilestone: true,
+  },
+  {
+    step: "02",
+    phase: "Phase 2: Launch",
+    date: "12 DEC 2026",
+    time: "11:30 AM",
+    title: "Coding Kickoff",
+    description: "The 24-hour national hackathon clock begins.",
+    isMilestone: true,
+  },
+  {
+    step: "03",
+    phase: "Phase 3: Orbit Sprint",
+    date: "12 DEC 2026",
+    time: "06:00 PM",
+    title: "Checkpoint 1 — Architecture Review",
+    description: "Jury inspection of system architecture and progress.",
+  },
+  {
+    step: "04",
+    phase: "Phase 4: Final Evaluation",
+    date: "13 DEC 2026",
+    time: "05:30 AM",
+    title: "Checkpoint 2 — Functionality Check",
+    description: "Pre-dawn evaluation of core features and API integrations.",
+  },
+  {
+    step: "05",
+    phase: "Phase 5: Victory",
+    date: "13 DEC 2026",
+    time: "11:30 AM",
+    title: "Code Freeze & Pitching",
+    description: "Hard freeze, final prototype demonstrations, and awards.",
+    isMilestone: true,
+  },
+];
+
 // Single Source of Truth for HackIgnite 1.0 Prize Pool
 export const PRIZE_DETAILS = {
   event: "HACKIGNITE 1.0",
@@ -56,6 +114,20 @@ export const PRIZE_DETAILS = {
   mainAmount: "UP TO ₹40,000",
   supportingText:
     "A common prize pool for HackIgnite 1.0, shared across both Web Development and App Development tracks.",
+};
+
+// Official Unstop Registration Hub Configuration
+export const UNSTOP_REGISTRATION = {
+  url: "https://unstop.com/o/ozT1RUD?utm_medium=Share&utm_source=adityhan33581&utm_campaign=Online_coding_challenge",
+  qrImage: "/assets/unstop-qr.jpg",
+  platform: "Unstop",
+  badge: "OFFICIAL PARTNER // UNSTOP POWERED",
+  headline: "CLAIM YOUR SEAT BEFORE SLOTS CLOSE",
+  subheadline:
+    "Official 24-Hour Innovation Challenge at JCET Hubballi. Limited physical slots remaining for national teams.",
+  fee: "₹2,000 per team",
+  prizePool: "Up to ₹40,000",
+  deadlineNote: "Registration closes once venue hacker capacity is reached",
 };
 
 export const PILLARS = [

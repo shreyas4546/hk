@@ -78,10 +78,27 @@ export default function RegistrationSection({ onOpenRegister }: RegistrationSect
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={onOpenRegister}
-            className="w-full sm:w-auto h-[50px] sm:h-[54px] px-9 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold font-['Space_Grotesk'] uppercase tracking-wider text-[#050708] bg-gradient-to-r from-[#00C8E8] via-[#19D8E8] to-[#00C8E8] bg-[length:200%_auto] hover:bg-[position:right_center] cyan-btn-glow transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_20px_rgba(0,200,232,0.35)]"
+            className="w-full sm:w-auto h-[52px] sm:h-[56px] px-9 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold font-['Space_Grotesk'] uppercase tracking-wider text-[#050708] bg-gradient-to-r from-[#00C8E8] via-[#19D8E8] to-[#00C8E8] bg-[length:200%_auto] hover:bg-[position:right_center] cyan-btn-glow transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer shadow-[0_4px_25px_rgba(0,200,232,0.45)]"
           >
-            <span>REGISTER YOUR TEAM</span>
+            <span>REGISTER YOUR TEAM ON UNSTOP</span>
             <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Sponsor Endorsement & Quick QR Micro-Hint */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs font-mono text-[#A4B6BF]">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8]" />
+            <span>Official Platform:</span>
+            <strong className="text-white">Unstop</strong>
+          </span>
+          <span className="text-white/20">|</span>
+          <button
+            onClick={onOpenRegister}
+            className="text-[#8DEBFF] hover:underline underline-offset-4 cursor-pointer inline-flex items-center gap-1"
+          >
+            <span>Click to View Mobile QR Scanner & Direct Link</span>
+            <ArrowRight className="w-3 h-3 inline" />
           </button>
         </div>
       </div>
