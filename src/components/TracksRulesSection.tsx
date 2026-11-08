@@ -105,22 +105,20 @@ export default function TracksRulesSection({ onOpenRegister }: TracksRulesSectio
         <div className="mt-7 inline-flex p-1.5 rounded-2xl bg-[#07131C]/90 border border-white/10 backdrop-blur-lg shadow-lg">
           <button
             onClick={() => setActiveTab("tracks")}
-            className={`px-6 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold transition-all duration-300 flex items-center gap-2 cursor-pointer ${
-              activeTab === "tracks"
-                ? "bg-[#00C8E8]/20 text-[#8DEBFF] border border-[#00C8E8]/60 shadow-[0_0_15px_rgba(0,200,232,0.3)]"
-                : "text-[#A4B6BF] hover:text-white border border-transparent"
-            }`}
+            className={`px-6 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold transition-all duration-300 flex items-center gap-2 cursor-pointer ${activeTab === "tracks"
+              ? "bg-[#00C8E8]/20 text-[#8DEBFF] border border-[#00C8E8]/60 shadow-[0_0_15px_rgba(0,200,232,0.3)]"
+              : "text-[#A4B6BF] hover:text-white border border-transparent"
+              }`}
           >
             <Layers className="w-4 h-4 text-[#00C8E8]" />
             <span>CHALLENGE TRACKS</span>
           </button>
           <button
             onClick={() => setActiveTab("rules")}
-            className={`px-6 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold transition-all duration-300 flex items-center gap-2 cursor-pointer ${
-              activeTab === "rules"
-                ? "bg-[#00C8E8]/20 text-[#8DEBFF] border border-[#00C8E8]/60 shadow-[0_0_15px_rgba(0,200,232,0.3)]"
-                : "text-[#A4B6BF] hover:text-white border border-transparent"
-            }`}
+            className={`px-6 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold transition-all duration-300 flex items-center gap-2 cursor-pointer ${activeTab === "rules"
+              ? "bg-[#00C8E8]/20 text-[#8DEBFF] border border-[#00C8E8]/60 shadow-[0_0_15px_rgba(0,200,232,0.3)]"
+              : "text-[#A4B6BF] hover:text-white border border-transparent"
+              }`}
           >
             <ShieldAlert className="w-4 h-4 text-[#00C8E8]" />
             <span>OFFICIAL RULES & SPECS</span>
@@ -150,6 +148,8 @@ export default function TracksRulesSection({ onOpenRegister }: TracksRulesSectio
                       <img
                         src={track.image}
                         alt={track.name}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                       {/* Subtle Vignette Gradient */}
@@ -218,7 +218,7 @@ export default function TracksRulesSection({ onOpenRegister }: TracksRulesSectio
                         PRIZE ELIGIBILITY
                       </span>
                       <span className="font-['Space_Grotesk'] font-bold text-base sm:text-lg text-[#00C8E8]">
-                        5 Places to Conquer
+                        ₹40,000 Pool // 5 Places to Conquer
                       </span>
                     </div>
 

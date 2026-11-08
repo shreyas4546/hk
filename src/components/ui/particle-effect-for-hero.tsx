@@ -12,6 +12,7 @@ export interface Particle {
   vy: number;
   size: number;
   color: string;
+  rgb: string;
   angle: number; // For organic oscillation
 }
 
@@ -42,15 +43,6 @@ const REPULSION_STRENGTH = 1.2; // Mouse push multiplier
 
 const randomRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
-const hexToRgba = (hex: string, alpha: number) => {
-  if (hex.startsWith('rgba')) return hex;
-  const c = hex.replace('#', '');
-  const r = parseInt(c.substring(0, 2), 16) || 255;
-  const g = parseInt(c.substring(2, 4), 16) || 255;
-  const b = parseInt(c.substring(4, 6), 16) || 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-};
-
 // --- AntiGravity / ZeroGravity Canvas Component ---
 
 export const AntiGravityCanvas: React.FC<{
@@ -67,6 +59,7 @@ export const AntiGravityCanvas: React.FC<{
   const frameIdRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   const dimensionsRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const gradientRef = useRef<CanvasGradient | null>(null);
 
   // Initialize Particles
   const initParticles = useCallback((width: number, height: number) => {
@@ -82,18 +75,23 @@ export const AntiGravityCanvas: React.FC<{
     const particleCount = Math.min(Math.floor(width * height * baseParticleDensity), maxInteractive);
     const newParticles: Particle[] = [];
 
-    // Astrovue + HackIgnite color distribution (White, Electric Cyan, Ice Blue, Tech Blue)
-    const colorPalette = ['#ffffff', '#00C8E8', '#8DEBFF', '#4285F4'];
-
     for (let i = 0; i < particleCount; i++) {
       const x = Math.random() * width;
       const y = Math.random() * height;
 
       const roll = Math.random();
       let color = '#ffffff';
-      if (roll > 0.70) color = '#00C8E8'; // Electric Cyan
-      else if (roll > 0.55) color = '#8DEBFF'; // Ice Blue
-      else if (roll > 0.45) color = '#4285F4'; // Tech Blue
+      let rgb = '255, 255, 255';
+      if (roll > 0.70) {
+        color = '#00C8E8'; // Electric Cyan
+        rgb = '0, 200, 232';
+      } else if (roll > 0.55) {
+        color = '#8DEBFF'; // Ice Blue
+        rgb = '141, 235, 255';
+      } else if (roll > 0.45) {
+        color = '#4285F4'; // Tech Blue
+        rgb = '66, 133, 244';
+      }
 
       newParticles.push({
         x,
@@ -104,6 +102,7 @@ export const AntiGravityCanvas: React.FC<{
         vy: 0,
         size: randomRange(1.2, 2.6),
         color,
+        rgb,
         angle: Math.random() * Math.PI * 2,
       });
     }
@@ -126,6 +125,22 @@ export const AntiGravityCanvas: React.FC<{
       });
     }
     backgroundParticlesRef.current = newBgParticles;
+
+    // Pre-create and cache atmospheric radial gradient for zero GC per frame
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = Math.max(width, height) * 0.72;
+        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+        gradient.addColorStop(0, 'rgba(0, 200, 232, 0.75)');
+        gradient.addColorStop(0.5, 'rgba(66, 133, 244, 0.40)');
+        gradient.addColorStop(1, 'rgba(5, 7, 8, 0)');
+        gradientRef.current = gradient;
+      }
+    }
 
     setDebugInfo((prev) => ({ ...prev, count: particleCount + bgCount }));
   }, []);
@@ -151,29 +166,19 @@ export const AntiGravityCanvas: React.FC<{
 
     // --- Background Effects ---
 
-    // 1. Pulsating Radial Glow (Atmospheric Space Lighting)
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const pulseSpeed = 0.0008;
-    const pulseOpacity = Math.sin(time * pulseSpeed) * 0.035 + 0.075;
-
-    const gradient = ctx.createRadialGradient(
-      centerX,
-      centerY,
-      0,
-      centerX,
-      centerY,
-      Math.max(width, height) * 0.72
-    );
-    gradient.addColorStop(0, `rgba(0, 200, 232, ${pulseOpacity})`);
-    gradient.addColorStop(0.5, `rgba(66, 133, 244, ${pulseOpacity * 0.55})`);
-    gradient.addColorStop(1, 'rgba(5, 7, 8, 0)');
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
+    // 1. Pulsating Radial Glow (using cached gradient for 0 allocation)
+    if (gradientRef.current) {
+      const pulseSpeed = 0.0008;
+      const pulseOpacity = Math.sin(time * pulseSpeed) * 0.035 + 0.075;
+      ctx.globalAlpha = pulseOpacity / 0.75;
+      ctx.fillStyle = gradientRef.current;
+      ctx.fillRect(0, 0, width, height);
+      ctx.globalAlpha = 1.0;
+    }
 
     // 2. Background Particles (Drifting Stars)
     const bgParticles = backgroundParticlesRef.current;
+    ctx.fillStyle = '#ffffff';
     for (let i = 0; i < bgParticles.length; i++) {
       const p = bgParticles[i];
       p.x += p.vx;
@@ -190,7 +195,6 @@ export const AntiGravityCanvas: React.FC<{
       const currentAlpha = p.alpha * (0.3 + 0.7 * twinkle);
 
       ctx.globalAlpha = currentAlpha;
-      ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
       ctx.fill();
@@ -235,17 +239,20 @@ export const AntiGravityCanvas: React.FC<{
       p.vy += springDy * RETURN_SPEED;
     }
 
-    // Phase 2: Resolve Collisions (Elastic Spheres)
+    // Phase 2: Resolve Collisions (Elastic Spheres with bounding-box early exit)
     const len = particles.length;
     for (let i = 0; i < len; i++) {
+      const p1 = particles[i];
       for (let j = i + 1; j < len; j++) {
-        const p1 = particles[i];
         const p2 = particles[j];
+        const minDist = p1.size + p2.size;
 
         const dx = p2.x - p1.x;
+        if (dx > minDist || dx < -minDist) continue;
         const dy = p2.y - p1.y;
+        if (dy > minDist || dy < -minDist) continue;
+
         const distSq = dx * dx + dy * dy;
-        const minDist = p1.size + p2.size;
 
         if (distSq < minDist * minDist) {
           const dist = Math.sqrt(distSq);
@@ -285,7 +292,7 @@ export const AntiGravityCanvas: React.FC<{
       }
     }
 
-    // Phase 3: Integration & Drawing
+    // Phase 3: Integration & Drawing (with pre-computed RGB and hardware-friendly glow)
     for (let i = 0; i < len; i++) {
       const p = particles[i];
 
@@ -298,20 +305,18 @@ export const AntiGravityCanvas: React.FC<{
       const velocity = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
       const opacity = Math.min(0.4 + velocity * 0.12, 1);
 
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-
       if (velocity > 0.5) {
-        ctx.save();
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = Math.min(velocity * 3.5, 9);
-        ctx.fillStyle = hexToRgba(p.color, opacity);
-        ctx.fill();
-        ctx.restore();
-      } else {
-        ctx.fillStyle = hexToRgba(p.color, opacity);
+        // Fast dual-arc glow without expensive canvas Gaussian shadowBlur stalls
+        ctx.fillStyle = `rgba(${p.rgb}, ${opacity * 0.28})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 2.2, 0, Math.PI * 2);
         ctx.fill();
       }
+
+      ctx.fillStyle = `rgba(${p.rgb}, ${opacity})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     frameIdRef.current = requestAnimationFrame(animate);
@@ -344,10 +349,30 @@ export const AntiGravityCanvas: React.FC<{
     return () => window.removeEventListener('resize', handleResize);
   }, [initParticles, isBackground]);
 
-  // Start Animation
+  // Start Animation with Tab Visibility Awareness (pauses when background tab)
   useEffect(() => {
+    let isRunning = true;
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        isRunning = false;
+        if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
+      } else {
+        if (!isRunning) {
+          isRunning = true;
+          lastTimeRef.current = performance.now();
+          frameIdRef.current = requestAnimationFrame(animate);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
     frameIdRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameIdRef.current);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      cancelAnimationFrame(frameIdRef.current);
+    };
   }, [animate]);
 
   // Global Mouse tracking across whole window

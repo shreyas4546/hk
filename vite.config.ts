@@ -1,17 +1,43 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
+  const currentDir = import.meta.dirname || path.resolve('.');
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: [
-        { find: /^@\/src\/(.*)/, replacement: path.resolve(__dirname, './src/$1') },
-        { find: /^@\/(.*)/, replacement: path.resolve(__dirname, './src/$1') },
-        { find: '@', replacement: path.resolve(__dirname, './src') },
+        { find: /^@\/src\/(.*)/, replacement: path.resolve(currentDir, './src/$1') },
+        { find: /^@\/(.*)/, replacement: path.resolve(currentDir, './src/$1') },
+        { find: '@', replacement: path.resolve(currentDir, './src') },
       ],
+    },
+    build: {
+      target: 'es2020',
+      cssCodeSplit: true,
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react-dom') || id.includes('react/') || id.includes('react\\')) {
+                return 'vendor-react';
+              }
+              if (id.includes('motion') || id.includes('gsap')) {
+                return 'vendor-motion';
+              }
+              if (id.includes('swiper')) {
+                return 'vendor-swiper';
+              }
+              if (id.includes('lucide-react')) {
+                return 'vendor-icons';
+              }
+            }
+          },
+        },
+      },
+      chunkSizeWarningLimit: 600,
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

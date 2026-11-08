@@ -40,7 +40,7 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
       subtitle: "Pinnacle Achievement",
       icon: Trophy,
       badge: "WINNER // CHAMPION",
-      image: "/assets/cards/place-1-gold.jpg",
+      image: "/assets/cards/place-1-gold.webp",
       desc: "The supreme honor of HackIgnite 1.0. Awarded to the team delivering the most exceptional technological engineering, viable product architecture, and captivating pitch demonstration.",
       cta: "Aim For Winner",
       isApex: true,
@@ -51,7 +51,7 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
       subtitle: "Excellence in Engineering",
       icon: Award,
       badge: "RUNNER-UP",
-      image: "/assets/cards/place-2-silver.jpg",
+      image: "/assets/cards/place-2-silver.webp",
       desc: "Recognizing first-class technical prowess, deep architectural rigor, and robust full-stack execution engineered during the intense 24-hour innovation marathon.",
       cta: "Target Runner Up",
     },
@@ -61,7 +61,7 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
       subtitle: "Outstanding Innovation",
       icon: Shield,
       badge: "2ND RUNNER-UP",
-      image: "/assets/cards/place-3-bronze.jpg",
+      image: "/assets/cards/place-3-bronze.webp",
       desc: "Honoring daring creativity, breakthrough problem framing, and original solutions addressing critical domains in AI, sustainability, healthcare, and open tech.",
       cta: "Compete For 2nd Runner Up",
     },
@@ -71,7 +71,7 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
       subtitle: "Architecture & Code Rigor",
       icon: Flag,
       badge: "BEST DEVELOPMENT",
-      image: "/assets/cards/place-4-distinction.jpg",
+      image: "/assets/cards/place-4-distinction.webp",
       desc: "Awarded to the team delivering the most robust software architecture, exceptional code quality, technical complexity, and high-performance engineering.",
       cta: "Build Best Development",
     },
@@ -81,7 +81,7 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
       subtitle: "Complete Viability & Impact",
       icon: Compass,
       badge: "BEST PROJECT",
-      image: "/assets/cards/place-5-merit.jpg",
+      image: "/assets/cards/place-5-merit.webp",
       desc: "Celebrating the most complete, functional, and impactful solution demonstrating real-world viability, seamless user experience, and outstanding presentation.",
       cta: "Create Best Project",
     },
@@ -202,6 +202,8 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
                       <img
                         src={place.image}
                         alt={place.label}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover object-center"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#04080D]/40 via-transparent to-transparent pointer-events-none" />

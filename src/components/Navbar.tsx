@@ -26,39 +26,58 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
 
   useEffect(() => {
     const sectionIds = navLinks.map((l) => l.href.substring(1));
+    let animId: number = 0;
+    let lastActive = "#hero";
+    let lastScrolled = false;
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(() => {
+        const scrolled = window.scrollY > 20;
+        if (scrolled !== lastScrolled) {
+          lastScrolled = scrolled;
+          setIsScrolled(scrolled);
+        }
 
-      // Check if user has scrolled near bottom of page (activate #sponsors)
-      const docHeight = document.documentElement.scrollHeight;
-      const scrollBottom = window.innerHeight + window.scrollY;
-      if (scrollBottom >= docHeight - 100) {
-        setActiveSection("#sponsors");
-        return;
-      }
+        // Check if user has scrolled near bottom of page (activate #sponsors)
+        const docHeight = document.documentElement.scrollHeight;
+        const scrollBottom = window.innerHeight + window.scrollY;
+        if (scrollBottom >= docHeight - 100) {
+          if (lastActive !== "#sponsors") {
+            lastActive = "#sponsors";
+            setActiveSection("#sponsors");
+          }
+          return;
+        }
 
-      // Detection threshold: 180px below viewport top
-      const scrollPos = window.scrollY + 180;
-      let currentActive = "#hero";
+        // Detection threshold: 180px below viewport top
+        const scrollPos = window.scrollY + 180;
+        let currentActive = "#hero";
 
-      for (let i = 0; i < sectionIds.length; i++) {
-        const id = sectionIds[i];
-        const el = document.getElementById(id);
-        if (el) {
-          const top = el.offsetTop;
-          if (top <= scrollPos) {
-            currentActive = `#${id}`;
+        for (let i = 0; i < sectionIds.length; i++) {
+          const id = sectionIds[i];
+          const el = document.getElementById(id);
+          if (el) {
+            const top = el.offsetTop;
+            if (top <= scrollPos) {
+              currentActive = `#${id}`;
+            }
           }
         }
-      }
 
-      setActiveSection(currentActive);
+        if (currentActive !== lastActive) {
+          lastActive = currentActive;
+          setActiveSection(currentActive);
+        }
+      });
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll(); // Initial check on mount
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(animId);
+    };
   }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -74,17 +93,15 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 flex items-center ${
-        isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 flex items-center ${isScrolled
           ? "bg-[#050708]/85 backdrop-blur-xl border-b border-[#00C8E8]/20 shadow-[0_8px_32px_rgba(0,0,0,0.85)]"
           : "bg-[#050708]/35 backdrop-blur-md border-b border-white/5"
-      }`}
+        }`}
     >
       {/* Bottom glowing animated accent highlight on navbar boundary */}
       <div
-        className={`absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#00C8E8]/50 to-transparent pointer-events-none transition-opacity duration-300 ${
-          isScrolled ? "opacity-100" : "opacity-30"
-        }`}
+        className={`absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#00C8E8]/50 to-transparent pointer-events-none transition-opacity duration-300 ${isScrolled ? "opacity-100" : "opacity-30"
+          }`}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -118,11 +135,10 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
                   key={link.label}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className={`relative px-2.5 lg:px-3 py-1.5 rounded-full font-['Inter',sans-serif] tracking-wide transition-colors duration-200 cursor-pointer ${
-                    isActive
+                  className={`relative px-2.5 lg:px-3 py-1.5 rounded-full font-['Inter',sans-serif] tracking-wide transition-colors duration-200 cursor-pointer ${isActive
                       ? "text-[#8DEBFF] font-semibold"
                       : "text-[#A4B6BF] hover:text-white"
-                  }`}
+                    }`}
                 >
                   {/* Active Traveling Glowing Line Indicator */}
                   {isActive && (
@@ -181,11 +197,10 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
                     key={link.label}
                     href={link.href}
                     onClick={(e) => handleNavClick(e, link.href)}
-                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-all font-['Inter',sans-serif] flex items-center justify-between cursor-pointer ${
-                      isActive
+                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-all font-['Inter',sans-serif] flex items-center justify-between cursor-pointer ${isActive
                         ? "bg-[#00C8E8]/15 text-[#8DEBFF] font-semibold border-l-2 border-[#00C8E8] shadow-[inset_0_0_12px_rgba(0,200,232,0.15)]"
                         : "text-[#A4B6BF] hover:text-[#F3F8FA] hover:bg-[#050708]/60"
-                    }`}
+                      }`}
                   >
                     <span>{link.label}</span>
                     {isActive && (

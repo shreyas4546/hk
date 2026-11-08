@@ -369,8 +369,9 @@ export default function EventOverview() {
               {/* Thematic Cosmic Space Background Image */}
               <div className="absolute inset-0 rounded-[1.25rem] overflow-hidden -z-10 pointer-events-none">
                 <img
-                  src="/assets/cards/coverflow-24h.jpg"
+                  src="/assets/cards/coverflow-24h.webp"
                   alt="24 Hours Sprint Nebula"
+                  decoding="async"
                   className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
@@ -475,8 +476,10 @@ export default function EventOverview() {
               {/* Thematic Cybernetic Mesh Background Image */}
               <div className="absolute inset-0 rounded-[1.25rem] overflow-hidden -z-10 pointer-events-none">
                 <img
-                  src="/assets/cards/coverflow-hackignite.jpg"
+                  src="/assets/cards/coverflow-hackignite.webp"
                   alt="HackIgnite Cybernetic Arena"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
@@ -526,8 +529,10 @@ export default function EventOverview() {
               {/* Thematic Holographic Crystal Prism Background Image */}
               <div className="absolute inset-0 rounded-[1.25rem] overflow-hidden -z-10 pointer-events-none">
                 <img
-                  src="/assets/cards/coverflow-podium.jpg"
+                  src="/assets/cards/coverflow-podium.webp"
                   alt="Podium Honors Crystal"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
@@ -589,8 +594,10 @@ export default function EventOverview() {
               {/* Thematic Stargate Timeline Background Image */}
               <div className="absolute inset-0 rounded-[1.25rem] overflow-hidden -z-10 pointer-events-none">
                 <img
-                  src="/assets/cards/coverflow-dates.jpg"
+                  src="/assets/cards/coverflow-dates.webp"
                   alt="Launch Window Stargate"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
@@ -645,8 +652,10 @@ export default function EventOverview() {
               {/* Thematic Planetary Orbital Ground Station Background Image */}
               <div className="absolute inset-0 rounded-[1.25rem] overflow-hidden -z-10 pointer-events-none">
                 <img
-                  src="/assets/cards/coverflow-venue.jpg"
+                  src="/assets/cards/coverflow-venue.webp"
                   alt="JCET Hubballi Ground Station"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
@@ -715,8 +724,10 @@ export default function EventOverview() {
               {/* Thematic Cosmic Aurora Access Pass Background Image */}
               <div className="absolute inset-0 rounded-[1.25rem] overflow-hidden -z-10 pointer-events-none">
                 <img
-                  src="/assets/cards/coverflow-pass.jpg"
+                  src="/assets/cards/coverflow-pass.webp"
                   alt="Team Access Aurora"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />

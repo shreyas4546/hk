@@ -11,10 +11,10 @@ interface HeroSectionProps {
 export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const heroRef = useRef<HTMLElement | null>(null);
+  const cursorGlowRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
-  // Interaction & motion states
-  const [parallax, setParallax] = useState({ x: 0, y: 0 });
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0, active: false });
+  // Interaction & motion states (no high-frequency mouse state)
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -51,7 +51,7 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
     }
   }, []);
 
-  // Mouse move handler for restrained parallax & subtle cursor lighting on desktop
+  // Direct DOM updates for restrained parallax & subtle cursor lighting (0 React re-renders)
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       if (isTouchDevice || prefersReducedMotion) return;
@@ -67,23 +67,35 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
       const normY = (clientY - rect.height / 2) / (rect.height / 2);
 
       // Restrained parallax: ±5px horizontal, ±3px vertical
-      setParallax({
-        x: Math.max(-5, Math.min(5, normX * 5)),
-        y: Math.max(-3, Math.min(3, normY * 3)),
-      });
+      const pX = Math.max(-5, Math.min(5, normX * 5));
+      const pY = Math.max(-3, Math.min(3, normY * 3));
 
-      setCursorPos({
-        x: clientX,
-        y: clientY,
-        active: true,
-      });
+      if (contentRef.current) {
+        contentRef.current.style.transform = `translate3d(${pX}px, ${pY}px, 0)`;
+      }
+
+      if (videoRef.current) {
+        videoRef.current.style.transform = `translate3d(${-pX * 0.35}px, ${-pY * 0.25}px, 0) scale(1.02)`;
+      }
+
+      if (cursorGlowRef.current) {
+        cursorGlowRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0) translate(-50%, -50%)`;
+        cursorGlowRef.current.style.opacity = "1";
+      }
     },
     [isTouchDevice, prefersReducedMotion]
   );
 
   const handleMouseLeave = useCallback(() => {
-    setParallax({ x: 0, y: 0 });
-    setCursorPos((prev) => ({ ...prev, active: false }));
+    if (contentRef.current) {
+      contentRef.current.style.transform = "none";
+    }
+    if (videoRef.current) {
+      videoRef.current.style.transform = "none";
+    }
+    if (cursorGlowRef.current) {
+      cursorGlowRef.current.style.opacity = "0";
+    }
   }, []);
 
   const handleManualPlay = () => {
@@ -117,13 +129,14 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
         <img
           src="/videos/hero-poster.jpg"
           alt="HackIgnite Astronaut in Deep Space"
-          className={`hero-media-cover absolute inset-0 w-full h-full transition-opacity duration-500 ease-out ${isVideoLoaded ? "opacity-0" : "opacity-100"
-            }`}
+          className={`hero-media-cover absolute inset-0 w-full h-full transition-opacity duration-500 ease-out ${
+            isVideoLoaded ? "opacity-0" : "opacity-100"
+          }`}
           loading="eager"
           decoding="async"
         />
 
-        {/* Real-Time Seamless 4.88s Crossfaded Loop Video */}
+        {/* Real-Time Seamless 4.88s Crossfaded Loop Video with WebM + faststart MP4 */}
         <video
           ref={videoRef}
           autoPlay
@@ -135,15 +148,12 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
           onLoadedData={() => setIsVideoLoaded(true)}
           onCanPlay={() => setIsVideoLoaded(true)}
           aria-hidden="true"
-          className="hero-media-cover w-full h-full"
+          className="hero-media-cover w-full h-full will-change-transform"
           style={{
-            transform:
-              !prefersReducedMotion && !isTouchDevice
-                ? `translate3d(${-parallax.x * 0.35}px, ${-parallax.y * 0.25}px, 0) scale(1.02)`
-                : "none",
             transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
+          <source src="/videos/hackignite-hero-loop.webm" type="video/webm" />
           <source src="/videos/hackignite-hero-loop.mp4" type="video/mp4" />
         </video>
 
@@ -163,16 +173,16 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
         <div className="absolute right-4 sm:right-10 top-1/4 w-60 sm:w-96 h-60 sm:h-96 bg-gradient-to-br from-[#00C8E8]/10 via-[#19D8E8]/05 to-transparent rounded-full blur-[90px] pointer-events-none z-10" />
       </div>
 
-      {/* Desktop Cursor-Reactive Subtle Glow (fine pointer only) */}
-      {cursorPos.active && !isTouchDevice && !prefersReducedMotion && (
+      {/* Desktop Cursor-Reactive Subtle Glow (fine pointer only, direct DOM 0 re-renders) */}
+      {!isTouchDevice && !prefersReducedMotion && (
         <div
-          className="hidden lg:block absolute pointer-events-none transition-opacity duration-300 z-10"
+          ref={cursorGlowRef}
+          className="hidden lg:block absolute pointer-events-none transition-opacity duration-300 z-10 opacity-0 will-change-transform"
           style={{
-            left: cursorPos.x,
-            top: cursorPos.y,
+            left: 0,
+            top: 0,
             width: "500px",
             height: "500px",
-            transform: "translate(-50%, -50%)",
             background:
               "radial-gradient(circle, rgba(0, 200, 232, 0.08) 0%, rgba(9, 35, 43, 0.02) 50%, transparent 70%)",
           }}
@@ -184,12 +194,9 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
           ========================================================================= */}
       <div className="relative z-20 w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-3 pb-12 sm:pt-4 sm:pb-16 lg:py-24 flex items-center">
         <div
-          className="w-full max-w-xl lg:max-w-2xl xl:max-w-3xl text-left"
+          ref={contentRef}
+          className="w-full max-w-xl lg:max-w-2xl xl:max-w-3xl text-left will-change-transform"
           style={{
-            transform:
-              !prefersReducedMotion && !isTouchDevice
-                ? `translate3d(${parallax.x}px, ${parallax.y}px, 0)`
-                : "none",
             transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >

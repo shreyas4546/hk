@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { ZeroGravityBackground } from "./components/ui/zero-gravity-background";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
@@ -14,11 +14,26 @@ import SponsorsOrganizers from "./components/SponsorsOrganizers";
 import SponsorsSection from "./components/SponsorsSection";
 import Footer from "./components/Footer";
 import AiEventAssistant from "./components/AiEventAssistant";
-import RegistrationModal from "./components/RegistrationModal";
+
+const RegistrationModal = lazy(() => import("./components/RegistrationModal"));
 
 export default function App() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
   const [selectedTrackId, setSelectedTrackId] = useState<string>("open-innovation");
+
+  useEffect(() => {
+    // Preload registration chunk during idle time for instantaneous open
+    const preloader = () => {
+      import("./components/RegistrationModal");
+    };
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const handle = (window as any).requestIdleCallback(preloader);
+      return () => (window as any).cancelIdleCallback(handle);
+    } else {
+      const timer = setTimeout(preloader, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleOpenRegister = (trackId?: string) => {
     if (trackId) {
@@ -81,12 +96,16 @@ export default function App() {
       {/* Feature 5: AI Event Assistant (Floating Intelligent Assistant) */}
       <AiEventAssistant />
 
-      {/* Interactive Registration Portal / Modal */}
-      <RegistrationModal
-        isOpen={isRegisterModalOpen}
-        onClose={handleCloseRegister}
-        preSelectedTrackId={selectedTrackId}
-      />
+      {/* Interactive Registration Portal / Modal (Code-split for performance) */}
+      <Suspense fallback={null}>
+        {isRegisterModalOpen && (
+          <RegistrationModal
+            isOpen={isRegisterModalOpen}
+            onClose={handleCloseRegister}
+            preSelectedTrackId={selectedTrackId}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

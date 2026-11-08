@@ -20,7 +20,7 @@ const PILLARS_DATA: PillarItemData[] = [
     id: "ID-0921",
     title: "THINK",
     desc: "Explore challenges, frame systemic problems, and conceive transformative digital ideas.",
-    image: "/assets/cards/pillar-think.jpg",
+    image: "/assets/cards/pillar-think.webp",
     icon: Brain,
     grid: "4x4",
     dataSize: "28.4MB",
@@ -31,7 +31,7 @@ const PILLARS_DATA: PillarItemData[] = [
     id: "ID-4882",
     title: "BUILD",
     desc: "Turn technical architectures and code repositories into robust working solutions.",
-    image: "/assets/cards/pillar-build.jpg",
+    image: "/assets/cards/pillar-build.webp",
     icon: Wrench,
     grid: "8x8",
     dataSize: "64.2MB",
@@ -42,7 +42,7 @@ const PILLARS_DATA: PillarItemData[] = [
     id: "ID-6859",
     title: "INNOVATE",
     desc: "Approach real-world obstacles with fresh algorithmic models and creative engineering.",
-    image: "/assets/cards/pillar-innovate.jpg",
+    image: "/assets/cards/pillar-innovate.webp",
     icon: Lightbulb,
     grid: "3x2",
     dataSize: "58.1MB",
@@ -53,7 +53,7 @@ const PILLARS_DATA: PillarItemData[] = [
     id: "ID-8322",
     title: "IMPACT",
     desc: "Deploy practical technology that creates tangible value for community and industry.",
-    image: "/assets/cards/pillar-impact.jpg",
+    image: "/assets/cards/pillar-impact.webp",
     icon: Target,
     grid: "6x6",
     dataSize: "91.7MB",
@@ -167,7 +167,7 @@ export default function MissionSection() {
 
           <!-- 3D Artwork Preview Frame -->
           <div class="relative w-full h-36 sm:h-44 rounded-xl overflow-hidden my-3 border border-[#00C8E8]/30 bg-[#04080D]/80 shrink-0 shadow-[0_0_15px_rgba(0,200,232,0.1)]">
-            <img src="${pillar.image}" alt="${pillar.title}" class="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110" />
+            <img src="${pillar.image}" alt="${pillar.title}" loading="lazy" decoding="async" class="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110" />
             <div class="absolute inset-0 bg-gradient-to-t from-[#04080D]/90 via-transparent to-transparent pointer-events-none"></div>
             <div class="absolute top-2.5 right-2.5 font-mono text-xs font-bold text-[#8DEBFF] px-2.5 py-0.5 rounded-full bg-[#07131C]/90 backdrop-blur-md border border-[#00C8E8]/40 shadow-sm">
               ${pillar.num}
@@ -286,12 +286,17 @@ export default function MissionSection() {
     };
     window.addEventListener("wheel", handleWheel, { passive: true });
 
-    // --- 60FPS RAF LOOP ---
-    let animId: number;
+    // --- 60FPS RAF LOOP WITH VIEWPORT AWARENESS ---
+    let animId: number = 0;
+    let isVisible = false;
     let lastTime = performance.now();
     let frameCounter = 0;
 
     const raf = (time: number) => {
+      if (!isVisible) {
+        animId = 0;
+        return;
+      }
       animId = requestAnimationFrame(raf);
 
       const delta = time - lastTime;
@@ -401,11 +406,39 @@ export default function MissionSection() {
       }
     };
 
-    animId = requestAnimationFrame(raf);
+    const startRaf = () => {
+      if (animId) return;
+      lastTime = performance.now();
+      animId = requestAnimationFrame(raf);
+    };
+
+    const stopRaf = () => {
+      if (animId) {
+        cancelAnimationFrame(animId);
+        animId = 0;
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          updateScrollFromWindow();
+          startRaf();
+        } else {
+          stopRaf();
+        }
+      },
+      { rootMargin: "300px 0px" }
+    );
+
+    if (containerEl) observer.observe(containerEl);
     updateScrollFromWindow();
 
     return () => {
-      cancelAnimationFrame(animId);
+      stopRaf();
+      observer.disconnect();
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("scroll", updateScrollFromWindow);
       window.removeEventListener("wheel", handleWheel);

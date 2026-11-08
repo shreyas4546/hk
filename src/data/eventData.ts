@@ -334,7 +334,7 @@ export const TRACKS: TrackItem[] = [
       "Architect responsive, high-performance web applications and decentralized digital experiences. Focus on modern frontend frameworks, scalable cloud architectures, interactive UI/UX, and robust backend APIs.",
     technologies: ["React / Next.js", "Full-Stack APIs", "Tailwind CSS", "Node / Cloud", "Real-Time Systems"],
     prize: "5 Places to Conquer",
-    image: "/assets/cards/track-web-dev.jpg",
+    image: "/assets/cards/track-web-dev.webp",
   },
   {
     id: "app-development",
@@ -346,6 +346,6 @@ export const TRACKS: TrackItem[] = [
       "Engineer intuitive, high-performance mobile applications across iOS, Android, or cross-platform ecosystems. Focus on sleek mobile user interfaces, offline-first local storage, device sensor integrations, and seamless cloud synchronization.",
     technologies: ["React Native / Flutter", "Swift / Kotlin", "Mobile UX/UI", "Offline-First Sync", "Push & Device APIs"],
     prize: "5 Places to Conquer",
-    image: "/assets/cards/track-app-dev.jpg",
+    image: "/assets/cards/track-app-dev.webp",
   },
 ];

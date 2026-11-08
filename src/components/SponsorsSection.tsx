@@ -149,6 +149,8 @@ export default function SponsorsSection() {
                       <img
                         src={sponsor.src}
                         alt={`${sponsor.name} Logo`}
+                        loading="lazy"
+                        decoding="async"
                         className={`h-8 sm:h-10 md:h-12 w-auto max-w-[110px] sm:max-w-[130px] md:max-w-[160px] object-contain transition-all duration-300 ${sponsor.featured
                             ? "brightness-125 filter drop-shadow-[0_0_8px_rgba(0,200,232,0.4)]"
                             : "filter grayscale opacity-80 brightness-150 group-hover:grayscale-0 group-hover:opacity-100 group-hover:brightness-100"

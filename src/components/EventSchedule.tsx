@@ -67,16 +67,22 @@ export default function EventSchedule() {
   const connectorPathD =
     "M 290 140 C 580 140, 710 240, 710 380 C 710 510, 290 510, 290 640 C 290 770, 710 770, 710 900 C 710 1030, 290 1030, 290 1160";
 
-  // Smooth scroll tracking driving the connector line in between cards
+  // Smooth scroll tracking driving the connector line in between cards with intersection awareness
+  const lastRawRef = useRef<number>(-1);
   useEffect(() => {
     let animId: number;
+    let isVisible = false;
 
     const handleScroll = () => {
+      if (!isVisible) return;
       cancelAnimationFrame(animId);
       animId = requestAnimationFrame(() => {
         if (!cardsContainerRef.current) return;
         const rect = cardsContainerRef.current.getBoundingClientRect();
         const windowHeight = window.innerHeight;
+
+        // Skip if outside active viewport zone
+        if (rect.bottom < -100 || rect.top > windowHeight + 100) return;
 
         // Progress begins as the first card approaches view and completes as the last card is crossed
         const startOffset = windowHeight * 0.65;
@@ -84,27 +90,50 @@ export default function EventSchedule() {
         const currentDistance = startOffset - rect.top;
 
         const raw = Math.max(0, Math.min(1, currentDistance / totalDistance));
-        setScrollProgress(raw);
+        
+        // Only trigger React state re-render if progress moved measurably or hit 0/1 bounds
+        if (
+          Math.abs(raw - lastRawRef.current) > 0.004 ||
+          (raw === 0 && lastRawRef.current !== 0) ||
+          (raw === 1 && lastRawRef.current !== 1)
+        ) {
+          lastRawRef.current = raw;
+          setScrollProgress(raw);
 
-        // Calculate exact (x, y) along the curved path for the traveling alive bead
-        if (svgPathRef.current) {
-          try {
-            const totalLen = svgPathRef.current.getTotalLength();
-            if (totalLen > 0) {
-              const pt = svgPathRef.current.getPointAtLength(raw * totalLen);
-              setCurrentCoord({ x: pt.x, y: pt.y });
+          // Calculate exact (x, y) along the curved path for the traveling alive bead
+          if (svgPathRef.current) {
+            try {
+              const totalLen = svgPathRef.current.getTotalLength();
+              if (totalLen > 0) {
+                const pt = svgPathRef.current.getPointAtLength(raw * totalLen);
+                setCurrentCoord({ x: pt.x, y: pt.y });
+              }
+            } catch {
+              // Ignore during initial layout mount
             }
-          } catch {
-            // Ignore during initial layout mount
           }
         }
       });
     };
 
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0].isIntersecting;
+        if (isVisible) handleScroll();
+      },
+      { rootMargin: "200px 0px" }
+    );
+
+    if (cardsContainerRef.current) {
+      observer.observe(cardsContainerRef.current);
+    }
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll, { passive: true });
     handleScroll();
+
     return () => {
+      observer.disconnect();
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
       cancelAnimationFrame(animId);
