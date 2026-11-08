@@ -218,7 +218,7 @@ export default function TracksRulesSection({ onOpenRegister }: TracksRulesSectio
                         PRIZE ELIGIBILITY
                       </span>
                       <span className="font-['Space_Grotesk'] font-bold text-base sm:text-lg text-[#00C8E8]">
-                        ₹40,000 Pool // 5 Places to Conquer
+                        <span className="text-xs font-normal text-[#8DEBFF]/70 lowercase font-['Space_Grotesk'] mr-1">(up to)</span>₹40,000 Pool // 5 Places to Conquer
                       </span>
                     </div>
 

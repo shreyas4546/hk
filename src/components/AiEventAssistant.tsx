@@ -53,7 +53,7 @@ function getGroundedAnswer(query: string): string {
 
   // 3b. Prize Pool & Awards
   if (q.includes("prize") || q.includes("award") || q.includes("pool") || q.includes("cash") || q.includes("conquer") || q.includes("bounty") || q.includes("reward") || q.includes("winner") || q.includes("money")) {
-    return `HackIgnite 1.0 features a total prize pool of ₹40,000! Teams compete for cash honors and trophies across the 5 Places to Conquer podium categories: Winner (#01 Champion), Runner Up (#02 Excellence in Engineering), Second Runner Up (#03 Outstanding Innovation), Best Development (#04 Architecture & Code Rigor), and Best Project (#05 Complete Viability & Impact).`;
+    return `HackIgnite 1.0 features a total prize pool of up to ₹40,000! Teams compete for cash honors and trophies across the 5 Places to Conquer podium categories: Winner (#01 Champion), Runner Up (#02 Excellence in Engineering), Second Runner Up (#03 Outstanding Innovation), Best Development (#04 Architecture & Code Rigor), and Best Project (#05 Complete Viability & Impact).`;
   }
 
   // 4. Coding Start

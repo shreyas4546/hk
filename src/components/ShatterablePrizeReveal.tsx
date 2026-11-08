@@ -571,7 +571,10 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
               </div>
 
               {/* THE ROLLING ₹40,000 HEADLINE */}
-              <div className="flex items-baseline justify-center gap-2 sm:gap-3 my-2">
+              <div className="flex items-baseline justify-center gap-2 sm:gap-3 my-2 flex-wrap">
+                <span className="text-xs sm:text-sm md:text-base font-['Space_Grotesk'] font-normal text-[#7E939E] lowercase tracking-normal self-center sm:self-baseline pb-1">
+                  (up to)
+                </span>
                 <span className="font-['Space_Grotesk'] font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#00C8E8] via-[#8DEBFF] to-[#FFD700] drop-shadow-[0_0_45px_rgba(0,200,232,0.6)]">
                   ₹{displayAmount.toLocaleString("en-IN")}
                 </span>
@@ -581,7 +584,7 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
               </div>
 
               <div className="inline-block px-4 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-[#A4B6BF] mb-6">
-                Turn a <strong className="text-[#00C8E8]">₹2,000 team entry</strong> into{" "}
+                Turn a <strong className="text-[#00C8E8]">₹2,000 team entry</strong> into up to{" "}
                 <strong className="text-[#FFD700]">₹40,000 in grand rewards</strong> + national prestige
               </div>
 
