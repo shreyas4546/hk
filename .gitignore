@@ -9,3 +9,6 @@ screenshot-*.png
 parallax-preview.png
 .env*
 !.env.example
+
+.vercel
+.env*
