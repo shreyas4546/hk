@@ -14,9 +14,8 @@ import {
   Flame,
   Zap,
   ArrowRight,
-  Clock,
   Phone,
-  Share2,
+  Link2,
 } from "lucide-react";
 import { EVENT_DETAILS, UNSTOP_REGISTRATION } from "../data/eventData";
 import { soundEffects } from "../utils/soundEffects";
@@ -49,16 +48,13 @@ export default function RegistrationModal({
 
   if (!isOpen) return null;
 
-  const handleCopyLink = () => {
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     navigator.clipboard.writeText(UNSTOP_REGISTRATION.url);
     soundEffects.playVictoryChime();
     setCopied(true);
     setTimeout(() => setCopied(false), 2400);
-  };
-
-  const handleLaunchUnstop = () => {
-    soundEffects.playVictoryChime();
-    window.open(UNSTOP_REGISTRATION.url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -109,7 +105,7 @@ export default function RegistrationModal({
               REGISTER ON <span className="cyan-turquoise-text">UNSTOP</span>
             </h2>
             <p className="text-xs sm:text-sm text-[#A4B6BF] font-['Inter',sans-serif] mt-1 max-w-xl">
-              Official registration for <strong className="text-white">HackIgnite 1.0</strong> (12–13 Dec 2026 at JCET Hubballi). Tap below to open Unstop directly, or scan the QR code from another device.
+              Official registration for <strong className="text-white">HackIgnite 1.0</strong> (12–13 Dec 2026 at JCET Hubballi). Click the buttons or QR code below to open the official Unstop portal.
             </p>
           </div>
 
@@ -142,16 +138,18 @@ export default function RegistrationModal({
               <div className="w-full flex items-center justify-between mb-3 text-[10px] font-mono text-[#8DEBFF] uppercase tracking-wider">
                 <span className="flex items-center gap-1">
                   <QrCode className="w-3.5 h-3.5 text-[#00C8E8]" />
-                  <span>FAST MOBILE SCAN</span>
+                  <span>CLICK OR SCAN QR</span>
                 </span>
-                <span className="text-[#A4B6BF]">100% SECURE</span>
+                <span className="text-[#00C8E8] font-bold">● ACTIVE</span>
               </div>
 
-              {/* QR Code Frame with Animated Cyber Laser */}
-              <div
-                onClick={handleLaunchUnstop}
-                className="relative w-44 h-44 sm:w-52 sm:h-52 p-2 rounded-2xl bg-white shadow-[0_0_30px_rgba(0,200,232,0.35)] transition-transform duration-300 group-hover:scale-[1.02] flex items-center justify-center overflow-hidden border-2 border-[#00C8E8] cursor-pointer"
-                title="Click or scan to open Unstop registration"
+              {/* QR Code Frame with Animated Cyber Laser - WRAPPED IN NATIVE ANCHOR TAG */}
+              <a
+                href={UNSTOP_REGISTRATION.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative w-44 h-44 sm:w-52 sm:h-52 p-2 rounded-2xl bg-white shadow-[0_0_30px_rgba(0,200,232,0.35)] hover:shadow-[0_0_45px_rgba(0,200,232,0.7)] transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center overflow-hidden border-2 border-[#00C8E8] cursor-pointer block group/qr"
+                title="Click to open Unstop registration in a new tab"
               >
                 {/* Laser scan line & trailing glow */}
                 <div className="qr-laser-line" />
@@ -161,18 +159,31 @@ export default function RegistrationModal({
                 <img
                   src={UNSTOP_REGISTRATION.qrImage}
                   alt="HackIgnite 1.0 Unstop Official Registration QR Code"
-                  className="w-full h-full object-contain block"
+                  className="w-full h-full object-contain block transition-transform duration-300 group-hover/qr:scale-105"
                 />
-              </div>
+
+                {/* Hover Click Hint Overlay */}
+                <div className="absolute inset-0 bg-[#00C8E8]/15 opacity-0 group-hover/qr:opacity-100 transition-opacity flex items-center justify-center pointer-events-none backdrop-blur-[1px]">
+                  <span className="px-3 py-1.5 rounded-lg bg-[#050708]/90 text-white font-mono text-xs font-bold border border-[#00C8E8] shadow-lg flex items-center gap-1">
+                    <span>OPEN UNSTOP</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-[#00C8E8]" />
+                  </span>
+                </div>
+              </a>
 
               {/* Instruction Below QR */}
               <div className="mt-4 space-y-1">
-                <div className="text-xs sm:text-sm font-bold text-[#F3F8FA] font-['Space_Grotesk'] flex items-center justify-center gap-1.5">
+                <a
+                  href={UNSTOP_REGISTRATION.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs sm:text-sm font-bold text-[#F3F8FA] hover:text-[#8DEBFF] font-['Space_Grotesk'] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
                   <Sparkles className="w-3.5 h-3.5 text-[#00C8E8]" />
-                  <span>POINT PHONE CAMERA TO SCAN</span>
-                </div>
+                  <span>CLICK OR SCAN TO REGISTER ↗</span>
+                </a>
                 <p className="text-[11px] text-[#A4B6BF] max-w-xs font-['Inter',sans-serif]">
-                  Scan with Google Lens, Paytm/GPay or your phone's camera to register instantly on mobile.
+                  Tap QR to launch directly, or scan with phone camera, Google Lens, or UPI scanner.
                 </p>
               </div>
             </div>
@@ -210,26 +221,35 @@ export default function RegistrationModal({
                 </div>
               </div>
 
-              {/* Direct Primary CTA Button */}
+              {/* Direct Primary CTA Button - NATIVE ANCHOR TAG */}
               <div className="space-y-3">
-                <button
-                  onClick={handleLaunchUnstop}
-                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#00C8E8] via-[#19D8E8] to-[#00C8E8] bg-[length:200%_auto] hover:bg-[position:right_center] text-[#050708] font-['Space_Grotesk'] font-bold text-base sm:text-lg tracking-wide uppercase shadow-[0_0_30px_rgba(0,200,232,0.5)] hover:shadow-[0_0_45px_rgba(0,200,232,0.8)] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3 cursor-pointer group"
+                <a
+                  href={UNSTOP_REGISTRATION.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#00C8E8] via-[#19D8E8] to-[#00C8E8] bg-[length:200%_auto] hover:bg-[position:right_center] text-[#050708] font-['Space_Grotesk'] font-bold text-base sm:text-lg tracking-wide uppercase shadow-[0_0_30px_rgba(0,200,232,0.5)] hover:shadow-[0_0_45px_rgba(0,200,232,0.8)] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3 cursor-pointer group text-center no-underline block"
                 >
                   <span>CONTINUE TO UNSTOP PORTAL</span>
-                  <ExternalLink className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
-                </button>
+                  <ExternalLink className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform inline-block" />
+                </a>
 
-                {/* Secondary Quick-Copy Link Button */}
+                {/* Secondary Clickable Link & Copy Bar */}
                 <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      readOnly
-                      value={UNSTOP_REGISTRATION.url}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#07131C] border border-white/10 text-xs font-mono text-[#8DEBFF]/90 select-all focus:outline-none focus:border-[#00C8E8]/60"
-                    />
-                  </div>
+                  <a
+                    href={UNSTOP_REGISTRATION.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#07131C] hover:bg-[#09232B] border border-white/10 hover:border-[#00C8E8]/70 text-xs font-mono text-[#8DEBFF] hover:text-white transition-all flex items-center justify-between gap-2 overflow-hidden group/link cursor-pointer"
+                    title="Click to visit Unstop portal directly"
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <Link2 className="w-3.5 h-3.5 text-[#00C8E8] shrink-0" />
+                      <span className="truncate underline underline-offset-2 decoration-[#00C8E8]/40 group-hover/link:decoration-[#00C8E8]">
+                        {UNSTOP_REGISTRATION.url}
+                      </span>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-[#00C8E8] shrink-0 opacity-60 group-hover/link:opacity-100 transition-opacity" />
+                  </a>
 
                   <button
                     onClick={handleCopyLink}
@@ -238,6 +258,7 @@ export default function RegistrationModal({
                         ? "bg-[#00C8E8]/20 border-[#00C8E8] text-[#8DEBFF] shadow-[0_0_15px_rgba(0,200,232,0.3)]"
                         : "bg-white/5 border-white/10 hover:border-[#00C8E8]/50 text-white hover:text-[#8DEBFF]"
                     }`}
+                    title="Copy Unstop registration link to clipboard"
                   >
                     {copied ? (
                       <>
@@ -365,13 +386,15 @@ export default function RegistrationModal({
             </a>
           </div>
 
-          <button
-            onClick={handleLaunchUnstop}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#00C8E8]/20 hover:bg-[#00C8E8]/30 border border-[#00C8E8]/50 text-[#8DEBFF] font-mono text-xs font-bold transition-all cursor-pointer"
+          <a
+            href={UNSTOP_REGISTRATION.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#00C8E8]/20 hover:bg-[#00C8E8]/30 border border-[#00C8E8]/50 text-[#8DEBFF] font-mono text-xs font-bold transition-all cursor-pointer no-underline"
           >
             <span>OPEN UNSTOP CHALLENGE</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          </a>
         </div>
       </div>
     </div>
