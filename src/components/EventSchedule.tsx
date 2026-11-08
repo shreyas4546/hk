@@ -56,70 +56,183 @@ const MILESTONE_NODES = [
 
 export default function EventSchedule() {
   const [selectedDay, setSelectedDay] = useState<number>(1);
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
-  const [currentCoord, setCurrentCoord] = useState<{ x: number; y: number } | null>({ x: 290, y: 140 });
+  const [reachedCards, setReachedCards] = useState<boolean[]>([false, false, false, false, false]);
+  const [reachedNodes, setReachedNodes] = useState<boolean[]>([false, false, false, false, false]);
 
   const sectionRef = useRef<HTMLElement>(null);
   const cardsContainerRef = useRef<HTMLDivElement>(null);
   const svgPathRef = useRef<SVGPathElement>(null);
+  const svgGlowPathRef = useRef<SVGPathElement>(null);
+  const svgGlowCoreRef = useRef<SVGPathElement>(null);
+  const beadGroupRef = useRef<SVGGElement>(null);
+  const mobileBarRef = useRef<HTMLDivElement>(null);
+  const mobileBeadRef = useRef<HTMLDivElement>(null);
+
+  // Inertia lerp refs for 60/120 FPS buttery-smooth progress tracking
+  const targetProgressRef = useRef<number>(0);
+  const currentProgressRef = useRef<number>(0);
+  const cachedLengthRef = useRef<number>(0);
+  const reachedCardsRef = useRef<boolean[]>([false, false, false, false, false]);
+  const reachedNodesRef = useRef<boolean[]>([false, false, false, false, false]);
 
   // S-curve connector path across the 5 cards
   const connectorPathD =
     "M 290 140 C 580 140, 710 240, 710 380 C 710 510, 290 510, 290 640 C 290 770, 710 770, 710 900 C 710 1030, 290 1030, 290 1160";
 
-  // Smooth scroll tracking driving the connector line in between cards with intersection awareness
-  const lastRawRef = useRef<number>(-1);
+  // Discrete milestone activation - only triggers React state re-render when a threshold boundary is crossed
+  const updateThresholds = (progress: number) => {
+    const cardThresholds = [0.02, 0.22, 0.44, 0.66, 0.88];
+    const nodeThresholds = [0.05, 0.25, 0.50, 0.75, 0.95];
+
+    let cardChanged = false;
+    const newCards = cardThresholds.map((th, i) => {
+      const val = progress >= th;
+      if (val !== reachedCardsRef.current[i]) cardChanged = true;
+      return val;
+    });
+
+    if (cardChanged) {
+      reachedCardsRef.current = newCards;
+      setReachedCards(newCards);
+    }
+
+    let nodeChanged = false;
+    const newNodes = nodeThresholds.map((th, i) => {
+      const val = progress >= th;
+      if (val !== reachedNodesRef.current[i]) nodeChanged = true;
+      return val;
+    });
+
+    if (nodeChanged) {
+      reachedNodesRef.current = newNodes;
+      setReachedNodes(newNodes);
+    }
+  };
+
+  // Direct DOM updates for 60/120 FPS continuous visual elements without React re-render overhead
+  const updateDom = (progress: number) => {
+    const dashOffset = (1 - progress).toFixed(4);
+
+    if (svgPathRef.current) {
+      svgPathRef.current.style.strokeDashoffset = dashOffset;
+    }
+    if (svgGlowPathRef.current) {
+      svgGlowPathRef.current.style.strokeDashoffset = dashOffset;
+    }
+    if (svgGlowCoreRef.current) {
+      svgGlowCoreRef.current.style.strokeDashoffset = dashOffset;
+    }
+
+    if (beadGroupRef.current && cachedLengthRef.current > 0) {
+      if (progress > 0.02) {
+        try {
+          const pt = svgPathRef.current?.getPointAtLength(progress * cachedLengthRef.current);
+          if (pt) {
+            beadGroupRef.current.setAttribute("transform", `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
+            beadGroupRef.current.style.opacity = "1";
+          }
+        } catch {
+          // Ignore SVG measurement during initial paint
+        }
+      } else {
+        beadGroupRef.current.style.opacity = "0";
+      }
+    }
+
+    if (mobileBarRef.current) {
+      mobileBarRef.current.style.height = `${(progress * 100).toFixed(2)}%`;
+    }
+    if (mobileBeadRef.current) {
+      mobileBeadRef.current.style.opacity = progress > 0.02 ? "1" : "0";
+    }
+  };
+
   useEffect(() => {
-    let animId: number;
+    let rafId = 0;
     let isVisible = false;
 
-    const handleScroll = () => {
-      if (!isVisible) return;
-      cancelAnimationFrame(animId);
-      animId = requestAnimationFrame(() => {
-        if (!cardsContainerRef.current) return;
-        const rect = cardsContainerRef.current.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
+    // Cache total path length once for fast O(1) point lookups
+    if (svgPathRef.current) {
+      try {
+        cachedLengthRef.current = svgPathRef.current.getTotalLength();
+      } catch {
+        // Fallback for SSR or non-rendered SVG
+      }
+    }
 
-        // Skip if outside active viewport zone
-        if (rect.bottom < -100 || rect.top > windowHeight + 100) return;
+    const tick = () => {
+      const diff = targetProgressRef.current - currentProgressRef.current;
+      if (Math.abs(diff) < 0.0003) {
+        currentProgressRef.current = targetProgressRef.current;
+        updateDom(currentProgressRef.current);
+        updateThresholds(currentProgressRef.current);
+        rafId = 0;
+        return;
+      }
 
-        // Progress begins as the first card approaches view and completes as the last card is crossed
-        const startOffset = windowHeight * 0.65;
-        const totalDistance = rect.height - windowHeight * 0.25;
-        const currentDistance = startOffset - rect.top;
+      // Smooth exponential damping (inertia lerp)
+      currentProgressRef.current += diff * 0.16;
+      updateDom(currentProgressRef.current);
+      updateThresholds(currentProgressRef.current);
+      rafId = requestAnimationFrame(tick);
+    };
 
-        const raw = Math.max(0, Math.min(1, currentDistance / totalDistance));
-        
-        // Only trigger React state re-render if progress moved measurably or hit 0/1 bounds
-        if (
-          Math.abs(raw - lastRawRef.current) > 0.004 ||
-          (raw === 0 && lastRawRef.current !== 0) ||
-          (raw === 1 && lastRawRef.current !== 1)
-        ) {
-          lastRawRef.current = raw;
-          setScrollProgress(raw);
+    const startRafLoop = () => {
+      if (rafId === 0) {
+        rafId = requestAnimationFrame(tick);
+      }
+    };
 
-          // Calculate exact (x, y) along the curved path for the traveling alive bead
-          if (svgPathRef.current) {
-            try {
-              const totalLen = svgPathRef.current.getTotalLength();
-              if (totalLen > 0) {
-                const pt = svgPathRef.current.getPointAtLength(raw * totalLen);
-                setCurrentCoord({ x: pt.x, y: pt.y });
-              }
-            } catch {
-              // Ignore during initial layout mount
-            }
-          }
+    const handleScroll = (immediate = false) => {
+      if (!isVisible || !cardsContainerRef.current) return;
+      const rect = cardsContainerRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+
+      if (rect.bottom < -100 || rect.top > windowHeight + 100) return;
+
+      const startOffset = windowHeight * 0.65;
+      const totalDistance = rect.height - windowHeight * 0.25;
+      const currentDistance = startOffset - rect.top;
+
+      const raw = Math.max(0, Math.min(1, currentDistance / totalDistance));
+      targetProgressRef.current = raw;
+
+      if (immediate) {
+        currentProgressRef.current = raw;
+        updateDom(raw);
+        updateThresholds(raw);
+      } else {
+        startRafLoop();
+      }
+    };
+
+    const handleResize = () => {
+      if (svgPathRef.current) {
+        try {
+          cachedLengthRef.current = svgPathRef.current.getTotalLength();
+        } catch {
+          // Fallback
         }
-      });
+      }
+      handleScroll(true);
     };
 
     const observer = new IntersectionObserver(
       (entries) => {
         isVisible = entries[0].isIntersecting;
-        if (isVisible) handleScroll();
+        if (isVisible) {
+          if (cachedLengthRef.current === 0 && svgPathRef.current) {
+            try {
+              cachedLengthRef.current = svgPathRef.current.getTotalLength();
+            } catch {
+              // Ignore
+            }
+          }
+          handleScroll(true);
+        } else if (rafId !== 0) {
+          cancelAnimationFrame(rafId);
+          rafId = 0;
+        }
       },
       { rootMargin: "200px 0px" }
     );
@@ -128,15 +241,18 @@ export default function EventSchedule() {
       observer.observe(cardsContainerRef.current);
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
-    handleScroll();
+    window.addEventListener("scroll", () => handleScroll(false), { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
+
+    // Initial mount sync
+    isVisible = true;
+    handleScroll(true);
 
     return () => {
       observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-      cancelAnimationFrame(animId);
+      window.removeEventListener("scroll", () => handleScroll(false));
+      window.removeEventListener("resize", handleResize);
+      if (rafId !== 0) cancelAnimationFrame(rafId);
     };
   }, []);
 
@@ -301,10 +417,6 @@ export default function EventSchedule() {
                   <stop offset="50%" stopColor="#19D8E8" />
                   <stop offset="100%" stopColor="#8DEBFF" />
                 </linearGradient>
-                <filter id="scheduleGlow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#00C8E8" floodOpacity="0.8" />
-                  <feDropShadow dx="0" dy="0" stdDeviation="12" floodColor="#19D8E8" floodOpacity="0.5" />
-                </filter>
               </defs>
 
               {/* 1. Ambient Background Guide Track (dim dashed roadmap line) */}
@@ -318,7 +430,35 @@ export default function EventSchedule() {
                 vectorEffect="non-scaling-stroke"
               />
 
-              {/* 2. Active Illuminated Timeline Progress Line (fills along path as you scroll) */}
+              {/* 2. Layered Outer Glow Track (GPU accelerated line glow) */}
+              <path
+                ref={svgGlowPathRef}
+                d={connectorPathD}
+                stroke="rgba(0, 200, 232, 0.22)"
+                strokeWidth="9"
+                fill="none"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+                pathLength="1"
+                strokeDasharray="1"
+                strokeDashoffset="1"
+              />
+
+              {/* 3. Layered Core Glow Track */}
+              <path
+                ref={svgGlowCoreRef}
+                d={connectorPathD}
+                stroke="rgba(141, 235, 255, 0.35)"
+                strokeWidth="5.5"
+                fill="none"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+                pathLength="1"
+                strokeDasharray="1"
+                strokeDashoffset="1"
+              />
+
+              {/* 4. Active Illuminated Timeline Progress Line */}
               <path
                 ref={svgPathRef}
                 d={connectorPathD}
@@ -329,16 +469,15 @@ export default function EventSchedule() {
                 vectorEffect="non-scaling-stroke"
                 pathLength="1"
                 strokeDasharray="1"
-                strokeDashoffset={1 - Math.max(0, Math.min(1, scrollProgress))}
-                filter="url(#scheduleGlow)"
+                strokeDashoffset="1"
                 style={{
-                  transition: "stroke-dashoffset 0.1s ease-out",
+                  filter: "drop-shadow(0 0 5px rgba(0, 200, 232, 0.85))",
                 }}
               />
 
-              {/* 3. Milestone Waypoints at Card Anchor Nodes */}
+              {/* 5. Milestone Waypoints at Card Anchor Nodes */}
               {MILESTONE_NODES.map((node, i) => {
-                const isReached = scrollProgress >= node.threshold;
+                const isReached = reachedNodes[i];
                 return (
                   <g key={i} transform={`translate(${node.x}, ${node.y})`}>
                     <circle
@@ -359,38 +498,42 @@ export default function EventSchedule() {
                         fill="none"
                         stroke="#00C8E8"
                         strokeWidth="1"
-                        opacity="0.4"
-                        className="animate-pulse"
+                        opacity="0.45"
                       />
                     )}
                   </g>
                 );
               })}
 
-              {/* 4. Alive Energy Pulse Bead Travelling Along the Active Line */}
-              {currentCoord && scrollProgress > 0.02 && (
-                <g transform={`translate(${currentCoord.x}, ${currentCoord.y})`}>
-                  {/* Outer Ripple */}
-                  <circle r="16" fill="#00C8E8" opacity="0.25" className="animate-ping" />
-                  {/* Cyan Halo */}
-                  <circle r="9" fill="#00C8E8" opacity="0.6" />
-                  {/* Cyan Ring */}
-                  <circle r="6" fill="none" stroke="#8DEBFF" strokeWidth="2" />
-                  {/* Intense White Core */}
-                  <circle r="3.5" fill="#FFFFFF" />
-                </g>
-              )}
+              {/* 6. Alive Energy Pulse Bead Travelling Along the Active Line */}
+              <g
+                ref={beadGroupRef}
+                transform="translate(290, 140)"
+                style={{ opacity: 0, transition: "opacity 0.25s ease" }}
+              >
+                {/* Outer luminous halo */}
+                <circle r="14" fill="#00C8E8" opacity="0.25" />
+                {/* Cyan Halo */}
+                <circle r="8" fill="#00C8E8" opacity="0.65" />
+                {/* Cyan Ring */}
+                <circle r="5" fill="none" stroke="#8DEBFF" strokeWidth="1.75" />
+                {/* Intense White Core */}
+                <circle r="3" fill="#FFFFFF" />
+              </g>
             </svg>
 
             {/* Mobile Vertical Timeline Track with Smooth Scroll Progress Fill */}
             <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-white/10 md:hidden pointer-events-none">
               <div
-                className="w-full bg-gradient-to-b from-[#00C8E8] via-[#19D8E8] to-[#8DEBFF] shadow-[0_0_12px_#00C8E8] transition-all duration-150 ease-out relative"
-                style={{ height: `${Math.round(Math.min(100, Math.max(0, scrollProgress * 100)))}%` }}
+                ref={mobileBarRef}
+                className="w-full bg-gradient-to-b from-[#00C8E8] via-[#19D8E8] to-[#8DEBFF] shadow-[0_0_12px_#00C8E8] relative"
+                style={{ height: "0%" }}
               >
-                {scrollProgress > 0.02 && (
-                  <div className="absolute -bottom-1.5 -left-[4px] w-2.5 h-2.5 rounded-full bg-white border border-[#00C8E8] shadow-[0_0_10px_#00C8E8] animate-pulse" />
-                )}
+                <div
+                  ref={mobileBeadRef}
+                  className="absolute -bottom-1.5 -left-[4px] w-2.5 h-2.5 rounded-full bg-white border border-[#00C8E8] shadow-[0_0_10px_#00C8E8]"
+                  style={{ opacity: 0, transition: "opacity 0.2s ease" }}
+                />
               </div>
             </div>
 
@@ -401,9 +544,7 @@ export default function EventSchedule() {
               const StatusIcon = status.icon;
               const ActivityIcon = getActivityIcon(event.type);
 
-              // Card is reached by the line progress
-              const cardThreshold = index * 0.22;
-              const isReached = scrollProgress >= cardThreshold;
+              const isReached = reachedCards[index];
 
               return (
                 <div
