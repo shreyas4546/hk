@@ -308,9 +308,6 @@ export default function EventOverview() {
           <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
             DURATION // 24 HOURS NON-STOP
           </span>
-          <span className="px-3 py-1.5 rounded-lg bg-[#00C8E8]/10 border border-[#00C8E8]/35 text-[#00C8E8] shadow-[0_0_15px_rgba(0,200,232,0.15)] font-bold">
-            PRIZE POOL // {EVENT_DETAILS.prizePool} TOTAL
-          </span>
           <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
             VENUE // JCET HUBBALLI
           </span>
