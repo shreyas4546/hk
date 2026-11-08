@@ -95,8 +95,8 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 flex items-center ${isScrolled
-          ? "bg-[#050708]/85 backdrop-blur-xl border-b border-[#00C8E8]/20 shadow-[0_8px_32px_rgba(0,0,0,0.85)]"
-          : "bg-[#050708]/35 backdrop-blur-md border-b border-white/5"
+        ? "bg-[#050708]/85 backdrop-blur-xl border-b border-[#00C8E8]/20 shadow-[0_8px_32px_rgba(0,0,0,0.85)]"
+        : "bg-[#050708]/35 backdrop-blur-md border-b border-white/5"
         }`}
     >
       {/* Bottom glowing animated accent highlight on navbar boundary */}
@@ -127,8 +127,8 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
                   className={`relative px-2.5 lg:px-3 py-1.5 rounded-full font-['Inter',sans-serif] tracking-wide transition-colors duration-200 cursor-pointer ${isActive
-                      ? "text-[#8DEBFF] font-semibold"
-                      : "text-[#A4B6BF] hover:text-white"
+                    ? "text-[#8DEBFF] font-semibold"
+                    : "text-[#A4B6BF] hover:text-white"
                     }`}
                 >
                   {/* Active Traveling Glowing Line Indicator */}
@@ -189,8 +189,8 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
                     href={link.href}
                     onClick={(e) => handleNavClick(e, link.href)}
                     className={`px-3 py-2 text-sm font-medium rounded-lg transition-all font-['Inter',sans-serif] flex items-center justify-between cursor-pointer ${isActive
-                        ? "bg-[#00C8E8]/15 text-[#8DEBFF] font-semibold border-l-2 border-[#00C8E8] shadow-[inset_0_0_12px_rgba(0,200,232,0.15)]"
-                        : "text-[#A4B6BF] hover:text-[#F3F8FA] hover:bg-[#050708]/60"
+                      ? "bg-[#00C8E8]/15 text-[#8DEBFF] font-semibold border-l-2 border-[#00C8E8] shadow-[inset_0_0_12px_rgba(0,200,232,0.15)]"
+                      : "text-[#A4B6BF] hover:text-[#F3F8FA] hover:bg-[#050708]/60"
                       }`}
                   >
                     <span>{link.label}</span>

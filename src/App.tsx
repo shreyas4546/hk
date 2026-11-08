@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { ZeroGravityBackground } from "./components/ui/zero-gravity-background";
+import CinematicPreloader from "./components/ui/CinematicPreloader";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import EventOverview from "./components/EventOverview";
@@ -18,6 +19,7 @@ import AiEventAssistant from "./components/AiEventAssistant";
 const RegistrationModal = lazy(() => import("./components/RegistrationModal"));
 
 export default function App() {
+  const [isIntroComplete, setIsIntroComplete] = useState<boolean>(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
   const [selectedTrackId, setSelectedTrackId] = useState<string>("open-innovation");
 
@@ -48,6 +50,11 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen bg-[#050708] text-[#F3F8FA] overflow-x-clip selection:bg-[#00C8E8]/30 selection:text-[#8DEBFF]">
+      {/* Cinematic Brand Intro / Preloader (Full Page Load & Refresh Only) */}
+      {!isIntroComplete && (
+        <CinematicPreloader onComplete={() => setIsIntroComplete(true)} />
+      )}
+
       {/* Zero Gravity Interactive Particle & Ambient Cosmic Background */}
       <ZeroGravityBackground />
 

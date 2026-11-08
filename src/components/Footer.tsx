@@ -81,7 +81,7 @@ export default function Footer() {
         <div className="max-w-6xl mx-auto space-y-3.5 sm:space-y-4">
           {/* Main 3-Column Content Layout with Balanced Proportions & Subtle Vertical Separators */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-start">
-            
+
             {/* COLUMN 1 — HACKIGNITE IDENTITY (Desktop: 4 cols | Mobile: Order 1) */}
             <div className="md:col-span-5 lg:col-span-4 space-y-2 md:border-r border-[#04080D]/12 md:pr-6">
               <div className="flex items-center gap-2.5">
@@ -173,8 +173,8 @@ export default function Footer() {
                 <div className="flex items-start gap-2">
                   <CreditCard className="w-3.5 h-3.5 text-[#04080D] shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Entry Fee</span>
-                    <span className="font-semibold text-[#04080D]">₹2,000 per team</span>
+                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Entry & Prize Pool</span>
+                    <span className="font-semibold text-[#04080D]">₹2,000 / team · ₹40,000 Pool</span>
                   </div>
                 </div>
 
