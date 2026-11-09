@@ -183,16 +183,29 @@ export default function EventSchedule() {
       }
     };
 
+    let cachedTop = 0;
+    let cachedHeight = 0;
+
+    const measureScheduleContainer = () => {
+      if (!cardsContainerRef.current) return;
+      const rect = cardsContainerRef.current.getBoundingClientRect();
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      cachedTop = rect.top + scrollY;
+      cachedHeight = rect.height;
+    };
+
     const handleScroll = (immediate = false) => {
       if (!isVisible || !cardsContainerRef.current) return;
-      const rect = cardsContainerRef.current.getBoundingClientRect();
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      const rectTop = cachedTop - scrollY;
+      const rectBottom = rectTop + cachedHeight;
       const windowHeight = window.innerHeight;
 
-      if (rect.bottom < -100 || rect.top > windowHeight + 100) return;
+      if (rectBottom < -100 || rectTop > windowHeight + 100) return;
 
       const startOffset = windowHeight * 0.65;
-      const totalDistance = rect.height - windowHeight * 0.25;
-      const currentDistance = startOffset - rect.top;
+      const totalDistance = cachedHeight - windowHeight * 0.25;
+      const currentDistance = startOffset - rectTop;
 
       const raw = Math.max(0, Math.min(1, currentDistance / totalDistance));
       targetProgressRef.current = raw;
@@ -207,6 +220,7 @@ export default function EventSchedule() {
     };
 
     const handleResize = () => {
+      measureScheduleContainer();
       if (svgPathRef.current) {
         try {
           cachedLengthRef.current = svgPathRef.current.getTotalLength();
@@ -221,6 +235,7 @@ export default function EventSchedule() {
       (entries) => {
         isVisible = entries[0].isIntersecting;
         if (isVisible) {
+          measureScheduleContainer();
           if (cachedLengthRef.current === 0 && svgPathRef.current) {
             try {
               cachedLengthRef.current = svgPathRef.current.getTotalLength();
@@ -241,16 +256,18 @@ export default function EventSchedule() {
       observer.observe(cardsContainerRef.current);
     }
 
-    window.addEventListener("scroll", () => handleScroll(false), { passive: true });
+    const onScroll = () => handleScroll(false);
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", handleResize, { passive: true });
 
     // Initial mount sync
     isVisible = true;
+    measureScheduleContainer();
     handleScroll(true);
 
     return () => {
       observer.disconnect();
-      window.removeEventListener("scroll", () => handleScroll(false));
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", handleResize);
       if (rafId !== 0) cancelAnimationFrame(rafId);
     };

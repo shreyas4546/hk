@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperClass } from "swiper";
 import {
@@ -32,6 +32,29 @@ interface WhyHackIgniteProps {
 export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
   const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  // Pause autoplay when section is offscreen to save mobile CPU/GPU
+  useEffect(() => {
+    if (!swiperInstance || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            swiperInstance.autoplay?.start();
+          } else {
+            swiperInstance.autoplay?.stop();
+          }
+        });
+      },
+      { rootMargin: "150px 0px" }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+    return () => observer.disconnect();
+  }, [swiperInstance]);
 
   const places = [
     {
@@ -90,6 +113,7 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
   return (
     <section
       id="conquer"
+      ref={sectionRef}
       className="conquer-section relative w-full min-w-0 max-w-7xl py-16 sm:py-20 px-4 sm:px-6 lg:px-8 mx-auto z-10 overflow-hidden bg-transparent"
     >
       {/* Section Header */}

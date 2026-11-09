@@ -13,6 +13,7 @@ export interface Particle {
   size: number;
   color: string;
   rgb: string;
+  spriteIndex: number;
   angle: number; // For organic oscillation
 }
 
@@ -43,6 +44,51 @@ const REPULSION_STRENGTH = 1.2; // Mouse push multiplier
 
 const randomRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
+// Pre-rendered offscreen sprite cache for 60/120 FPS GPU blitting (0 arc/fill calls per frame)
+let cachedSprites: HTMLCanvasElement[] | null = null;
+
+function getParticleSprites(): HTMLCanvasElement[] {
+  if (cachedSprites) return cachedSprites;
+
+  const configs = [
+    { rgb: '0, 200, 232' },   // 0: Cyan
+    { rgb: '141, 235, 255' }, // 1: Ice Blue
+    { rgb: '66, 133, 244' },  // 2: Tech Blue
+    { rgb: '255, 255, 255' }, // 3: White
+  ];
+
+  cachedSprites = configs.map(({ rgb }) => {
+    const sprite = document.createElement('canvas');
+    sprite.width = 32;
+    sprite.height = 32;
+    const sCtx = sprite.getContext('2d');
+    if (!sCtx) return sprite;
+
+    const center = 16;
+    const radius = 14;
+
+    const grad = sCtx.createRadialGradient(center, center, 0, center, center, radius);
+    grad.addColorStop(0, `rgba(${rgb}, 1)`);
+    grad.addColorStop(0.35, `rgba(${rgb}, 0.55)`);
+    grad.addColorStop(0.7, `rgba(${rgb}, 0.15)`);
+    grad.addColorStop(1, `rgba(${rgb}, 0)`);
+
+    sCtx.fillStyle = grad;
+    sCtx.beginPath();
+    sCtx.arc(center, center, radius, 0, Math.PI * 2);
+    sCtx.fill();
+
+    sCtx.fillStyle = '#ffffff';
+    sCtx.beginPath();
+    sCtx.arc(center, center, 2.2, 0, Math.PI * 2);
+    sCtx.fill();
+
+    return sprite;
+  });
+
+  return cachedSprites;
+}
+
 // --- AntiGravity / ZeroGravity Canvas Component ---
 
 export const AntiGravityCanvas: React.FC<{
@@ -50,6 +96,7 @@ export const AntiGravityCanvas: React.FC<{
   isBackground?: boolean;
 }> = ({ className = '', isBackground = false }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [debugInfo, setDebugInfo] = useState({ count: 0, fps: 0 });
 
@@ -82,15 +129,19 @@ export const AntiGravityCanvas: React.FC<{
       const roll = Math.random();
       let color = '#ffffff';
       let rgb = '255, 255, 255';
+      let spriteIndex = 3; // White
       if (roll > 0.70) {
         color = '#00C8E8'; // Electric Cyan
         rgb = '0, 200, 232';
+        spriteIndex = 0;
       } else if (roll > 0.55) {
         color = '#8DEBFF'; // Ice Blue
         rgb = '141, 235, 255';
+        spriteIndex = 1;
       } else if (roll > 0.45) {
         color = '#4285F4'; // Tech Blue
         rgb = '66, 133, 244';
+        spriteIndex = 2;
       }
 
       newParticles.push({
@@ -103,6 +154,7 @@ export const AntiGravityCanvas: React.FC<{
         size: randomRange(1.2, 2.6),
         color,
         rgb,
+        spriteIndex,
         angle: Math.random() * Math.PI * 2,
       });
     }
@@ -131,6 +183,7 @@ export const AntiGravityCanvas: React.FC<{
     if (canvas) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
+        ctxRef.current = ctx;
         const centerX = width / 2;
         const centerY = height / 2;
         const radius = Math.max(width, height) * 0.72;
@@ -142,14 +195,14 @@ export const AntiGravityCanvas: React.FC<{
       }
     }
 
-    setDebugInfo((prev) => ({ ...prev, count: particleCount + bgCount }));
+    if (!isBackground) {
+      setDebugInfo((prev) => ({ ...prev, count: particleCount + bgCount }));
+    }
   }, []);
 
-  // Animation Loop
+  // Animation Loop with GPU Hardware Blitting (0 vector path overhead)
   const animate = useCallback((time: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = ctxRef.current;
     if (!ctx) return;
 
     const { width, height } = dimensionsRef.current;
@@ -164,10 +217,10 @@ export const AntiGravityCanvas: React.FC<{
     // Clear Canvas
     ctx.clearRect(0, 0, width, height);
 
-    // --- Background Effects ---
+    const isMobile = width < 768;
 
-    // 1. Pulsating Radial Glow (using cached gradient for 0 allocation)
-    if (gradientRef.current) {
+    // 1. Pulsating Radial Glow (Desktop only for 0 fillrate pressure on mobile GPUs)
+    if (!isMobile && gradientRef.current) {
       const pulseSpeed = 0.0008;
       const pulseOpacity = Math.sin(time * pulseSpeed) * 0.035 + 0.075;
       ctx.globalAlpha = pulseOpacity / 0.75;
@@ -176,30 +229,26 @@ export const AntiGravityCanvas: React.FC<{
       ctx.globalAlpha = 1.0;
     }
 
-    // 2. Background Particles (Drifting Stars)
+    // 2. Background Particles (Drifting Stars) — Rendered as high-speed rects (0 arc overhead)
     const bgParticles = backgroundParticlesRef.current;
-    ctx.fillStyle = '#ffffff';
-    for (let i = 0; i < bgParticles.length; i++) {
-      const p = bgParticles[i];
-      p.x += p.vx;
-      p.y += p.vy;
+    if (bgParticles.length > 0) {
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.45;
+      for (let i = 0; i < bgParticles.length; i++) {
+        const p = bgParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
 
-      // Wrap around screen
-      if (p.x < 0) p.x = width;
-      if (p.x > width) p.x = 0;
-      if (p.y < 0) p.y = height;
-      if (p.y > height) p.y = 0;
+        // Wrap around screen
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
 
-      // Twinkle effect
-      const twinkle = Math.sin(time * 0.002 + p.phase) * 0.5 + 0.5;
-      const currentAlpha = p.alpha * (0.3 + 0.7 * twinkle);
-
-      ctx.globalAlpha = currentAlpha;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+      }
+      ctx.globalAlpha = 1.0;
     }
-    ctx.globalAlpha = 1.0;
 
     // --- Main Foreground Physics ---
 
@@ -239,60 +288,10 @@ export const AntiGravityCanvas: React.FC<{
       p.vy += springDy * RETURN_SPEED;
     }
 
-    // Phase 2: Resolve Collisions (Elastic Spheres with bounding-box early exit)
+    // Phase 2: Integration & GPU Sprite Blitting (Zero arc/fill calls, 0 GC churn)
+    const sprites = getParticleSprites();
     const len = particles.length;
-    for (let i = 0; i < len; i++) {
-      const p1 = particles[i];
-      for (let j = i + 1; j < len; j++) {
-        const p2 = particles[j];
-        const minDist = p1.size + p2.size;
 
-        const dx = p2.x - p1.x;
-        if (dx > minDist || dx < -minDist) continue;
-        const dy = p2.y - p1.y;
-        if (dy > minDist || dy < -minDist) continue;
-
-        const distSq = dx * dx + dy * dy;
-
-        if (distSq < minDist * minDist) {
-          const dist = Math.sqrt(distSq);
-          if (dist > 0.01) {
-            const nx = dx / dist;
-            const ny = dy / dist;
-            const overlap = minDist - dist;
-            const pushX = nx * overlap * 0.5;
-            const pushY = ny * overlap * 0.5;
-
-            p1.x -= pushX;
-            p1.y -= pushY;
-            p2.x += pushX;
-            p2.y += pushY;
-
-            const dvx = p1.vx - p2.vx;
-            const dvy = p1.vy - p2.vy;
-            const velocityAlongNormal = dvx * nx + dvy * ny;
-
-            if (velocityAlongNormal > 0) {
-              const m1 = p1.size;
-              const m2 = p2.size;
-              const restitution = 0.85;
-              const impulseMagnitude =
-                (-(1 + restitution) * velocityAlongNormal) / (1 / m1 + 1 / m2);
-
-              const impulseX = impulseMagnitude * nx;
-              const impulseY = impulseMagnitude * ny;
-
-              p1.vx += impulseX / m1;
-              p1.vy += impulseY / m1;
-              p2.vx -= impulseX / m2;
-              p2.vy -= impulseY / m2;
-            }
-          }
-        }
-      }
-    }
-
-    // Phase 3: Integration & Drawing (with pre-computed RGB and hardware-friendly glow)
     for (let i = 0; i < len; i++) {
       const p = particles[i];
 
@@ -304,33 +303,34 @@ export const AntiGravityCanvas: React.FC<{
 
       const velocity = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
       const opacity = Math.min(0.4 + velocity * 0.12, 1);
+      const renderSize = p.size * (velocity > 0.5 ? 4.8 : 3.8);
 
-      if (velocity > 0.5) {
-        // Fast dual-arc glow without expensive canvas Gaussian shadowBlur stalls
-        ctx.fillStyle = `rgba(${p.rgb}, ${opacity * 0.28})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 2.2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      ctx.fillStyle = `rgba(${p.rgb}, ${opacity})`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.globalAlpha = opacity;
+      ctx.drawImage(
+        sprites[p.spriteIndex],
+        p.x - renderSize / 2,
+        p.y - renderSize / 2,
+        renderSize,
+        renderSize
+      );
     }
+    ctx.globalAlpha = 1.0;
 
     frameIdRef.current = requestAnimationFrame(animate);
   }, [isBackground]);
 
-  // Resize Handler with High-DPI support
+  // Resize Handler with adaptive DPR capping for low-end mobile devices
   useEffect(() => {
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
       const width = isBackground ? window.innerWidth : (containerRef.current?.getBoundingClientRect().width || window.innerWidth);
       const height = isBackground ? window.innerHeight : (containerRef.current?.getBoundingClientRect().height || window.innerHeight);
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const isMobile = width < 768;
+      // Cap DPR to 1 on mobile to prevent extreme fillrate stalls; cap to 1.5 on desktop
+      const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
 
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
@@ -338,15 +338,26 @@ export const AntiGravityCanvas: React.FC<{
       canvas.style.height = `${height}px`;
 
       const ctx = canvas.getContext('2d');
-      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (ctx) {
+        ctxRef.current = ctx;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
 
       initParticles(width, height);
     };
 
-    window.addEventListener('resize', handleResize);
+    const debouncedResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(handleResize, 150);
+    };
+
+    window.addEventListener('resize', debouncedResize, { passive: true });
     handleResize();
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      window.removeEventListener('resize', debouncedResize);
+    };
   }, [initParticles, isBackground]);
 
   // Start Animation with Tab Visibility Awareness (pauses when background tab)
@@ -375,26 +386,45 @@ export const AntiGravityCanvas: React.FC<{
     };
   }, [animate]);
 
-  // Global Mouse tracking across whole window
+  // Global Mouse and Touch tracking across whole window (zero object allocations)
   useEffect(() => {
     const handleWindowMouseMove = (e: MouseEvent) => {
-      mouseRef.current = {
-        x: e.clientX,
-        y: e.clientY,
-        isActive: true,
-      };
+      mouseRef.current.x = e.clientX;
+      mouseRef.current.y = e.clientY;
+      mouseRef.current.isActive = true;
+    };
+
+    const handleWindowTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        mouseRef.current.x = e.touches[0].clientX;
+        mouseRef.current.y = e.touches[0].clientY;
+        mouseRef.current.isActive = true;
+      }
     };
 
     const handleWindowMouseLeave = () => {
       mouseRef.current.isActive = false;
     };
 
+    const handleWindowScroll = () => {
+      // Inactive during scroll to keep touch scrolling frictionless
+      mouseRef.current.isActive = false;
+    };
+
     window.addEventListener('mousemove', handleWindowMouseMove, { passive: true });
+    window.addEventListener('touchmove', handleWindowTouchMove, { passive: true });
+    window.addEventListener('touchend', handleWindowMouseLeave, { passive: true });
+    window.addEventListener('touchcancel', handleWindowMouseLeave, { passive: true });
+    window.addEventListener('scroll', handleWindowScroll, { passive: true });
     document.addEventListener('mouseleave', handleWindowMouseLeave);
     window.addEventListener('blur', handleWindowMouseLeave);
 
     return () => {
       window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('touchmove', handleWindowTouchMove);
+      window.removeEventListener('touchend', handleWindowMouseLeave);
+      window.removeEventListener('touchcancel', handleWindowMouseLeave);
+      window.removeEventListener('scroll', handleWindowScroll);
       document.removeEventListener('mouseleave', handleWindowMouseLeave);
       window.removeEventListener('blur', handleWindowMouseLeave);
     };

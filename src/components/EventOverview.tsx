@@ -129,6 +129,7 @@ export default function EventOverview() {
   const scrollTrackRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const activeIndexRef = useRef(0);
+  const isVisibleRef = useRef(true);
 
   // Drag tracking state
   const dragStartX = useRef<number | null>(null);
@@ -200,7 +201,9 @@ export default function EventOverview() {
         cardEl.style.transform = transform;
         cardEl.style.opacity = `${opacity}`;
         cardEl.style.zIndex = `${zIndex}`;
-        cardEl.style.filter = filter;
+        if (!isMobile) {
+          cardEl.style.filter = filter;
+        }
         cardEl.style.pointerEvents = pointerEvents;
 
         if (Math.abs(diff) < 0.35) {
@@ -213,11 +216,34 @@ export default function EventOverview() {
     [totalCards, isMobile]
   );
 
+  // Viewport intersection observer to pause transforms when 3D track is offscreen
+  useEffect(() => {
+    const track = scrollTrackRef.current;
+    if (!track || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isVisibleRef.current = entry.isIntersecting;
+          if (entry.isIntersecting) {
+            applyTransforms(smoothProgress.get());
+          }
+        });
+      },
+      { rootMargin: "250px 0px 250px 0px", threshold: 0 }
+    );
+
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [smoothProgress, applyTransforms]);
+
   // Subscribe to smooth motion scroll spring
   useEffect(() => {
     applyTransforms(smoothProgress.get());
     const unsubscribe = smoothProgress.on("change", (latest) => {
-      applyTransforms(latest);
+      if (isVisibleRef.current) {
+        applyTransforms(latest);
+      }
     });
     return () => unsubscribe();
   }, [smoothProgress, applyTransforms]);

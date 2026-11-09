@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import {
   Calendar,
   MapPin,
@@ -9,6 +9,25 @@ import {
 } from "lucide-react";
 
 export default function Footer() {
+  const footerRef = useRef<HTMLElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = footerRef.current;
+    if (!el) return;
+
+    // Viewport-aware visibility observer: pause 128 bubble calculations when footer is offscreen
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { rootMargin: "300px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     const el = document.querySelector(id);
@@ -35,7 +54,7 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="blob-footer">
+    <footer ref={footerRef} className="blob-footer">
       {/* SVG Gooey Filter for Liquid Metaball Physics (PROTECTED - UNTOUCHED) */}
       <svg
         style={{ position: "fixed", top: "100vh", pointerEvents: "none", width: 0, height: 0, opacity: 0 }}
@@ -54,8 +73,8 @@ export default function Footer() {
         </defs>
       </svg>
 
-      {/* Bubbles Layer for Liquid Wave Upper Boundary (PROTECTED - UNTOUCHED) */}
-      <div className="bubbles">
+      {/* Bubbles Layer for Liquid Wave Upper Boundary (PROTECTED - UNTOUCHED, Viewport-paused) */}
+      <div className={`bubbles ${isVisible ? "bubbles-active" : "bubbles-paused"}`}>
         {bubbles.map((b, i) => (
           <div
             key={i}

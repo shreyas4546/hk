@@ -30,6 +30,19 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
     let animId: number = 0;
     let lastActive = "#hero";
     let lastScrolled = false;
+    let sectionCache: Array<{ id: string; top: number }> = [];
+
+    const measureSections = () => {
+      sectionCache = sectionIds
+        .map((id) => {
+          const el = document.getElementById(id);
+          return el ? { id, top: el.offsetTop } : null;
+        })
+        .filter(Boolean) as Array<{ id: string; top: number }>;
+    };
+
+    measureSections();
+    window.addEventListener("resize", measureSections, { passive: true });
 
     const handleScroll = () => {
       cancelAnimationFrame(animId);
@@ -55,14 +68,10 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
         const scrollPos = window.scrollY + 180;
         let currentActive = "#hero";
 
-        for (let i = 0; i < sectionIds.length; i++) {
-          const id = sectionIds[i];
-          const el = document.getElementById(id);
-          if (el) {
-            const top = el.offsetTop;
-            if (top <= scrollPos) {
-              currentActive = `#${id}`;
-            }
+        for (let i = 0; i < sectionCache.length; i++) {
+          const s = sectionCache[i];
+          if (s.top <= scrollPos) {
+            currentActive = `#${s.id}`;
           }
         }
 
@@ -77,6 +86,7 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
     handleScroll(); // Initial check on mount
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", measureSections);
       cancelAnimationFrame(animId);
     };
   }, []);

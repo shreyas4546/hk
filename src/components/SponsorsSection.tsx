@@ -71,26 +71,49 @@ export default function SponsorsSection() {
     const row = containerRef.current?.querySelector(".logo-scroller-row") as HTMLElement | null;
     if (!row) return;
 
-    const ctx = gsap.context(() => {
-      gsap.set(row, { xPercent: 0 });
+    let tl: gsap.core.Timeline | null = null;
+    let observer: IntersectionObserver | null = null;
 
-      const tl = gsap.timeline({ repeat: -1, ease: "none" });
+    const ctx = gsap.context(() => {
+      gsap.set(row, { xPercent: 0, force3D: true });
+
+      tl = gsap.timeline({ repeat: -1, ease: "none" });
       tl.to(row, {
         xPercent: -50,
         duration: 28,
         ease: "none",
       });
 
-      const onEnter = () => tl.pause();
-      const onLeave = () => tl.resume();
+      const onEnter = () => tl?.pause();
+      const onLeave = () => tl?.resume();
 
       row.addEventListener("mouseenter", onEnter);
       row.addEventListener("mouseleave", onLeave);
       row.addEventListener("touchstart", onEnter, { passive: true });
       row.addEventListener("touchend", onLeave, { passive: true });
+
+      // Pause ticker when offscreen to save main-thread and GPU cycles on mobile
+      if (containerRef.current && typeof IntersectionObserver !== "undefined") {
+        observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                tl?.play();
+              } else {
+                tl?.pause();
+              }
+            });
+          },
+          { rootMargin: "150px 0px 150px 0px", threshold: 0 }
+        );
+        observer.observe(containerRef.current);
+      }
     }, containerRef);
 
-    return () => ctx.revert();
+    return () => {
+      if (observer) observer.disconnect();
+      ctx.revert();
+    };
   }, []);
 
   // Duplicate items for gapless infinite marquee

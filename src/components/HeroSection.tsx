@@ -34,21 +34,47 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
     return () => motionQuery.removeEventListener("change", handleMotionChange);
   }, []);
 
-  // Handle video autoplay and fallback detection
+  // Handle video autoplay, fallback detection, and viewport-aware playback pause
   useEffect(() => {
     const video = videoRef.current;
+    const hero = heroRef.current;
     if (!video) return;
 
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setAutoplayBlocked(false);
-        })
-        .catch(() => {
-          setAutoplayBlocked(true);
-        });
+    const attemptPlay = () => {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setAutoplayBlocked(false);
+          })
+          .catch(() => {
+            setAutoplayBlocked(true);
+          });
+      }
+    };
+
+    attemptPlay();
+
+    // Pause video decoding when hero section is scrolled offscreen to conserve mobile GPU
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          attemptPlay();
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    if (hero) {
+      observer.observe(hero);
     }
+
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   // Direct DOM updates for restrained parallax & subtle cursor lighting (0 React re-renders)

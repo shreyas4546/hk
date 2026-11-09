@@ -291,9 +291,24 @@
   -webkit-backdrop-filter: blur(28px) saturate(160%);
   border-radius: 1.25rem;
   box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.85), inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
   transform-style: preserve-3d;
   backface-visibility: hidden;
+}
+
+@media (max-width: 768px) {
+  .coverflow-3d-card {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(7, 19, 28, 0.82);
+  }
+
+  .glass-bento-card,
+  .bento-card-glass,
+  .parallax-tilt-container {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
 
 .coverflow-3d-card::before {
@@ -720,6 +735,8 @@
   min-height: 12rem;
   overflow: visible;
   width: 100%;
+  content-visibility: auto;
+  contain-intrinsic-size: 500px;
 }
 
 .blob-footer .bubbles {
@@ -733,6 +750,10 @@
   pointer-events: none;
 }
 
+.blob-footer .bubbles.bubbles-paused .bubble {
+  animation-play-state: paused;
+}
+
 .blob-footer .bubbles .bubble {
   position: absolute;
   left: var(--position, 50%);
@@ -741,7 +762,6 @@
   animation: bubble-size var(--time, 4s) ease-in infinite var(--delay, 0s),
     bubble-move var(--time, 4s) ease-in infinite var(--delay, 0s);
   transform: translate(-50%, 100%);
-  will-change: width, height, bottom;
 }
 
 .blob-footer .content {

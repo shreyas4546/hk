@@ -81,10 +81,14 @@ export default function MissionSection() {
 
     // --- CONFIGURATION: EXACTLY 1 SINGLE LOOP (THINK, BUILD, INNOVATE, IMPACT) ---
     // 4 cards + 4 matching 3D headline words = 8 items total
+    const winW = window.innerWidth;
+    const winH = window.innerHeight;
+    const isMobile = winW < 640;
+
     const CONFIG = {
       pillarCount: 4,
       itemCount: 8,
-      starCount: 110,
+      starCount: isMobile ? 25 : 100,
       zGap: 850,
       loopSize: 8 * 850, // 6800px single loop
       camSpeed: 2.2,
@@ -114,10 +118,6 @@ export default function MissionSection() {
 
     // Clear any existing children in world
     worldEl.innerHTML = "";
-
-    const winW = window.innerWidth;
-    const winH = window.innerHeight;
-    const isMobile = winW < 640;
 
     // 1. Build the Single Loop of the 4 Pillars
     // Interleaving: Pillar 01 Card -> "THINK" -> Pillar 02 Card -> "BUILD" -> Pillar 03 Card -> "INNOVATE" -> Pillar 04 Card -> "IMPACT"
@@ -256,12 +256,27 @@ export default function MissionSection() {
       state.mouseY = 0;
     };
 
-    // Calculate scroll progress from page scroll
-    const updateScrollFromWindow = () => {
+    // Cache container layout geometry to eliminate forced synchronous layout reflows during scroll
+    let cachedContainerTop = 0;
+    let cachedContainerHeight = 0;
+
+    const measureContainer = () => {
       if (!containerEl) return;
       const rect = containerEl.getBoundingClientRect();
-      const scrollWithin = -rect.top;
-      const maxScroll = containerEl.offsetHeight - window.innerHeight;
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      cachedContainerTop = rect.top + scrollY;
+      cachedContainerHeight = containerEl.offsetHeight;
+    };
+
+    measureContainer();
+    window.addEventListener("resize", measureContainer, { passive: true });
+
+    // Calculate scroll progress from page scroll with zero DOM layout thrashing
+    const updateScrollFromWindow = () => {
+      if (!isVisible || !containerEl) return;
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      const scrollWithin = scrollY - cachedContainerTop;
+      const maxScroll = cachedContainerHeight - window.innerHeight;
 
       if (maxScroll <= 0) return;
 
@@ -424,6 +439,7 @@ export default function MissionSection() {
         const entry = entries[0];
         isVisible = entry.isIntersecting;
         if (isVisible) {
+          measureContainer();
           updateScrollFromWindow();
           startRaf();
         } else {
@@ -439,6 +455,7 @@ export default function MissionSection() {
     return () => {
       stopRaf();
       observer.disconnect();
+      window.removeEventListener("resize", measureContainer);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("scroll", updateScrollFromWindow);
       window.removeEventListener("wheel", handleWheel);
