@@ -42,7 +42,7 @@ function calculateCardTransform(d: number, isMobile: boolean): CardTransform {
       transform: `translate3d(${x}px, ${y}px, ${z}px) rotateZ(${rZ}deg) rotateY(${rY}deg) scale(0.6)`,
       opacity: 0,
       zIndex: 5,
-      filter: "brightness(0.3)",
+      filter: "brightness(0.6)",
       pointerEvents: "none",
     };
   }
@@ -75,7 +75,7 @@ function calculateCardTransform(d: number, isMobile: boolean): CardTransform {
   let rY = 0;
   let scale = 1;
   let opacity = 1;
-  let brightness = 1;
+  let brightness = 1.05;
 
   if (absD <= 1) {
     const t = absD;
@@ -85,8 +85,8 @@ function calculateCardTransform(d: number, isMobile: boolean): CardTransform {
     rZ = sign * t * step1RZ;
     rY = -sign * t * step1RY;
     scale = 1 - t * 0.12;
-    opacity = 1 - t * 0.25;
-    brightness = 1 - t * 0.25;
+    opacity = 1 - t * 0.12; // 0.88 at t=1 (bright and clearly visible)
+    brightness = 1.05 - t * 0.13; // 0.92 at t=1
   } else if (absD <= 2) {
     const t = absD - 1;
     x = sign * (step1X + t * (step2X - step1X));
@@ -94,9 +94,9 @@ function calculateCardTransform(d: number, isMobile: boolean): CardTransform {
     z = step1Z + t * (step2Z - step1Z);
     rZ = sign * (step1RZ + t * (step2RZ - step1RZ));
     rY = -sign * (step1RY + t * (step2RY - step1RY));
-    scale = 0.88 - t * 0.14;
-    opacity = 0.75 - t * 0.37;
-    brightness = 0.75 - t * 0.25;
+    scale = 0.88 - t * 0.12;
+    opacity = 0.88 - t * 0.23; // 0.65 at t=1 (d=2)
+    brightness = 0.92 - t * 0.14; // 0.78 at t=1
   } else {
     const t = absD - 2;
     x = sign * (step2X + t * (step3X - step2X));
@@ -104,16 +104,16 @@ function calculateCardTransform(d: number, isMobile: boolean): CardTransform {
     z = step2Z + t * (step3Z - step2Z);
     rZ = sign * (step2RZ + t * (step3RZ - step2RZ));
     rY = -sign * (step2RY + t * (step3RY - step2RY));
-    scale = 0.74 - t * 0.14;
-    opacity = 0.38 - t * 0.38;
-    brightness = 0.5 - t * 0.2;
+    scale = 0.76 - t * 0.16;
+    opacity = 0.65 - t * 0.65; // smoothly fades from 0.65 to 0
+    brightness = 0.78 - t * 0.18;
   }
 
   const zIndex = Math.round(50 - absD * 12);
 
   return {
     transform: `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateZ(${rZ.toFixed(2)}deg) rotateY(${rY.toFixed(2)}deg) scale(${scale.toFixed(3)})`,
-    opacity: Math.max(0, opacity),
+    opacity: Math.max(0, Math.min(1, opacity)),
     zIndex,
     filter: `brightness(${brightness.toFixed(2)})`,
     pointerEvents: absD <= 1.2 ? "auto" : "none",
@@ -125,12 +125,9 @@ export default function EventOverview() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
+  const scrollTrackRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const activeIndexRef = useRef(0);
-  const currentFloatRef = useRef(0);
-  const targetFloatRef = useRef(0);
-  const animFrameRef = useRef<number | null>(null);
-  const lastWheelTime = useRef(0);
 
   // Drag tracking state
   const dragStartX = useRef<number | null>(null);
@@ -148,10 +145,36 @@ export default function EventOverview() {
 
   const totalCards = 6;
 
-  // Directly apply transforms on DOM nodes without triggering React re-renders
+  // Programmatic scroll-to-card helper with prefers-reduced-motion check
+  const goToCard = useCallback(
+    (targetIndex: number) => {
+      const clamped = Math.max(0, Math.min(totalCards - 1, targetIndex));
+      if (!scrollTrackRef.current) return;
+      const rect = scrollTrackRef.current.getBoundingClientRect();
+      const currentScroll = window.scrollY || document.documentElement.scrollTop;
+      const trackTop = rect.top + currentScroll;
+      const maxScroll = scrollTrackRef.current.offsetHeight - window.innerHeight;
+      if (maxScroll <= 0) return;
+      const targetScroll = trackTop + (clamped / (totalCards - 1)) * maxScroll;
+
+      const prefersReducedMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      window.scrollTo({
+        top: targetScroll,
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+      });
+    },
+    [totalCards]
+  );
+
+  // Directly apply transforms on DOM nodes without triggering React re-renders on scroll
   const applyTransforms = useCallback(
-    (floatVal: number) => {
-      const roundedIndex = Math.min(totalCards - 1, Math.max(0, Math.round(floatVal)));
+    (progressVal: number) => {
+      const clampedProgress = Math.max(0, Math.min(1, progressVal));
+      const currentFloat = clampedProgress * (totalCards - 1);
+      const roundedIndex = Math.min(totalCards - 1, Math.max(0, Math.round(currentFloat)));
 
       if (roundedIndex !== activeIndexRef.current) {
         activeIndexRef.current = roundedIndex;
@@ -160,7 +183,7 @@ export default function EventOverview() {
 
       cardRefs.current.forEach((cardEl, idx) => {
         if (!cardEl) return;
-        const diff = idx - floatVal;
+        const diff = idx - currentFloat;
         const { transform, opacity, zIndex, filter, pointerEvents } = calculateCardTransform(
           diff,
           isMobile
@@ -169,12 +192,10 @@ export default function EventOverview() {
         cardEl.style.transform = transform;
         cardEl.style.opacity = `${opacity}`;
         cardEl.style.zIndex = `${zIndex}`;
-        if (!isMobile) {
-          cardEl.style.filter = filter;
-        }
+        cardEl.style.filter = filter;
         cardEl.style.pointerEvents = pointerEvents;
 
-        if (Math.abs(diff) < 0.35) {
+        if (Math.abs(diff) < 0.45) {
           cardEl.classList.add("active-card");
         } else {
           cardEl.classList.remove("active-card");
@@ -184,55 +205,51 @@ export default function EventOverview() {
     [totalCards, isMobile]
   );
 
-  // Smooth animation to target card index
-  const animateTo = useCallback(
-    (targetIndex: number) => {
-      const clamped = Math.max(0, Math.min(totalCards - 1, targetIndex));
-      targetFloatRef.current = clamped;
-
-      if (animFrameRef.current !== null) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-
-      const step = () => {
-        const diff = targetFloatRef.current - currentFloatRef.current;
-        if (Math.abs(diff) < 0.005) {
-          currentFloatRef.current = targetFloatRef.current;
-          applyTransforms(currentFloatRef.current);
-          animFrameRef.current = null;
-          return;
-        }
-        // Smooth exponential approach (~60fps fluid easing)
-        currentFloatRef.current += diff * 0.18;
-        applyTransforms(currentFloatRef.current);
-        animFrameRef.current = requestAnimationFrame(step);
-      };
-      animFrameRef.current = requestAnimationFrame(step);
-    },
-    [totalCards, applyTransforms]
-  );
-
-  // Initialize transforms on mount and breakpoint change
+  // High-performance real-time bidirectional scroll synchronization engine
+  // Responds with 0ms latency to both downward and upward scrolling, reversing effortlessly
   useEffect(() => {
-    applyTransforms(currentFloatRef.current);
-  }, [applyTransforms]);
+    let ticking = false;
 
-  // Clean up animation frame on unmount
-  useEffect(() => {
-    return () => {
-      if (animFrameRef.current !== null) {
-        cancelAnimationFrame(animFrameRef.current);
+    const computeProgress = () => {
+      const track = scrollTrackRef.current;
+      if (!track) return 0;
+      const rect = track.getBoundingClientRect();
+      const trackHeight = track.offsetHeight;
+      const winHeight = window.innerHeight;
+      const maxScroll = trackHeight - winHeight;
+      if (maxScroll <= 0) return 0;
+
+      // rect.top is the distance from top of viewport to top of track
+      // When rect.top >= 0: progress = 0 (Card 0 centered, locked to top intro)
+      // When rect.top <= -maxScroll: progress = 1 (Card 5 centered, locked to bottom outro)
+      const p = -rect.top / maxScroll;
+      return Math.max(0, Math.min(1, p));
+    };
+
+    const update = () => {
+      const progress = computeProgress();
+      applyTransforms(progress);
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
       }
     };
-  }, []);
 
-  // Programmatic helper
-  const goToCard = useCallback(
-    (targetIndex: number) => {
-      animateTo(targetIndex);
-    },
-    [animateTo]
-  );
+    // Initial sync on mount and resize
+    update();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [applyTransforms]);
 
   // Touch Swipe Handlers for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -245,12 +262,11 @@ export default function EventOverview() {
     const deltaX = e.changedTouches[0].clientX - dragStartX.current;
     const deltaY = e.changedTouches[0].clientY - dragStartY.current;
 
-    // Detect horizontal swipe intent (prevent hijacking pure vertical page scroll)
-    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 0.8) {
+    if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY)) {
       if (deltaX < 0) {
-        animateTo(activeIndexRef.current + 1);
+        goToCard(activeIndex + 1);
       } else {
-        animateTo(activeIndexRef.current - 1);
+        goToCard(activeIndex - 1);
       }
     }
     dragStartX.current = null;
@@ -265,34 +281,14 @@ export default function EventOverview() {
   const handleMouseUp = (e: React.MouseEvent) => {
     if (dragStartX.current === null) return;
     const deltaX = e.clientX - dragStartX.current;
-    if (Math.abs(deltaX) > 45) {
+    if (Math.abs(deltaX) > 50) {
       if (deltaX < 0) {
-        animateTo(activeIndexRef.current + 1);
+        goToCard(activeIndex + 1);
       } else {
-        animateTo(activeIndexRef.current - 1);
+        goToCard(activeIndex - 1);
       }
     }
     dragStartX.current = null;
-  };
-
-  // Mouse wheel handler: cycle cards when hovering over arena, release to page scroll at boundaries
-  const handleWheel = (e: React.WheelEvent) => {
-    const now = performance.now();
-    if (now - lastWheelTime.current < 280) return;
-
-    if (e.deltaY > 30 || e.deltaX > 30) {
-      if (activeIndexRef.current < totalCards - 1) {
-        e.preventDefault();
-        lastWheelTime.current = now;
-        animateTo(activeIndexRef.current + 1);
-      }
-    } else if (e.deltaY < -30 || e.deltaX < -30) {
-      if (activeIndexRef.current > 0) {
-        e.preventDefault();
-        lastWheelTime.current = now;
-        animateTo(activeIndexRef.current - 1);
-      }
-    }
   };
 
   // 1-Click Copy Address Handler
@@ -302,13 +298,6 @@ export default function EventOverview() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2200);
     });
-  };
-
-  const handleScrollToDetails = () => {
-    const el = document.getElementById("explore-details");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
   };
 
   return (
@@ -357,47 +346,44 @@ export default function EventOverview() {
         </div>
 
         {/* Scroll Invitation Cue */}
-        <div
-          onClick={handleScrollToDetails}
-          className="mt-8 sm:mt-10 inline-flex items-center justify-center gap-2 text-xs font-mono text-[#A4B6BF]/80 hover:text-[#00C8E8] tracking-widest uppercase cursor-pointer transition-colors"
-        >
+        <div className="mt-10 sm:mt-12 flex items-center justify-center gap-2 text-xs font-mono text-[#A4B6BF]/80 tracking-widest uppercase">
           <span>EXPLORE 3D EVENT ARCHITECTURE</span>
           <ArrowDown className="w-4 h-4 text-[#00C8E8] animate-bounce" />
         </div>
       </div>
 
       {/* =========================================================================
-          PART 2: THE 3D COVERFLOW ARENA (Directly Accessible, Zero Dead Space)
-          Cards are 100% visible on entry, during scrolling, and fully interactive
+          PART 2: THE 3D COVERFLOW SCROLL ARENA (Pinned Viewport with Luxurious Space)
+          Zero overlap: cards have 100% of the stage to float, rotate, and recede
           ========================================================================= */}
-      <div id="explore-details" className="relative w-full max-w-6xl mx-auto flex flex-col items-center pt-2 sm:pt-6 pb-16 sm:pb-24 px-4 sm:px-6 z-20">
-        {/* Subtle Ambient Radial Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[400px] bg-gradient-to-b from-[#00C8E8]/10 via-[#8A2BE2]/08 to-transparent blur-[140px] pointer-events-none rounded-full -z-10" />
+      <div ref={scrollTrackRef} className="relative w-full h-[260vh] sm:h-[300vh]">
+        <div className="sticky top-0 h-[100dvh] w-full flex flex-col justify-between items-center pt-20 sm:pt-24 pb-6 sm:pb-8 px-4 sm:px-6 overflow-hidden z-20">
+          {/* Subtle Ambient Radial Glow */}
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[750px] h-[400px] bg-gradient-to-b from-[#00C8E8]/10 via-[#8A2BE2]/08 to-transparent blur-[140px] pointer-events-none rounded-full -z-10" />
 
-        {/* Minimal HUD Header for the 3D Stage */}
-        <div className="text-center z-10 w-full mb-4 sm:mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#07131C]/60 backdrop-blur-md border border-[#00C8E8]/30 text-[11px] font-mono text-[#8DEBFF] mb-1.5 shadow-[0_0_15px_rgba(0,200,232,0.15)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
-            <span className="tracking-widest uppercase">EVENT CORE // 3D TIMELINE & VENUE</span>
+          {/* Minimal HUD Header for the 3D Stage (Takes only ~50px, zero clutter) */}
+          <div className="text-center z-10 w-full pt-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#07131C]/60 backdrop-blur-md border border-[#00C8E8]/30 text-[11px] font-mono text-[#8DEBFF] mb-1 shadow-[0_0_15px_rgba(0,200,232,0.15)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
+              <span className="tracking-widest uppercase">EVENT CORE // 3D TIMELINE & VENUE</span>
+            </div>
+            <h3 className="font-['Space_Grotesk'] font-bold text-lg sm:text-2xl text-[#F3F8FA] tracking-tight uppercase">
+              EXPLORE EVENT DETAILS
+            </h3>
           </div>
-          <h3 className="font-['Space_Grotesk'] font-bold text-lg sm:text-2xl text-[#F3F8FA] tracking-tight uppercase">
-            EXPLORE EVENT DETAILS
-          </h3>
-        </div>
 
-        {/* -----------------------------------------------------------------------
-            3D CURVED ARC COVERFLOW CAROUSEL
-            Immediately visible below header: cards float, rotate, and curve with 0 clipping
-            ----------------------------------------------------------------------- */}
-        <div
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onWheel={handleWheel}
-          className="relative w-full max-w-5xl h-[360px] sm:h-[400px] flex items-center justify-center perspective-[1100px] sm:perspective-[1400px] select-none my-2 sm:my-4"
-          style={{ transformStyle: "preserve-3d" }}
-        >
+          {/* -----------------------------------------------------------------------
+              3D CURVED ARC COVERFLOW CAROUSEL
+              Ample vertical breathing room — no text colliding with the cards
+              ----------------------------------------------------------------------- */}
+          <div
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            className="relative w-full max-w-5xl flex-1 flex items-center justify-center perspective-[1100px] sm:perspective-[1400px] select-none my-auto"
+            style={{ transformStyle: "preserve-3d" }}
+          >
             {/* ---------------- CARD 0: 24 HOURS (Mission Core) ---------------- */}
             <div
               ref={(el) => {
@@ -412,10 +398,10 @@ export default function EventOverview() {
                   src="/assets/cards/coverflow-24h.webp"
                   alt="24 Hours Sprint Nebula"
                   decoding="async"
-                  className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover object-center opacity-70 group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#04080D_90%)]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111C]/95 via-[#06111C]/65 to-[#06111C]/35" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_rgba(6,17,28,0.7)_90%)]" />
               </div>
 
               {/* Card Header */}
@@ -426,7 +412,7 @@ export default function EventOverview() {
                     MISSION CORE // 24-HOUR SPRINT
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/10 text-[#00C8E8] border border-[#00C8E8]/30">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/15 text-[#00C8E8] border border-[#00C8E8]/35 font-semibold shadow-[0_0_10px_rgba(0,200,232,0.2)]">
                   NON-STOP
                 </span>
               </div>
@@ -476,7 +462,7 @@ export default function EventOverview() {
                   </svg>
 
                   <div className="flex items-baseline gap-2 relative z-10">
-                    <span className="font-['Space_Grotesk'] font-black text-6xl sm:text-7xl md:text-8xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#F3F8FA] via-[#F3F8FA] to-[#8DEBFF]/40 drop-shadow-[0_0_35px_rgba(0,200,232,0.35)]">
+                    <span className="font-['Space_Grotesk'] font-black text-6xl sm:text-7xl md:text-8xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#F3F8FA] via-[#F3F8FA] to-[#8DEBFF]/40 drop-shadow-[0_0_35px_rgba(0,200,232,0.45)]">
                       24
                     </span>
                     <span className="font-['Space_Grotesk'] font-bold text-xl sm:text-2xl text-[#00C8E8] tracking-widest uppercase">
@@ -489,7 +475,7 @@ export default function EventOverview() {
                   <h3 className="font-['Space_Grotesk'] font-bold text-sm sm:text-base text-[#F3F8FA] uppercase tracking-wide mb-1">
                     Non-Stop Innovation Marathon
                   </h3>
-                  <p className="text-xs text-[#A4B6BF] font-['Inter',sans-serif] leading-relaxed line-clamp-2">
+                  <p className="text-xs text-[#C2D7E5] font-['Inter',sans-serif] leading-relaxed line-clamp-2">
                     Ideate, architect, and ship high-impact prototypes before the clock hits zero.
                   </p>
                 </div>
@@ -501,7 +487,7 @@ export default function EventOverview() {
                   <Clock className="w-3.5 h-3.5 text-[#00C8E8]" />
                   DURATION // 24 HOURS
                 </span>
-                <span className="text-[#A4B6BF]">ROUND-THE-CLOCK</span>
+                <span className="text-[#C2D7E5] font-semibold">ROUND-THE-CLOCK</span>
               </div>
             </div>
 
@@ -520,10 +506,10 @@ export default function EventOverview() {
                   alt="HackIgnite Cybernetic Arena"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover object-center opacity-70 group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#04080D_90%)]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111C]/95 via-[#06111C]/65 to-[#06111C]/35" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_rgba(6,17,28,0.7)_90%)]" />
               </div>
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
@@ -532,29 +518,29 @@ export default function EventOverview() {
                     EVENT // EDITION 01
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/10 text-[#00C8E8] border border-[#00C8E8]/30">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/15 text-[#00C8E8] border border-[#00C8E8]/35 font-semibold shadow-[0_0_10px_rgba(0,200,232,0.2)]">
                   OFFICIAL
                 </span>
               </div>
 
               <div className="flex flex-col items-center justify-center my-auto py-2 text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#00C8E8]/20 to-[#8A2BE2]/20 border border-[#00C8E8]/40 flex items-center justify-center shadow-[0_0_25px_rgba(0,200,232,0.25)] mb-3">
-                  <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-[#00C8E8]" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#00C8E8]/25 to-[#8A2BE2]/25 border border-[#00C8E8]/50 flex items-center justify-center shadow-[0_0_25px_rgba(0,200,232,0.35)] mb-3">
+                  <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-[#00C8E8] drop-shadow-[0_0_10px_rgba(0,200,232,0.6)]" />
                 </div>
-                <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-[#F3F8FA] tracking-tight uppercase mb-1">
+                <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-[#FFFFFF] tracking-tight uppercase mb-1 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                   {EVENT_DETAILS.name}
                 </h3>
-                <p className="text-xs sm:text-sm text-[#00C8E8] font-mono mb-2 uppercase tracking-wider">
+                <p className="text-xs sm:text-sm text-[#8DEBFF] font-mono mb-2 uppercase tracking-wider font-semibold">
                   Inaugural National Innovation Sprint
                 </p>
-                <p className="text-xs text-[#A4B6BF] font-['Inter',sans-serif] leading-relaxed max-w-xs sm:max-w-sm line-clamp-2">
+                <p className="text-xs text-[#C2D7E5] font-['Inter',sans-serif] leading-relaxed max-w-xs sm:max-w-sm line-clamp-2">
                   Presented by {EVENT_DETAILS.department} at {EVENT_DETAILS.institution}.
                 </p>
               </div>
 
               <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
                 <span>STATUS // REGISTRATION OPEN</span>
-                <span className="text-[#A4B6BF]">TIER-1 ARENA</span>
+                <span className="text-[#C2D7E5] font-semibold">TIER-1 ARENA</span>
               </div>
             </div>
 
@@ -573,10 +559,10 @@ export default function EventOverview() {
                   alt="Podium Honors Crystal"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover object-center opacity-70 group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#04080D_90%)]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111C]/95 via-[#06111C]/65 to-[#06111C]/35" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_rgba(6,17,28,0.7)_90%)]" />
               </div>
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
@@ -585,7 +571,7 @@ export default function EventOverview() {
                     PODIUM // 5 RANKS
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#8A2BE2]/20 text-[#A78BFA] border border-[#8A2BE2]/40">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#8A2BE2]/25 text-[#DDD6FE] border border-[#8A2BE2]/50 font-semibold shadow-[0_0_10px_rgba(138,43,226,0.25)]">
                   AWARDS
                 </span>
               </div>
@@ -596,30 +582,30 @@ export default function EventOverview() {
                     <span
                       key={rank}
                       className={`px-2 py-1 rounded-md text-[11px] sm:text-xs font-mono font-bold border ${i === 0
-                          ? "bg-[#00C8E8]/20 border-[#00C8E8] text-[#8DEBFF] shadow-[0_0_12px_rgba(0,200,232,0.3)]"
+                          ? "bg-[#00C8E8]/25 border-[#00C8E8] text-[#FFFFFF] shadow-[0_0_15px_rgba(0,200,232,0.4)]"
                           : i === 1
-                            ? "bg-[#8A2BE2]/20 border-[#8A2BE2] text-[#DDD6FE]"
-                            : "bg-white/5 border-white/10 text-white/70"
+                            ? "bg-[#8A2BE2]/25 border-[#8A2BE2] text-[#F3F8FA] shadow-[0_0_15px_rgba(138,43,226,0.35)]"
+                            : "bg-[#0B1E2E]/85 border-[#00C8E8]/30 text-[#8DEBFF]"
                         }`}
                     >
                       {rank}
                     </span>
                   ))}
                 </div>
-                <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-[#F3F8FA] tracking-tight uppercase mb-1">
+                <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-[#FFFFFF] tracking-tight uppercase mb-1 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                   {EVENT_DETAILS.competitionHighlight}
                 </h3>
-                <p className="text-xs sm:text-sm text-[#00C8E8] font-mono mb-2 uppercase tracking-wider font-bold">
+                <p className="text-xs sm:text-sm text-[#00C8E8] font-mono mb-2 uppercase tracking-wider font-bold drop-shadow-[0_0_12px_rgba(0,200,232,0.4)]">
                   {EVENT_DETAILS.prizePool} Total Prize Pool
                 </p>
-                <p className="text-xs text-[#A4B6BF] font-['Inter',sans-serif] leading-relaxed max-w-xs sm:max-w-sm line-clamp-2">
+                <p className="text-xs text-[#C2D7E5] font-['Inter',sans-serif] leading-relaxed max-w-xs sm:max-w-sm line-clamp-2">
                   Five distinct podium placements rewarding standout technological engineering, viable product design, and pitch execution.
                 </p>
               </div>
 
               <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
                 <span>HONORS // {EVENT_DETAILS.prizePool} PRIZE POOL</span>
-                <span className="text-[#A4B6BF]">RIGOROUS JURY</span>
+                <span className="text-[#C2D7E5] font-semibold">RIGOROUS JURY</span>
               </div>
             </div>
 
@@ -638,10 +624,10 @@ export default function EventOverview() {
                   alt="Launch Window Stargate"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover object-center opacity-70 group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#04080D_90%)]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111C]/95 via-[#06111C]/65 to-[#06111C]/35" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_rgba(6,17,28,0.7)_90%)]" />
               </div>
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
@@ -650,34 +636,34 @@ export default function EventOverview() {
                     TIMELINE // 2-DAY SPRINT
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/10 text-[#00C8E8] border border-[#00C8E8]/30">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/15 text-[#00C8E8] border border-[#00C8E8]/35 font-semibold shadow-[0_0_10px_rgba(0,200,232,0.2)]">
                   DECEMBER 2026
                 </span>
               </div>
 
               <div className="flex flex-col items-center justify-center my-auto py-2 text-center w-full">
-                <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl md:text-4xl text-[#F3F8FA] tracking-tight uppercase mb-3">
+                <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl md:text-4xl text-[#FFFFFF] tracking-tight uppercase mb-3 drop-shadow-[0_0_20px_rgba(0,200,232,0.3)]">
                   {EVENT_DETAILS.dates}
                 </h3>
 
                 {/* Dual Day Timeline Chips */}
                 <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
-                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left">
+                  <div className="p-2.5 rounded-xl bg-[#0A2033]/85 border border-[#00C8E8]/35 shadow-[0_4px_16px_rgba(0,0,0,0.4)] text-left">
                     <div className="text-[10px] font-mono text-[#00C8E8] font-bold mb-0.5">DAY 01 // 12 DEC</div>
-                    <div className="text-xs font-semibold text-[#F3F8FA]">Sprint Launch</div>
-                    <div className="text-[10px] text-[#A4B6BF] mt-0.5">Kickoff & Architecture</div>
+                    <div className="text-xs font-semibold text-[#FFFFFF]">Sprint Launch</div>
+                    <div className="text-[10px] text-[#C2D7E5] mt-0.5">Kickoff & Architecture</div>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left">
-                    <div className="text-[10px] font-mono text-[#8A2BE2] font-bold mb-0.5">DAY 02 // 13 DEC</div>
-                    <div className="text-xs font-semibold text-[#F3F8FA]">Grand Finale</div>
-                    <div className="text-[10px] text-[#A4B6BF] mt-0.5">Demos & Valedictory</div>
+                  <div className="p-2.5 rounded-xl bg-[#0A2033]/85 border border-[#8A2BE2]/40 shadow-[0_4px_16px_rgba(0,0,0,0.4)] text-left">
+                    <div className="text-[10px] font-mono text-[#A78BFA] font-bold mb-0.5">DAY 02 // 13 DEC</div>
+                    <div className="text-xs font-semibold text-[#FFFFFF]">Grand Finale</div>
+                    <div className="text-[10px] text-[#C2D7E5] mt-0.5">Demos & Valedictory</div>
                   </div>
                 </div>
               </div>
 
               <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
                 <span>WEEKEND // SAT & SUN</span>
-                <span className="text-[#A4B6BF]">48H IMMERSION</span>
+                <span className="text-[#C2D7E5] font-semibold">48H IMMERSION</span>
               </div>
             </div>
 
@@ -696,10 +682,10 @@ export default function EventOverview() {
                   alt="JCET Hubballi Ground Station"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover object-center opacity-70 group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#04080D_90%)]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111C]/95 via-[#06111C]/65 to-[#06111C]/35" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_rgba(6,17,28,0.7)_90%)]" />
               </div>
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
@@ -708,35 +694,35 @@ export default function EventOverview() {
                     GROUND STATION // VENUE
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/10 text-[#00C8E8] border border-[#00C8E8]/30">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/15 text-[#00C8E8] border border-[#00C8E8]/35 font-semibold shadow-[0_0_10px_rgba(0,200,232,0.2)]">
                   HUBBALLI
                 </span>
               </div>
 
               <div className="flex flex-col items-center justify-center my-auto py-2 text-center w-full">
                 <div className="relative mb-2">
-                  <div className="w-12 h-12 rounded-full bg-[#00C8E8]/15 border border-[#00C8E8]/40 flex items-center justify-center text-[#8DEBFF]">
+                  <div className="w-12 h-12 rounded-full bg-[#00C8E8]/20 border border-[#00C8E8]/50 flex items-center justify-center text-[#8DEBFF] shadow-[0_0_20px_rgba(0,200,232,0.3)]">
                     <MapPin className="w-6 h-6 text-[#00C8E8]" />
                   </div>
                   <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#00C8E8] animate-ping" />
                 </div>
 
-                <h3 className="font-['Space_Grotesk'] font-bold text-xl sm:text-2xl text-[#F3F8FA] tracking-tight uppercase mb-1">
+                <h3 className="font-['Space_Grotesk'] font-bold text-xl sm:text-2xl text-[#FFFFFF] tracking-tight uppercase mb-1 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                   {EVENT_DETAILS.venue}
                 </h3>
-                <p className="text-[11px] text-[#A4B6BF] max-w-xs leading-relaxed mb-3">
+                <p className="text-[11px] text-[#C2D7E5] max-w-xs leading-relaxed mb-3">
                   {EVENT_DETAILS.address}
                 </p>
 
                 {/* Interactive Copy Address Button */}
                 <button
                   onClick={handleCopyAddress}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-[#00C8E8]/15 border border-white/15 hover:border-[#00C8E8]/40 text-xs font-mono text-[#8DEBFF] transition-all"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2033]/90 hover:bg-[#00C8E8]/20 border border-[#00C8E8]/35 hover:border-[#00C8E8]/60 text-xs font-mono text-[#8DEBFF] shadow-[0_0_12px_rgba(0,200,232,0.15)] transition-all"
                 >
                   {copied ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400">Address Copied!</span>
+                      <span className="text-emerald-400 font-semibold">Address Copied!</span>
                     </>
                   ) : (
                     <>
@@ -749,7 +735,7 @@ export default function EventOverview() {
 
               <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
                 <span>COORDS // 15.3647° N, 75.1240° E</span>
-                <span className="text-[#A4B6BF]">KARNATAKA</span>
+                <span className="text-[#C2D7E5] font-semibold">KARNATAKA</span>
               </div>
             </div>
 
@@ -768,10 +754,10 @@ export default function EventOverview() {
                   alt="Team Access Aurora"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover object-center opacity-45 group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover object-center opacity-70 group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#04080D] via-[#07131C]/75 to-[#07131C]/50" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#04080D_90%)]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111C]/95 via-[#06111C]/65 to-[#06111C]/35" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_rgba(6,17,28,0.7)_90%)]" />
               </div>
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
@@ -780,106 +766,106 @@ export default function EventOverview() {
                     REGISTRATION // ACCESS PASS
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-semibold shadow-[0_0_10px_rgba(16,185,129,0.25)]">
                   TEAM PASS
                 </span>
               </div>
 
               <div className="flex flex-col items-center justify-center my-auto py-2 text-center w-full">
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="font-['Space_Grotesk'] font-black text-4xl sm:text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-[#00C8E8] via-[#8DEBFF] to-[#8A2BE2] drop-shadow-[0_0_25px_rgba(0,200,232,0.35)]">
+                  <span className="font-['Space_Grotesk'] font-black text-4xl sm:text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-[#00C8E8] via-[#8DEBFF] to-[#A78BFA] drop-shadow-[0_0_30px_rgba(0,200,232,0.4)]">
                     {EVENT_DETAILS.registrationFeeAmount}
                   </span>
                   <span className="font-mono text-sm sm:text-base text-[#00C8E8] font-bold">
                     / TEAM
                   </span>
                 </div>
-                <p className="text-xs text-[#A4B6BF] mb-3">Flat fee for up to 4 innovators</p>
+                <p className="text-xs text-[#C2D7E5] mb-3">Flat fee for up to 4 innovators</p>
 
                 {/* Perks Grid */}
-                <div className="grid grid-cols-2 gap-2 text-left w-full max-w-xs text-[11px] text-[#F3F8FA]/90">
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white/5">
+                <div className="grid grid-cols-2 gap-2 text-left w-full max-w-xs text-[11px] text-[#F3F8FA]">
+                  <div className="flex items-center gap-1.5 p-2 rounded-lg bg-[#0A2033]/85 border border-[#00C8E8]/25 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
                     <Zap className="w-3.5 h-3.5 text-[#00C8E8] shrink-0" />
-                    <span>24H Meals & Fuel</span>
+                    <span className="font-medium">24H Meals & Fuel</span>
                   </div>
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white/5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#8A2BE2] shrink-0" />
-                    <span>Mentorship & Swag</span>
+                  <div className="flex items-center gap-1.5 p-2 rounded-lg bg-[#0A2033]/85 border border-[#8A2BE2]/30 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+                    <Sparkles className="w-3.5 h-3.5 text-[#A78BFA] shrink-0" />
+                    <span className="font-medium">Mentorship & Swag</span>
                   </div>
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white/5">
+                  <div className="flex items-center gap-1.5 p-2 rounded-lg bg-[#0A2033]/85 border border-[#00C8E8]/25 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
                     <Clock className="w-3.5 h-3.5 text-[#00C8E8] shrink-0" />
-                    <span>Gigabit Fiber WiFi</span>
+                    <span className="font-medium">Gigabit Fiber WiFi</span>
                   </div>
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white/5">
-                    <Award className="w-3.5 h-3.5 text-[#8A2BE2] shrink-0" />
-                    <span>Official Certificates</span>
+                  <div className="flex items-center gap-1.5 p-2 rounded-lg bg-[#0A2033]/85 border border-[#8A2BE2]/30 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+                    <Award className="w-3.5 h-3.5 text-[#A78BFA] shrink-0" />
+                    <span className="font-medium">Official Certificates</span>
                   </div>
                 </div>
               </div>
 
               <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
                 <span>PASS // ALL-INCLUSIVE</span>
-                <span className="text-emerald-400">NO HIDDEN CHARGES</span>
+                <span className="text-emerald-400 font-semibold">NO HIDDEN CHARGES</span>
               </div>
             </div>
           </div>
 
-        {/* -----------------------------------------------------------------------
-            BOTTOM: NAVIGATION HUD, DOTS & SCROLL CUE
-            Matches reference design with glowing active indicators & counter
-            ----------------------------------------------------------------------- */}
-        <div className="w-full max-w-3xl mx-auto flex flex-col items-center gap-2 sm:gap-3 z-10 mt-6 sm:mt-8">
-          {/* Controls Bar */}
-          <div className="flex items-center justify-between w-full px-4 sm:px-8">
-            {/* Prev Chevron */}
-            <button
-              onClick={() => goToCard(activeIndex - 1)}
-              disabled={activeIndex === 0}
-              aria-label="Previous card"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#07131C]/70 backdrop-blur-md border border-[#00C8E8]/30 hover:border-[#00C8E8] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-[#8DEBFF] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.15)] cursor-pointer"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+          {/* -----------------------------------------------------------------------
+              BOTTOM: NAVIGATION HUD, DOTS & SCROLL CUE
+              Matches reference video with glowing active indicators & counter
+              ----------------------------------------------------------------------- */}
+          <div className="w-full max-w-3xl mx-auto flex flex-col items-center gap-2 sm:gap-3 z-10 pb-1 sm:pb-2">
+            {/* Controls Bar */}
+            <div className="flex items-center justify-between w-full px-4 sm:px-8">
+              {/* Prev Chevron */}
+              <button
+                onClick={() => goToCard(activeIndex - 1)}
+                disabled={activeIndex === 0}
+                aria-label="Previous card"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#07131C]/70 backdrop-blur-md border border-[#00C8E8]/30 hover:border-[#00C8E8] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-[#8DEBFF] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.15)]"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
 
-            {/* Pagination Dots */}
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              {[0, 1, 2, 3, 4, 5].map((idx) => {
-                const isActive = activeIndex === idx;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => goToCard(idx)}
-                    aria-label={`Go to card ${idx + 1}`}
-                    className={`transition-all duration-300 cursor-pointer ${
-                      isActive
-                        ? "w-7 sm:w-8 h-2 sm:h-2.5 rounded-full bg-gradient-to-r from-[#00C8E8] to-[#8A2BE2] shadow-[0_0_12px_rgba(0,200,232,0.6)]"
-                        : "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white/20 hover:bg-white/40"
-                    }`}
-                  />
-                );
-              })}
+              {/* Pagination Dots */}
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                {[0, 1, 2, 3, 4, 5].map((idx) => {
+                  const isActive = activeIndex === idx;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => goToCard(idx)}
+                      aria-label={`Go to card ${idx + 1}`}
+                      className={`transition-all duration-300 ${isActive
+                          ? "w-7 sm:w-8 h-2 sm:h-2.5 rounded-full bg-gradient-to-r from-[#00C8E8] to-[#8A2BE2] shadow-[0_0_12px_rgba(0,200,232,0.6)]"
+                          : "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white/20 hover:bg-white/40"
+                        }`}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Next Chevron */}
+              <button
+                onClick={() => goToCard(activeIndex + 1)}
+                disabled={activeIndex === totalCards - 1}
+                aria-label="Next card"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#07131C]/70 backdrop-blur-md border border-[#00C8E8]/30 hover:border-[#00C8E8] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-[#8DEBFF] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.15)]"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
 
-            {/* Next Chevron */}
-            <button
-              onClick={() => goToCard(activeIndex + 1)}
-              disabled={activeIndex === totalCards - 1}
-              aria-label="Next card"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#07131C]/70 backdrop-blur-md border border-[#00C8E8]/30 hover:border-[#00C8E8] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-[#8DEBFF] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.15)] cursor-pointer"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Micro Telemetry Cue */}
-          <div className="flex items-center justify-between w-full px-6 sm:px-10 text-[10px] sm:text-xs font-mono text-[#A4B6BF]/70">
-            <span>[ 0{activeIndex + 1} // 06 ]</span>
-            <span className="hidden sm:inline-block tracking-wider uppercase">
-              SCROLL DOWN TO ADVANCE CARDS • DRAG OR TAP TO NAVIGATE
-            </span>
-            <span className="sm:hidden tracking-wider uppercase">
-              SWIPE TO BROWSE
-            </span>
+            {/* Micro Telemetry Cue */}
+            <div className="flex items-center justify-between w-full px-6 sm:px-10 text-[10px] sm:text-xs font-mono text-[#A4B6BF]/70">
+              <span>[ 0{activeIndex + 1} // 06 ]</span>
+              <span className="hidden sm:inline-block tracking-wider uppercase">
+                SCROLL DOWN TO ADVANCE CARDS • DRAG OR TAP TO NAVIGATE
+              </span>
+              <span className="sm:hidden tracking-wider uppercase">
+                SWIPE TO BROWSE
+              </span>
+            </div>
           </div>
         </div>
       </div>

@@ -283,24 +283,26 @@
   background: linear-gradient(135deg, rgba(0, 200, 232, 0.85) 0%, rgba(138, 43, 226, 0.75) 100%);
 }
 
-/* 3D Curved Arc Coverflow Card with 1px Cyan-to-Neon-Purple Border */
+/* 3D Curved Arc Coverflow Card - High Contrast Cosmic Glass & Ambient Illumination */
 .coverflow-3d-card {
   position: absolute;
-  background: rgba(7, 19, 28, 0.42);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  background: linear-gradient(150deg, rgba(12, 28, 44, 0.82) 0%, rgba(7, 18, 30, 0.92) 100%);
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
   border-radius: 1.25rem;
-  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.85), inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.88), 0 0 24px rgba(0, 200, 232, 0.14), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
   will-change: transform, opacity;
   transform-style: preserve-3d;
   backface-visibility: hidden;
+  transition: box-shadow 0.35s ease, border-color 0.35s ease;
 }
 
 @media (max-width: 768px) {
   .coverflow-3d-card {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    background: rgba(7, 19, 28, 0.82);
+    background: linear-gradient(150deg, rgba(14, 30, 48, 0.94) 0%, rgba(8, 19, 32, 0.97) 100%);
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.9), 0 0 18px rgba(0, 200, 232, 0.16), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
   }
 
   .glass-bento-card,
@@ -316,21 +318,21 @@
   position: absolute;
   inset: 0;
   border-radius: 1.25rem;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(0, 200, 232, 0.5) 0%, rgba(138, 43, 226, 0.42) 100%);
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(0, 200, 232, 0.65) 0%, rgba(138, 43, 226, 0.48) 55%, rgba(0, 200, 232, 0.4) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  transition: background 0.3s ease;
+  transition: background 0.35s ease, opacity 0.35s ease;
 }
 
 .coverflow-3d-card.active-card {
-  box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 200, 232, 0.22), 0 0 45px rgba(138, 43, 226, 0.18);
+  box-shadow: 0 26px 65px -10px rgba(0, 0, 0, 0.92), 0 0 38px rgba(0, 200, 232, 0.32), 0 0 52px rgba(138, 43, 226, 0.22), inset 0 1px 0 0 rgba(0, 200, 232, 0.4);
 }
 
 .coverflow-3d-card.active-card::before {
-  background: linear-gradient(135deg, rgba(0, 200, 232, 0.9) 0%, rgba(138, 43, 226, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(0, 200, 232, 1) 0%, rgba(142, 235, 255, 0.9) 40%, rgba(138, 43, 226, 0.95) 100%);
 }
 
 /* =========================================================================
