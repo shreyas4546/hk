@@ -15,7 +15,6 @@ import {
   Zap,
   ArrowDown,
 } from "lucide-react";
-import { useScroll, useSpring } from "motion/react";
 import { EVENT_DETAILS } from "../data/eventData";
 import NorrisHeadline from "./ui/norris-headline";
 
@@ -126,27 +125,16 @@ export default function EventOverview() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  const scrollTrackRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const activeIndexRef = useRef(0);
-  const isVisibleRef = useRef(true);
+  const currentFloatRef = useRef(0);
+  const targetFloatRef = useRef(0);
+  const animFrameRef = useRef<number | null>(null);
+  const lastWheelTime = useRef(0);
 
   // Drag tracking state
   const dragStartX = useRef<number | null>(null);
   const dragStartY = useRef<number | null>(null);
-
-  // Motion scroll progress hooks attached specifically to the 3D scroll track
-  const { scrollYProgress } = useScroll({
-    target: scrollTrackRef,
-    offset: ["start start", "end end"],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 220,
-    damping: 28,
-    mass: 0.4,
-    restDelta: 0.0001,
-  });
 
   // Responsive breakpoint check
   useEffect(() => {
@@ -160,30 +148,10 @@ export default function EventOverview() {
 
   const totalCards = 6;
 
-  // Programmatic scroll-to-card helper
-  const goToCard = useCallback(
-    (targetIndex: number) => {
-      const clamped = Math.max(0, Math.min(totalCards - 1, targetIndex));
-      if (!scrollTrackRef.current) return;
-      const rect = scrollTrackRef.current.getBoundingClientRect();
-      const currentScroll = window.scrollY || document.documentElement.scrollTop;
-      const trackTop = rect.top + currentScroll;
-      const maxScroll = scrollTrackRef.current.offsetHeight - window.innerHeight;
-      if (maxScroll <= 0) return;
-      const targetScroll = trackTop + (clamped / (totalCards - 1)) * maxScroll;
-      window.scrollTo({
-        top: targetScroll,
-        behavior: "smooth",
-      });
-    },
-    [totalCards]
-  );
-
-  // Directly apply transforms on DOM nodes without triggering React re-renders on scroll
+  // Directly apply transforms on DOM nodes without triggering React re-renders
   const applyTransforms = useCallback(
-    (progressVal: number) => {
-      const currentFloat = progressVal * (totalCards - 1);
-      const roundedIndex = Math.min(totalCards - 1, Math.max(0, Math.round(currentFloat)));
+    (floatVal: number) => {
+      const roundedIndex = Math.min(totalCards - 1, Math.max(0, Math.round(floatVal)));
 
       if (roundedIndex !== activeIndexRef.current) {
         activeIndexRef.current = roundedIndex;
@@ -192,7 +160,7 @@ export default function EventOverview() {
 
       cardRefs.current.forEach((cardEl, idx) => {
         if (!cardEl) return;
-        const diff = idx - currentFloat;
+        const diff = idx - floatVal;
         const { transform, opacity, zIndex, filter, pointerEvents } = calculateCardTransform(
           diff,
           isMobile
@@ -216,37 +184,55 @@ export default function EventOverview() {
     [totalCards, isMobile]
   );
 
-  // Viewport intersection observer to pause transforms when 3D track is offscreen
-  useEffect(() => {
-    const track = scrollTrackRef.current;
-    if (!track || typeof IntersectionObserver === "undefined") return;
+  // Smooth animation to target card index
+  const animateTo = useCallback(
+    (targetIndex: number) => {
+      const clamped = Math.max(0, Math.min(totalCards - 1, targetIndex));
+      targetFloatRef.current = clamped;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          isVisibleRef.current = entry.isIntersecting;
-          if (entry.isIntersecting) {
-            applyTransforms(smoothProgress.get());
-          }
-        });
-      },
-      { rootMargin: "250px 0px 250px 0px", threshold: 0 }
-    );
-
-    observer.observe(track);
-    return () => observer.disconnect();
-  }, [smoothProgress, applyTransforms]);
-
-  // Subscribe to smooth motion scroll spring
-  useEffect(() => {
-    applyTransforms(smoothProgress.get());
-    const unsubscribe = smoothProgress.on("change", (latest) => {
-      if (isVisibleRef.current) {
-        applyTransforms(latest);
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
       }
-    });
-    return () => unsubscribe();
-  }, [smoothProgress, applyTransforms]);
+
+      const step = () => {
+        const diff = targetFloatRef.current - currentFloatRef.current;
+        if (Math.abs(diff) < 0.005) {
+          currentFloatRef.current = targetFloatRef.current;
+          applyTransforms(currentFloatRef.current);
+          animFrameRef.current = null;
+          return;
+        }
+        // Smooth exponential approach (~60fps fluid easing)
+        currentFloatRef.current += diff * 0.18;
+        applyTransforms(currentFloatRef.current);
+        animFrameRef.current = requestAnimationFrame(step);
+      };
+      animFrameRef.current = requestAnimationFrame(step);
+    },
+    [totalCards, applyTransforms]
+  );
+
+  // Initialize transforms on mount and breakpoint change
+  useEffect(() => {
+    applyTransforms(currentFloatRef.current);
+  }, [applyTransforms]);
+
+  // Clean up animation frame on unmount
+  useEffect(() => {
+    return () => {
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+    };
+  }, []);
+
+  // Programmatic helper
+  const goToCard = useCallback(
+    (targetIndex: number) => {
+      animateTo(targetIndex);
+    },
+    [animateTo]
+  );
 
   // Touch Swipe Handlers for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -259,11 +245,12 @@ export default function EventOverview() {
     const deltaX = e.changedTouches[0].clientX - dragStartX.current;
     const deltaY = e.changedTouches[0].clientY - dragStartY.current;
 
-    if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Detect horizontal swipe intent (prevent hijacking pure vertical page scroll)
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 0.8) {
       if (deltaX < 0) {
-        goToCard(activeIndex + 1);
+        animateTo(activeIndexRef.current + 1);
       } else {
-        goToCard(activeIndex - 1);
+        animateTo(activeIndexRef.current - 1);
       }
     }
     dragStartX.current = null;
@@ -278,14 +265,34 @@ export default function EventOverview() {
   const handleMouseUp = (e: React.MouseEvent) => {
     if (dragStartX.current === null) return;
     const deltaX = e.clientX - dragStartX.current;
-    if (Math.abs(deltaX) > 50) {
+    if (Math.abs(deltaX) > 45) {
       if (deltaX < 0) {
-        goToCard(activeIndex + 1);
+        animateTo(activeIndexRef.current + 1);
       } else {
-        goToCard(activeIndex - 1);
+        animateTo(activeIndexRef.current - 1);
       }
     }
     dragStartX.current = null;
+  };
+
+  // Mouse wheel handler: cycle cards when hovering over arena, release to page scroll at boundaries
+  const handleWheel = (e: React.WheelEvent) => {
+    const now = performance.now();
+    if (now - lastWheelTime.current < 280) return;
+
+    if (e.deltaY > 30 || e.deltaX > 30) {
+      if (activeIndexRef.current < totalCards - 1) {
+        e.preventDefault();
+        lastWheelTime.current = now;
+        animateTo(activeIndexRef.current + 1);
+      }
+    } else if (e.deltaY < -30 || e.deltaX < -30) {
+      if (activeIndexRef.current > 0) {
+        e.preventDefault();
+        lastWheelTime.current = now;
+        animateTo(activeIndexRef.current - 1);
+      }
+    }
   };
 
   // 1-Click Copy Address Handler
@@ -295,6 +302,13 @@ export default function EventOverview() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2200);
     });
+  };
+
+  const handleScrollToDetails = () => {
+    const el = document.getElementById("explore-details");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   return (
@@ -343,44 +357,47 @@ export default function EventOverview() {
         </div>
 
         {/* Scroll Invitation Cue */}
-        <div className="mt-10 sm:mt-12 flex items-center justify-center gap-2 text-xs font-mono text-[#A4B6BF]/80 tracking-widest uppercase">
+        <div
+          onClick={handleScrollToDetails}
+          className="mt-8 sm:mt-10 inline-flex items-center justify-center gap-2 text-xs font-mono text-[#A4B6BF]/80 hover:text-[#00C8E8] tracking-widest uppercase cursor-pointer transition-colors"
+        >
           <span>EXPLORE 3D EVENT ARCHITECTURE</span>
           <ArrowDown className="w-4 h-4 text-[#00C8E8] animate-bounce" />
         </div>
       </div>
 
       {/* =========================================================================
-          PART 2: THE 3D COVERFLOW SCROLL ARENA (Pinned Viewport with Luxurious Space)
-          Zero overlap: cards have 100% of the stage to float, rotate, and recede
+          PART 2: THE 3D COVERFLOW ARENA (Directly Accessible, Zero Dead Space)
+          Cards are 100% visible on entry, during scrolling, and fully interactive
           ========================================================================= */}
-      <div ref={scrollTrackRef} className="relative w-full h-[260vh] sm:h-[300vh]">
-        <div className="sticky top-0 h-[100dvh] w-full flex flex-col justify-between items-center pt-20 sm:pt-24 pb-6 sm:pb-8 px-4 sm:px-6 overflow-hidden z-20">
-          {/* Subtle Ambient Radial Glow */}
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[750px] h-[400px] bg-gradient-to-b from-[#00C8E8]/10 via-[#8A2BE2]/08 to-transparent blur-[140px] pointer-events-none rounded-full -z-10" />
+      <div id="explore-details" className="relative w-full max-w-6xl mx-auto flex flex-col items-center pt-2 sm:pt-6 pb-16 sm:pb-24 px-4 sm:px-6 z-20">
+        {/* Subtle Ambient Radial Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[400px] bg-gradient-to-b from-[#00C8E8]/10 via-[#8A2BE2]/08 to-transparent blur-[140px] pointer-events-none rounded-full -z-10" />
 
-          {/* Minimal HUD Header for the 3D Stage (Takes only ~50px, zero clutter) */}
-          <div className="text-center z-10 w-full pt-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#07131C]/60 backdrop-blur-md border border-[#00C8E8]/30 text-[11px] font-mono text-[#8DEBFF] mb-1 shadow-[0_0_15px_rgba(0,200,232,0.15)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
-              <span className="tracking-widest uppercase">EVENT CORE // 3D TIMELINE & VENUE</span>
-            </div>
-            <h3 className="font-['Space_Grotesk'] font-bold text-lg sm:text-2xl text-[#F3F8FA] tracking-tight uppercase">
-              EXPLORE EVENT DETAILS
-            </h3>
+        {/* Minimal HUD Header for the 3D Stage */}
+        <div className="text-center z-10 w-full mb-4 sm:mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#07131C]/60 backdrop-blur-md border border-[#00C8E8]/30 text-[11px] font-mono text-[#8DEBFF] mb-1.5 shadow-[0_0_15px_rgba(0,200,232,0.15)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
+            <span className="tracking-widest uppercase">EVENT CORE // 3D TIMELINE & VENUE</span>
           </div>
+          <h3 className="font-['Space_Grotesk'] font-bold text-lg sm:text-2xl text-[#F3F8FA] tracking-tight uppercase">
+            EXPLORE EVENT DETAILS
+          </h3>
+        </div>
 
-          {/* -----------------------------------------------------------------------
-              3D CURVED ARC COVERFLOW CAROUSEL
-              Ample vertical breathing room — no text colliding with the cards
-              ----------------------------------------------------------------------- */}
-          <div
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            className="relative w-full max-w-5xl flex-1 flex items-center justify-center perspective-[1100px] sm:perspective-[1400px] select-none my-auto"
-            style={{ transformStyle: "preserve-3d" }}
-          >
+        {/* -----------------------------------------------------------------------
+            3D CURVED ARC COVERFLOW CAROUSEL
+            Immediately visible below header: cards float, rotate, and curve with 0 clipping
+            ----------------------------------------------------------------------- */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onWheel={handleWheel}
+          className="relative w-full max-w-5xl h-[360px] sm:h-[400px] flex items-center justify-center perspective-[1100px] sm:perspective-[1400px] select-none my-2 sm:my-4"
+          style={{ transformStyle: "preserve-3d" }}
+        >
             {/* ---------------- CARD 0: 24 HOURS (Mission Core) ---------------- */}
             <div
               ref={(el) => {
@@ -807,62 +824,62 @@ export default function EventOverview() {
             </div>
           </div>
 
-          {/* -----------------------------------------------------------------------
-              BOTTOM: NAVIGATION HUD, DOTS & SCROLL CUE
-              Matches reference video with glowing active indicators & counter
-              ----------------------------------------------------------------------- */}
-          <div className="w-full max-w-3xl mx-auto flex flex-col items-center gap-2 sm:gap-3 z-10 pb-1 sm:pb-2">
-            {/* Controls Bar */}
-            <div className="flex items-center justify-between w-full px-4 sm:px-8">
-              {/* Prev Chevron */}
-              <button
-                onClick={() => goToCard(activeIndex - 1)}
-                disabled={activeIndex === 0}
-                aria-label="Previous card"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#07131C]/70 backdrop-blur-md border border-[#00C8E8]/30 hover:border-[#00C8E8] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-[#8DEBFF] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.15)]"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
+        {/* -----------------------------------------------------------------------
+            BOTTOM: NAVIGATION HUD, DOTS & SCROLL CUE
+            Matches reference design with glowing active indicators & counter
+            ----------------------------------------------------------------------- */}
+        <div className="w-full max-w-3xl mx-auto flex flex-col items-center gap-2 sm:gap-3 z-10 mt-6 sm:mt-8">
+          {/* Controls Bar */}
+          <div className="flex items-center justify-between w-full px-4 sm:px-8">
+            {/* Prev Chevron */}
+            <button
+              onClick={() => goToCard(activeIndex - 1)}
+              disabled={activeIndex === 0}
+              aria-label="Previous card"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#07131C]/70 backdrop-blur-md border border-[#00C8E8]/30 hover:border-[#00C8E8] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-[#8DEBFF] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.15)] cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
 
-              {/* Pagination Dots */}
-              <div className="flex items-center gap-2 sm:gap-2.5">
-                {[0, 1, 2, 3, 4, 5].map((idx) => {
-                  const isActive = activeIndex === idx;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => goToCard(idx)}
-                      aria-label={`Go to card ${idx + 1}`}
-                      className={`transition-all duration-300 ${isActive
-                          ? "w-7 sm:w-8 h-2 sm:h-2.5 rounded-full bg-gradient-to-r from-[#00C8E8] to-[#8A2BE2] shadow-[0_0_12px_rgba(0,200,232,0.6)]"
-                          : "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white/20 hover:bg-white/40"
-                        }`}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Next Chevron */}
-              <button
-                onClick={() => goToCard(activeIndex + 1)}
-                disabled={activeIndex === totalCards - 1}
-                aria-label="Next card"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#07131C]/70 backdrop-blur-md border border-[#00C8E8]/30 hover:border-[#00C8E8] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-[#8DEBFF] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.15)]"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+            {/* Pagination Dots */}
+            <div className="flex items-center gap-2 sm:gap-2.5">
+              {[0, 1, 2, 3, 4, 5].map((idx) => {
+                const isActive = activeIndex === idx;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => goToCard(idx)}
+                    aria-label={`Go to card ${idx + 1}`}
+                    className={`transition-all duration-300 cursor-pointer ${
+                      isActive
+                        ? "w-7 sm:w-8 h-2 sm:h-2.5 rounded-full bg-gradient-to-r from-[#00C8E8] to-[#8A2BE2] shadow-[0_0_12px_rgba(0,200,232,0.6)]"
+                        : "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white/20 hover:bg-white/40"
+                    }`}
+                  />
+                );
+              })}
             </div>
 
-            {/* Micro Telemetry Cue */}
-            <div className="flex items-center justify-between w-full px-6 sm:px-10 text-[10px] sm:text-xs font-mono text-[#A4B6BF]/70">
-              <span>[ 0{activeIndex + 1} // 06 ]</span>
-              <span className="hidden sm:inline-block tracking-wider uppercase">
-                SCROLL DOWN TO ADVANCE CARDS • DRAG OR TAP TO NAVIGATE
-              </span>
-              <span className="sm:hidden tracking-wider uppercase">
-                SWIPE TO BROWSE
-              </span>
-            </div>
+            {/* Next Chevron */}
+            <button
+              onClick={() => goToCard(activeIndex + 1)}
+              disabled={activeIndex === totalCards - 1}
+              aria-label="Next card"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#07131C]/70 backdrop-blur-md border border-[#00C8E8]/30 hover:border-[#00C8E8] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-[#8DEBFF] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.15)] cursor-pointer"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Micro Telemetry Cue */}
+          <div className="flex items-center justify-between w-full px-6 sm:px-10 text-[10px] sm:text-xs font-mono text-[#A4B6BF]/70">
+            <span>[ 0{activeIndex + 1} // 06 ]</span>
+            <span className="hidden sm:inline-block tracking-wider uppercase">
+              SCROLL DOWN TO ADVANCE CARDS • DRAG OR TAP TO NAVIGATE
+            </span>
+            <span className="sm:hidden tracking-wider uppercase">
+              SWIPE TO BROWSE
+            </span>
           </div>
         </div>
       </div>
