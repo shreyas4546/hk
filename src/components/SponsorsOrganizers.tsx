@@ -75,14 +75,14 @@ const ACADEMIC_LEADERSHIP: FacultyMember[] = [
     icon: GraduationCap,
   },
   {
-    name: "Prof. Vishwanath J",
+    name: "Prof. Vishwanath Hiregoudar",
     role: "AI&ML HoD",
     department: "AI & Machine Learning",
-    monogram: "VJ",
+    monogram: "VH",
     icon: Sparkles,
   },
   {
-    name: "Prof. Amruta N",
+    name: "Prof. Amruta Naveen",
     role: "Faculty Coordinator",
     department: "JCET Hubballi",
     monogram: "AN",
