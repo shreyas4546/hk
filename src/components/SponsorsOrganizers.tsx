@@ -186,20 +186,18 @@ export default function SponsorsOrganizers() {
                   return (
                     <div
                       key={coordinator.name}
-                      className={`roster-row group relative flex items-center justify-between gap-2 p-2 sm:p-3 rounded-xl transition-all duration-300 hover:translate-x-1 w-full min-w-0 ${
-                        isLead
+                      className={`roster-row group relative flex items-center justify-between gap-2 p-2 sm:p-3 rounded-xl transition-all duration-300 hover:translate-x-1 w-full min-w-0 ${isLead
                           ? "bg-[#00C8E8]/[0.06] hover:bg-[#00C8E8]/[0.12] border border-[#00C8E8]/35 hover:border-[#00C8E8] shadow-[0_0_15px_rgba(0,200,232,0.1)]"
                           : "bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-[#00C8E8]/30"
-                      }`}
+                        }`}
                     >
                       {/* Name & Role */}
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <div
-                          className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center font-['Space_Grotesk'] font-bold text-[11px] sm:text-xs shrink-0 transition-transform group-hover:scale-105 ${
-                            isLead
+                          className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center font-['Space_Grotesk'] font-bold text-[11px] sm:text-xs shrink-0 transition-transform group-hover:scale-105 ${isLead
                               ? "bg-[#071A24] text-[#8DEBFF] border border-[#00C8E8]/60 shadow-[0_0_10px_rgba(0,200,232,0.3)]"
                               : "bg-[#07131C] text-[#F3F8FA] border border-white/10 group-hover:border-[#00C8E8]/40"
-                          }`}
+                            }`}
                         >
                           {coordinator.monogram}
                         </div>
@@ -226,11 +224,10 @@ export default function SponsorsOrganizers() {
                         href={`tel:+91${coordinator.phone}`}
                         aria-label={`Call ${coordinator.name} at ${coordinator.formattedPhone}`}
                         title={`Call ${coordinator.name}`}
-                        className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-['Space_Grotesk'] font-semibold transition-all duration-200 shrink-0 cursor-pointer ${
-                          isLead
+                        className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-['Space_Grotesk'] font-semibold transition-all duration-200 shrink-0 cursor-pointer ${isLead
                             ? "bg-[#00C8E8] hover:bg-[#8DEBFF] text-[#050708] shadow-[0_0_12px_rgba(0,200,232,0.35)]"
                             : "bg-[#07131C] hover:bg-[#00C8E8]/20 text-[#8DEBFF] border border-white/10 hover:border-[#00C8E8]/50"
-                        }`}
+                          }`}
                       >
                         <Phone className="w-3 h-3 text-current shrink-0" />
                         <span className="hidden sm:inline">{coordinator.formattedPhone}</span>

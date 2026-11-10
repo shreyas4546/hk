@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { OFFICIAL_RULES, TRACKS } from "../data/eventData";
 import NorrisHeadline from "./ui/norris-headline";
+import { generateRulesPdf } from "../utils/generateRulesPdf";
 
 interface TracksRulesSectionProps {
   onOpenRegister?: () => void;
@@ -25,55 +26,7 @@ export default function TracksRulesSection({ onOpenRegister }: TracksRulesSectio
   const [activeTab, setActiveTab] = useState<"tracks" | "rules">("tracks");
 
   const handleDownloadRules = () => {
-    const rulesDocument = [
-      "============================================================",
-      "HACKIGNITE 1.0 — OFFICIAL COMPETITION RULES & GUIDELINES",
-      "Department of Computer Science and Engineering (CSE/AI&ML)",
-      "Jain College of Engineering and Technology, Hubballi",
-      "Event Dates: 12–13 December 2026",
-      "============================================================",
-      "",
-      "1. TEAM COMPOSITION & ELIGIBILITY",
-      "- Each participating team must consist of strictly 2 to 4 members.",
-      "- Teams must have a designated Team Lead for all official communications.",
-      "- Inter-college and cross-disciplinary collaborations are permitted.",
-      "",
-      "2. 24-HOUR SPRINT & CODE INTEGRITY",
-      "- The coding period begins at 11:30 AM on 12 December 2026 and ends at 11:30 AM on 13 December 2026.",
-      "- All project code, architectures, and assets must be developed during the 24-hour sprint.",
-      "- Pre-built proprietary products or existing projects are strictly disallowed.",
-      "- Public open-source libraries, frameworks, and APIs are permitted provided their usage is documented.",
-      "",
-      "3. INTELLECTUAL PROPERTY (100% PARTICIPANT OWNERSHIP)",
-      "- All code, software, repositories, prototypes, and presentations developed during HackIgnite 1.0 remain the exclusive intellectual property of the respective participating teams.",
-      "- The organizers and institution claim zero ownership over participant inventions.",
-      "",
-      "4. MANDATORY CHECKPOINTS & JURY EVALUATION",
-      "- Checkpoint 1 (12 Dec, 06:00 PM – 07:30 PM): Problem framing, architectural scope, and feasibility.",
-      "- Checkpoint 2 (13 Dec, 05:30 AM – 07:00 AM): Working prototype verification and feature progress.",
-      "- Both checkpoints are mandatory for teams to qualify for the final pitching round.",
-      "",
-      "5. VENUE & CODE OF CONDUCT",
-      "- Participants must carry their valid college identity card at all times.",
-      "- Respectful, professional, and ethical conduct is strictly required. Harassment or misconduct results in immediate disqualification.",
-      "- High-speed Wi-Fi, power connectivity, and meals (Lunch, Dinner, Midnight Refreshment, Breakfast) are provided on campus.",
-      "",
-      "6. OFFICIAL COORDINATION HOTLINE",
-      "- Event Coordinator: Aditya R H",
-      "- Phone: +91 70229 51232",
-      "- Campus: JCET, Hebballi Road, Sai Nagar, Unkal, Hubballi – 580031",
-      "============================================================",
-    ].join("\n");
-
-    const blob = new Blob([rulesDocument], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "hackignite-1.0-official-rules.txt";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    generateRulesPdf();
   };
 
   return (
@@ -245,7 +198,7 @@ export default function TracksRulesSection({ onOpenRegister }: TracksRulesSectio
               className="px-4 py-2.5 rounded-xl bg-[#00C8E8] hover:bg-[#8DEBFF] text-[#050708] font-['Space_Grotesk'] font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(0,200,232,0.3)] shrink-0 cursor-pointer"
             >
               <Download className="w-4 h-4" />
-              <span>Download Rules (.txt)</span>
+              <span>Download Rules (.PDF)</span>
             </button>
           </div>
 
