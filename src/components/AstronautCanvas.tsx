@@ -317,8 +317,8 @@ export default function AstronautCanvas({ className = "" }: AstronautCanvasProps
       {!isLoaded && !hasError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 cosmic-glass rounded-2xl p-6 border border-[#20CFFF]/30">
           <RefreshCw className="w-8 h-8 text-[#20CFFF] animate-spin mb-3" />
-          <div className="text-xs font-mono font-bold text-white tracking-widest uppercase mb-2">
-            INITIALIZING 3D ASTRONAUT // {loadingProgress}%
+          <div className="text-xs font-['Space_Grotesk'] font-bold text-white tracking-widest uppercase mb-2">
+            Loading 3D Model · {loadingProgress}%
           </div>
           <div className="w-48 h-1.5 bg-[#07111D] rounded-full overflow-hidden border border-[#20CFFF]/20">
             <div

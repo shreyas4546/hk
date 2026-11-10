@@ -25,7 +25,7 @@ export function generateSchedulePdf(): void {
   // Day 01 Section
   add("BT");
   add("/F1 12.5 Tf 0.05 0.15 0.25 rg");
-  add("50 686 Td (DAY 01 // 12 DECEMBER 2026 - OPENING & SPRINT COMMENCEMENT) Tj");
+  add("50 686 Td (DAY 01 · 12 DECEMBER 2026 - OPENING & SPRINT COMMENCEMENT) Tj");
   add("ET");
 
   const day1Events = OFFICIAL_SCHEDULE[0]?.events || [];
@@ -52,7 +52,7 @@ export function generateSchedulePdf(): void {
   // Day 02 Section
   add("BT");
   add("/F1 12.5 Tf 0.05 0.15 0.25 rg");
-  add(`50 ${y} Td (DAY 02 // 13 DECEMBER 2026 - EVALUATION & VALEDICTORY) Tj`);
+  add(`50 ${y} Td (DAY 02 · 13 DECEMBER 2026 - EVALUATION & VALEDICTORY) Tj`);
   add("ET");
   y -= 20;
 

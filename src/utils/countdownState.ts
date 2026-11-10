@@ -55,8 +55,8 @@ export function calculateEventCountdownState(nowMs = Date.now()): CountdownState
 
     return {
       status: "BEFORE_REGISTRATION",
-      statusBadge: "MISSION COUNTDOWN // IST (ASIA/KOLKATA)",
-      statusHeadline: "THE MISSION BEGINS IN",
+      statusBadge: "Event Countdown · IST",
+      statusHeadline: "Hackathon Begins In",
       days,
       hours,
       minutes,
@@ -70,7 +70,7 @@ export function calculateEventCountdownState(nowMs = Date.now()): CountdownState
   if (nowMs >= T_REGISTRATION_OPEN && nowMs < T_REGISTRATION_CLOSE) {
     return {
       status: "REGISTRATION_OPEN",
-      statusBadge: "CAMPUS LIVE // CHECK-IN ACTIVE",
+      statusBadge: "Live on Campus · Check-In Active",
       statusHeadline: "REGISTRATION OPEN",
       days: 0,
       hours: 0,
@@ -88,7 +88,7 @@ export function calculateEventCountdownState(nowMs = Date.now()): CountdownState
     const seconds = Math.floor((diff / 1000) % 60);
     return {
       status: "BEFORE_REGISTRATION",
-      statusBadge: "KICKOFF STANDBY // ARENA PREP",
+      statusBadge: "Kickoff Standby · Final Preparation",
       statusHeadline: "CODING BEGINS IN",
       days: 0,
       hours: 0,
@@ -107,7 +107,7 @@ export function calculateEventCountdownState(nowMs = Date.now()): CountdownState
     const seconds = Math.floor((diff / 1000) % 60);
     return {
       status: "CODING_IN_PROGRESS",
-      statusBadge: "ARENA SPRINT // 24-HOUR CLOCK ACTIVE",
+      statusBadge: "Sprint Active · 24-Hour Timer",
       statusHeadline: "24-HOUR CODING IN PROGRESS",
       days: 0,
       hours,
@@ -122,8 +122,8 @@ export function calculateEventCountdownState(nowMs = Date.now()): CountdownState
   if (nowMs >= T_CODING_END && nowMs < T_EVENT_CLOSE) {
     return {
       status: "FINAL_PRESENTATIONS",
-      statusBadge: "CODE FREEZE // JURY EVALUATION",
-      statusHeadline: "FINAL PRESENTATIONS / PRIZE DISTRIBUTION",
+      statusBadge: "Code Freeze · Jury Evaluation",
+      statusHeadline: "FINAL PRESENTATIONS & PRIZE DISTRIBUTION",
       days: 0,
       hours: 0,
       minutes: 0,
@@ -136,7 +136,7 @@ export function calculateEventCountdownState(nowMs = Date.now()): CountdownState
   // 6. AFTER 1:00 PM, 13 DECEMBER
   return {
     status: "EVENT_COMPLETED",
-    statusBadge: "EDITION CONCLUDED // VICTORY",
+    statusBadge: "Edition Concluded",
     statusHeadline: "HACKIGNITE 1.0 COMPLETED",
     days: 0,
     hours: 0,

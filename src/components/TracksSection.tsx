@@ -168,9 +168,9 @@ export default function TracksSection({ onSelectTrack }: TracksSectionProps) {
       <div className="mt-12 p-6 sm:p-8 rounded-2xl cosmic-glass border border-[#20CFFF]/40 relative overflow-hidden">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="flex-1">
-            <div className="flex items-center gap-2 text-xs font-mono text-[#20CFFF] mb-2">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#20CFFF] mb-2 font-['Space_Grotesk']">
               <Cpu className="w-4 h-4" />
-              <span>ACTIVE DOMAIN FOCUS // {currentTrack.code}</span>
+              <span>Track Focus · {currentTrack.code}</span>
             </div>
             <h3 className="font-display font-black text-2xl sm:text-3xl text-white mb-2">
               {currentTrack.name}

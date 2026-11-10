@@ -3,13 +3,10 @@ import { Brain, Wrench, Lightbulb, Target } from "lucide-react";
 
 interface PillarItemData {
   num: string;
-  id: string;
   title: string;
   desc: string;
   image: string;
   icon: React.ComponentType<{ className?: string }>;
-  grid: string;
-  dataSize: string;
   badge: string;
 }
 
@@ -17,46 +14,34 @@ interface PillarItemData {
 const PILLARS_DATA: PillarItemData[] = [
   {
     num: "01",
-    id: "ID-0921",
     title: "THINK",
     desc: "Explore challenges, frame systemic problems, and conceive transformative digital ideas.",
     image: "/assets/cards/pillar-think.webp",
     icon: Brain,
-    grid: "4x4",
-    dataSize: "28.4MB",
     badge: "ANALYSIS",
   },
   {
     num: "02",
-    id: "ID-4882",
     title: "BUILD",
     desc: "Turn technical architectures and code repositories into robust working solutions.",
     image: "/assets/cards/pillar-build.webp",
     icon: Wrench,
-    grid: "8x8",
-    dataSize: "64.2MB",
     badge: "SYNTHESIS",
   },
   {
     num: "03",
-    id: "ID-6859",
     title: "INNOVATE",
     desc: "Approach real-world obstacles with fresh algorithmic models and creative engineering.",
     image: "/assets/cards/pillar-innovate.webp",
     icon: Lightbulb,
-    grid: "3x2",
-    dataSize: "58.1MB",
     badge: "CREATION",
   },
   {
     num: "04",
-    id: "ID-8322",
     title: "IMPACT",
     desc: "Deploy practical technology that creates tangible value for community and industry.",
     image: "/assets/cards/pillar-impact.webp",
     icon: Target,
-    grid: "6x6",
-    dataSize: "91.7MB",
     badge: "DEPLOYMENT",
   },
 ];
@@ -88,7 +73,7 @@ export default function MissionSection() {
     const CONFIG = {
       pillarCount: 4,
       itemCount: 8,
-      starCount: isMobile ? 25 : 100,
+      starCount: isMobile ? 0 : 50,
       zGap: 850,
       loopSize: 8 * 850, // 6800px single loop
       camSpeed: 2.2,
@@ -156,11 +141,8 @@ export default function MissionSection() {
         card.innerHTML = `
           <!-- Card Header -->
           <div class="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
-            <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-[#00C8E8] shadow-[0_0_8px_#00C8E8]"></span>
-              <span class="font-mono text-xs font-bold text-[#8DEBFF] tracking-widest">${pillar.id}</span>
-            </div>
-            <div class="px-2.5 py-0.5 rounded bg-[#07131C] border border-[#00C8E8]/30 text-[10px] font-mono text-[#00C8E8] uppercase tracking-wider font-semibold">
+            <span class="font-['Space_Grotesk'] text-xs font-bold text-[#8DEBFF] tracking-wider uppercase">Pillar ${pillar.num}</span>
+            <div class="px-2.5 py-0.5 rounded-full bg-[#07131C] border border-[#00C8E8]/20 text-[11px] font-['Inter',sans-serif] text-[#8DEBFF] font-medium">
               ${pillar.badge}
             </div>
           </div>
@@ -169,14 +151,11 @@ export default function MissionSection() {
           <div class="relative w-full h-36 sm:h-44 rounded-xl overflow-hidden my-3 border border-[#00C8E8]/30 bg-[#04080D]/80 shrink-0 shadow-[0_0_15px_rgba(0,200,232,0.1)]">
             <img src="${pillar.image}" alt="${pillar.title}" loading="lazy" decoding="async" class="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110" />
             <div class="absolute inset-0 bg-gradient-to-t from-[#04080D]/90 via-transparent to-transparent pointer-events-none"></div>
-            <div class="absolute top-2.5 right-2.5 font-mono text-xs font-bold text-[#8DEBFF] px-2.5 py-0.5 rounded-full bg-[#07131C]/90 backdrop-blur-md border border-[#00C8E8]/40 shadow-sm">
-              ${pillar.num}
-            </div>
           </div>
 
           <!-- Card Title & Description -->
           <div class="my-auto py-1">
-            <h2 class="font-['Syncopate',sans-serif] font-bold text-2xl sm:text-3xl text-[#F3F8FA] tracking-wider uppercase mb-1.5 leading-none">
+            <h2 class="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-[#F3F8FA] tracking-wide uppercase mb-1.5 leading-none">
               ${pillar.title}
             </h2>
             <p class="text-xs sm:text-[13px] text-[#A4B6BF] font-['Inter',sans-serif] leading-relaxed line-clamp-3">
@@ -184,15 +163,10 @@ export default function MissionSection() {
             </p>
           </div>
 
-          <!-- Card Footer Telemetry -->
-          <div class="pt-3 border-t border-white/10 flex items-center justify-between font-mono text-[10.5px] text-[#8DEBFF]/80 shrink-0">
-            <span>GRID: ${pillar.grid}</span>
-            <span>DATA: ${pillar.dataSize}</span>
-          </div>
-
-          <!-- Subtle Background Watermark Number -->
-          <div class="absolute bottom-2 right-3 font-mono font-black text-5xl sm:text-6xl text-[#00C8E8]/[0.06] pointer-events-none select-none">
-            ${pillar.num}
+          <!-- Card Footer -->
+          <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-['Inter',sans-serif] text-[#8DEBFF]/90 shrink-0">
+            <span>HackIgnite Core</span>
+            <span class="text-[#A4B6BF]">Phase ${pillar.num}</span>
           </div>
         `;
 
@@ -344,15 +318,21 @@ export default function MissionSection() {
         coordRef.current.innerText = `${Math.round(state.scroll)}`;
       }
 
-      // 1. Camera Tilt & Shake
-      const tiltX = state.mouseY * 5 - state.targetVelocity * 0.35;
-      const tiltY = state.mouseX * 5;
-      worldEl.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+      // 1. Camera Tilt & Shake (reduced on mobile for 0 compositor churn)
+      if (!isMobile) {
+        const tiltX = state.mouseY * 5 - state.targetVelocity * 0.35;
+        const tiltY = state.mouseX * 5;
+        worldEl.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
 
-      // 2. Dynamic Perspective Warp (FOV warp)
-      const baseFov = isMobile ? 800 : 1000;
-      const fov = Math.max(isMobile ? 420 : 500, baseFov - Math.min(instantSpeed * 12, 500));
-      viewportEl.style.perspective = `${fov}px`;
+        // 2. Dynamic Perspective Warp (FOV warp on desktop only)
+        const baseFov = 1000;
+        const fov = Math.max(500, baseFov - Math.min(instantSpeed * 12, 500));
+        viewportEl.style.perspective = `${fov}px`;
+      } else {
+        // Mobile static 3D perspective to preserve GPU projection matrix
+        if (worldEl.style.transform !== "none") worldEl.style.transform = "none";
+        if (viewportEl.style.perspective !== "800px") viewportEl.style.perspective = "800px";
+      }
 
       // 3. Render Items in Single Loop
       const cameraZ = state.scroll * CONFIG.camSpeed;
@@ -364,6 +344,8 @@ export default function MissionSection() {
       if (activePillarRef.current) {
         activePillarRef.current.innerText = PILLARS_DATA[activeIdx].title;
       }
+
+      const isFastMoving = instantSpeed > 0.8;
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
@@ -388,36 +370,42 @@ export default function MissionSection() {
         if (alpha < 0) alpha = 0;
         if (alpha > 1) alpha = 1;
 
-        item.el.style.opacity = `${alpha.toFixed(3)}`;
+        if (alpha <= 0.005) {
+          if (item.el.style.opacity !== "0") item.el.style.opacity = "0";
+          continue;
+        }
 
-        if (alpha > 0.01) {
-          let trans = `translate3d(${item.x}px, ${item.y}px, ${vizZ}px)`;
+        item.el.style.opacity = `${alpha.toFixed(2)}`;
 
-          if (item.type === "star") {
-            const stretch = Math.max(1, Math.min(1 + instantSpeed * 0.15, 12));
-            trans += ` scale3d(1, 1, ${stretch})`;
-          } else if (item.type === "text") {
-            trans += ` rotateZ(${item.rot}deg)`;
+        let trans = `translate3d(${item.x}px, ${item.y}px, ${vizZ}px)`;
+
+        if (item.type === "star") {
+          const stretch = Math.max(1, Math.min(1 + instantSpeed * 0.15, 12));
+          trans += ` scale3d(1, 1, ${stretch})`;
+        } else if (item.type === "text") {
+          trans += ` rotateZ(${item.rot}deg)`;
+          if (!isMobile) {
             const textInner = item.el.firstElementChild as HTMLElement | null;
             if (textInner) {
-              // Cyber cyan & turquoise RGB split (NO RED!)
-              if (instantSpeed > 0.8) {
-                const offset = Math.min(instantSpeed * 1.8, 24);
-                textInner.style.textShadow = `${offset}px 0 rgba(0, 200, 232, 0.95), ${-offset}px 0 rgba(141, 235, 255, 0.95), 0 0 25px rgba(0, 200, 232, 0.5)`;
-                textInner.style.webkitTextStroke = "2px rgba(243, 248, 250, 0.5)";
-              } else {
+              if (isFastMoving) {
+                const offset = Math.min(instantSpeed * 1.8, 16);
+                textInner.style.textShadow = `${offset}px 0 rgba(0, 200, 232, 0.95), ${-offset}px 0 rgba(141, 235, 255, 0.95)`;
+              } else if (textInner.style.textShadow !== "none") {
                 textInner.style.textShadow = "none";
-                textInner.style.webkitTextStroke = "2px rgba(243, 248, 250, 0.2)";
               }
             }
-          } else {
+          }
+        } else {
+          if (!isMobile) {
             const t = time * 0.001;
             const float = Math.sin(t + item.x) * 6;
             trans += ` rotateZ(${item.rot}deg) rotateY(${float}deg)`;
+          } else {
+            trans += ` rotateZ(${item.rot}deg)`;
           }
-
-          item.el.style.transform = trans;
         }
+
+        item.el.style.transform = trans;
       }
     };
 
@@ -482,58 +470,17 @@ export default function MissionSection() {
         <div className="hyper-vignette" />
         <div className="hyper-noise" />
 
-        {/* Center Crosshair Reticle in Cyber Cyan */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 opacity-35 text-[#00C8E8] font-mono text-lg">
-          +
-        </div>
-
-        {/* TOP SECTION TITLE HUD BADGE */}
-        <div className="absolute top-20 sm:top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center max-w-xl px-4 w-full">
-          <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#07131C]/90 backdrop-blur-md border border-[#00C8E8]/40 text-[10px] sm:text-[11px] font-mono text-[#8DEBFF] mb-2 shadow-[0_0_20px_rgba(0,200,232,0.2)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
-            <span>EVENT PILLARS // 3D HYPER SCROLL</span>
-          </div>
-          <h2 className="font-['Syncopate',sans-serif] font-bold text-base sm:text-2xl text-white tracking-widest uppercase">
-            THINK • BUILD • <span className="cyan-turquoise-text">INNOVATE • IMPACT</span>
-          </h2>
-          <p className="text-[10px] sm:text-xs text-[#A4B6BF] font-['Inter',sans-serif] mt-1 max-w-md mx-auto hidden sm:block">
-            Scroll down to dive through the 24-hour innovation core.
+        {/* TOP SECTION TITLE */}
+        <div className="absolute top-16 sm:top-12 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center max-w-xl px-4 w-full">
+          <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] mb-2 font-['Space_Grotesk']">
+            What Drives Us
           </p>
-        </div>
-
-        {/* HUD Top Bar (Desktop) */}
-        <div className="absolute top-8 left-8 right-8 z-30 pointer-events-none hidden sm:flex justify-between items-center font-mono text-xs text-white/50 uppercase tracking-widest">
-          <span className="flex items-center gap-1.5 text-white/70">
-            <span className="w-2 h-2 bg-[#00C8E8] rounded-xs shadow-[0_0_8px_#00C8E8]" />
-            SYS.READY // FOCUS: <strong ref={activePillarRef} className="text-[#00C8E8] ml-1">THINK</strong>
-          </span>
-          <div className="hyper-hud-line" />
-          <span>
-            FPS: <strong ref={fpsRef} className="text-[#00C8E8]">60</strong>
-          </span>
-        </div>
-
-        {/* HUD Bottom Bar (Desktop & Mobile) */}
-        <div className="absolute bottom-5 sm:bottom-8 left-4 right-4 sm:left-8 sm:right-8 z-30 pointer-events-none flex justify-between items-center font-mono text-[10px] sm:text-xs text-white/50 uppercase tracking-widest">
-          <span>
-            COORD: <strong ref={coordRef} className="text-[#00C8E8]">0000</strong>
-          </span>
-          <div className="hyper-hud-line" />
-          <span className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-[#00C8E8] rounded-xs shadow-[0_0_6px_#00C8E8]" />
-            <span>HACKIGNITE 1.0 // 4 PILLARS</span>
-          </span>
-        </div>
-
-        {/* HUD Left Edge Vertical Velocity Telemetry */}
-        <div
-          className="absolute left-2.5 sm:left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-none font-mono text-[9px] sm:text-[10px] text-white/50 tracking-wider hidden xs:block"
-          style={{
-            writingMode: "vertical-rl",
-            transform: "rotate(180deg)",
-          }}
-        >
-          SCROLL VELOCITY // <strong ref={velRef} className="text-[#00C8E8]">0.00</strong>
+          <h2 className="font-['Space_Grotesk'] font-bold text-xl sm:text-3xl text-white tracking-wide uppercase">
+            Think · Build · <span className="cyan-turquoise-text">Innovate · Impact</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-[#A4B6BF] font-['Inter',sans-serif] mt-2 max-w-md mx-auto hidden sm:block">
+            The core principles powering our 24-hour innovation marathon.
+          </p>
         </div>
 
         {/* 3D PERSPECTIVE VIEWPORT */}

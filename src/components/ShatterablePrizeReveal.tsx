@@ -400,22 +400,22 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
           <div className="relative z-10 flex flex-col justify-between h-full w-full">
             {/* Top Bar: Eyebrow Tag, Integrity Gauge & Sound Toggle */}
             <div className="flex items-center justify-between gap-3 w-full border-b border-white/10 pb-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 border border-white/15 text-[11px] sm:text-xs font-mono text-[#8DEBFF]">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 border border-white/15 text-[11px] sm:text-xs font-['Space_Grotesk'] text-[#8DEBFF]">
                 <span
                   className={`w-2 h-2 rounded-full ${
                     crackLevel === 0
                       ? "bg-emerald-400"
                       : crackLevel === 1
-                      ? "bg-amber-400 animate-pulse"
-                      : "bg-rose-500 animate-ping"
+                      ? "bg-amber-400"
+                      : "bg-rose-500"
                   }`}
                 />
-                <span className="font-bold tracking-wider">
+                <span className="font-semibold tracking-wider uppercase">
                   {crackLevel === 0
-                    ? "VAULT SEALED // 100% INTEGRITY"
+                    ? "Vault Sealed · 100% Integrity"
                     : crackLevel === 1
-                    ? "STRUCTURAL COMPROMISE // 66% INTEGRITY"
-                    : "CRITICAL FAILURE // 33% INTEGRITY — BREAK NOW!"}
+                    ? "Structural Stress · 66% Integrity"
+                    : "Critical Failure · 33% Integrity — Tap to break!"}
                 </span>
               </div>
 
@@ -440,13 +440,13 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
                 <Sparkles className="w-4 h-4 text-[#FFD700] absolute -top-1 -right-1 animate-bounce" />
               </div>
 
-              {/* Norris Headline Tagline */}
-              <div className="text-xs sm:text-sm font-mono tracking-widest text-[#8DEBFF] uppercase mb-2">
-                AN INTERFACE YOU CAN LITERALLY BREAK
+              {/* Tagline */}
+              <div className="text-xs sm:text-sm font-semibold tracking-widest text-[#8DEBFF] uppercase mb-2 font-['Space_Grotesk']">
+                Interactive Challenge
               </div>
 
               <NorrisHeadline className="font-['Space_Grotesk'] font-bold text-3xl sm:text-4xl md:text-5xl text-[#F3F8FA] uppercase tracking-tight mb-3">
-                CLASSIFIED <span className="cyan-turquoise-text">PRIZE VAULT</span>
+                PRIZE <span className="cyan-turquoise-text">VAULT</span>
               </NorrisHeadline>
 
               <p className="text-sm sm:text-base text-[#A4B6BF] max-w-lg mx-auto leading-relaxed font-['Inter',sans-serif] px-4">
@@ -459,15 +459,15 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
 
               {/* Interactive Hit Prompt Bar */}
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#00C8E8]/15 border border-[#00C8E8]/40 text-xs sm:text-sm font-mono font-bold text-[#00C8E8] shadow-[0_0_20px_rgba(0,200,232,0.2)] animate-pulse">
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#00C8E8]/15 border border-[#00C8E8]/40 text-xs sm:text-sm font-['Space_Grotesk'] font-bold text-[#00C8E8] shadow-[0_0_20px_rgba(0,200,232,0.2)]">
                   <Zap className="w-4 h-4" />
-                  <span>CLICK GLASS TO HIT ({3 - crackLevel}/3 HITS LEFT)</span>
+                  <span>Click Glass to Hit ({3 - crackLevel}/3 hits left)</span>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleInstantShatter}
-                  className="px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/15 border border-white/20 text-xs font-mono text-white/80 hover:text-white transition-all cursor-pointer"
+                  className="px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/15 border border-white/20 text-xs font-['Space_Grotesk'] text-white/80 hover:text-white transition-all cursor-pointer"
                 >
                   ⚡ Instant Shatter
                 </button>
@@ -475,11 +475,11 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
             </div>
 
             {/* Bottom Glass Integrity Progress Bar */}
-            <div className="w-full pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-[#A4B6BF]">
+            <div className="w-full pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-['Space_Grotesk'] text-[#A4B6BF]">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-[#00C8E8]" />
                 <span>
-                  DEFENSE RATING:{" "}
+                  Integrity Rating:{" "}
                   <strong className="text-white">
                     {crackLevel === 0 ? "MAXIMUM" : crackLevel === 1 ? "BREACH DETECTED" : "CRITICAL"}
                   </strong>
@@ -537,18 +537,16 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
           <div className="relative z-10 flex flex-col gap-5 sm:gap-6 w-full animate-[fadeIn_0.6s_ease-out]">
             {/* Top Bar: Vault Unlocked, ROI Badge & Controls */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3 w-full">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-emerald-500/20 via-[#00C8E8]/20 to-[#FFD700]/20 border border-[#FFD700]/40 text-xs font-mono text-[#FFD700] shadow-[0_0_20px_rgba(255,215,0,0.25)]">
+              <div className="text-xs font-semibold tracking-wider text-[#FFD700] font-['Space_Grotesk'] uppercase flex items-center gap-2">
                 <Unlock className="w-3.5 h-3.5 text-[#FFD700]" />
-                <span className="font-bold tracking-widest uppercase">
-                  VAULT BREACHED // OFFICIAL PRIZE POOL REVEALED
-                </span>
+                <span>Prize Pool Unlocked</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-xs font-mono text-[#8DEBFF] border border-white/10 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-xs font-['Space_Grotesk'] text-[#8DEBFF] border border-white/10 transition-colors cursor-pointer"
                   title="Break again"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -566,8 +564,8 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
               </div>
 
               {/* Kicker Tag */}
-              <div className="text-xs sm:text-sm font-mono tracking-widest text-[#8DEBFF] uppercase mb-1 font-semibold">
-                NATIONAL LEVEL 24-HOUR CHALLENGE // TOTAL BOUNTY
+              <div className="text-xs sm:text-sm font-semibold tracking-widest text-[#8DEBFF] uppercase mb-1 font-['Space_Grotesk']">
+                National 24-Hour Hackathon · Total Prize Pool
               </div>
 
               {/* THE ROLLING ₹40,000 HEADLINE */}
@@ -578,12 +576,12 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
                 <span className="font-['Space_Grotesk'] font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#00C8E8] via-[#8DEBFF] to-[#FFD700] drop-shadow-[0_0_45px_rgba(0,200,232,0.6)]">
                   ₹{displayAmount.toLocaleString("en-IN")}
                 </span>
-                <span className="font-mono text-sm sm:text-xl text-[#FFD700] font-bold tracking-wider">
+                <span className="font-['Space_Grotesk'] text-sm sm:text-xl text-[#FFD700] font-bold tracking-wider">
                   CASH POOL
                 </span>
               </div>
 
-              <div className="inline-block px-4 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-[#A4B6BF] mb-6">
+              <div className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-['Inter',sans-serif] text-[#A4B6BF] mb-6">
                 Turn a <strong className="text-[#00C8E8]">₹2,000 team entry</strong> into up to{" "}
                 <strong className="text-[#FFD700]">₹40,000 in grand rewards</strong> + national prestige
               </div>
@@ -591,31 +589,31 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
               {/* High-Value 5 Places to Conquer Mini Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 w-full max-w-3xl mb-6 text-left">
                 <div className="p-3 rounded-xl bg-gradient-to-b from-[#FFD700]/15 to-transparent border border-[#FFD700]/40 shadow-[0_0_15px_rgba(255,215,0,0.15)]">
-                  <div className="text-[10px] font-mono text-[#FFD700] font-bold">🥇 WINNER</div>
+                  <div className="text-[10px] font-['Space_Grotesk'] text-[#FFD700] font-bold">🥇 WINNER</div>
                   <div className="font-['Space_Grotesk'] font-bold text-sm text-[#F3F8FA] mt-0.5">CHAMPION</div>
                   <div className="text-[10px] text-[#A4B6BF] mt-1 leading-tight">Supreme Cash + Golden Trophy</div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-gradient-to-b from-[#8DEBFF]/15 to-transparent border border-[#8DEBFF]/40">
-                  <div className="text-[10px] font-mono text-[#8DEBFF] font-bold">🥈 RUNNER UP</div>
+                  <div className="text-[10px] font-['Space_Grotesk'] text-[#8DEBFF] font-bold">🥈 RUNNER UP</div>
                   <div className="font-['Space_Grotesk'] font-bold text-sm text-[#F3F8FA] mt-0.5">EXCELLENCE</div>
                   <div className="text-[10px] text-[#A4B6BF] mt-1 leading-tight">Cash Award + Silver Honor</div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-gradient-to-b from-[#CD7F32]/20 to-transparent border border-[#CD7F32]/40">
-                  <div className="text-[10px] font-mono text-[#CD7F32] font-bold">🥉 2ND RUNNER UP</div>
+                  <div className="text-[10px] font-['Space_Grotesk'] text-[#CD7F32] font-bold">🥉 2ND RUNNER UP</div>
                   <div className="font-['Space_Grotesk'] font-bold text-sm text-[#F3F8FA] mt-0.5">INNOVATION</div>
                   <div className="text-[10px] text-[#A4B6BF] mt-1 leading-tight">Cash Award + Bronze Honor</div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                  <div className="text-[10px] font-mono text-[#A4B6BF]">💎 BEST DEV</div>
+                  <div className="text-[10px] font-['Space_Grotesk'] text-[#A4B6BF]">💎 BEST DEV</div>
                   <div className="font-['Space_Grotesk'] font-bold text-sm text-[#F3F8FA] mt-0.5">CODE RIGOR</div>
                   <div className="text-[10px] text-[#A4B6BF] mt-1 leading-tight">Architecture Distinction</div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                  <div className="text-[10px] font-mono text-[#A4B6BF]">🚀 BEST PROJECT</div>
+                  <div className="text-[10px] font-['Space_Grotesk'] text-[#A4B6BF]">🚀 BEST PROJECT</div>
                   <div className="font-['Space_Grotesk'] font-bold text-sm text-[#F3F8FA] mt-0.5">VIABILITY</div>
                   <div className="text-[10px] text-[#A4B6BF] mt-1 leading-tight">Impact & UX Distinction</div>
                 </div>
@@ -639,18 +637,18 @@ export default function ShatterablePrizeReveal({ onOpenRegister }: ShatterablePr
             </div>
 
             {/* Bottom Proof Strip */}
-            <div className="w-full pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-[#8DEBFF]">
+            <div className="w-full pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs font-['Inter',sans-serif] text-[#8DEBFF]">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>100% INTELLECTUAL PROPERTY RETAINED BY TEAMS</span>
+                <span>100% intellectual property retained by teams</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#FFD700]" />
-                <span>24H FREE MEALS, ACCOMMODATION & POWER HUBS</span>
+                <span>24h free meals, accommodation & power hubs</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#00C8E8]" />
-                <span>ALL-INCLUSIVE TEAM PASS: ₹2,000</span>
+                <span>All-inclusive team pass: ₹2,000</span>
               </div>
             </div>
           </div>

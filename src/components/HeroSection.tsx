@@ -169,7 +169,7 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
           poster="/videos/hero-poster.jpg"
           onLoadedData={() => setIsVideoLoaded(true)}
           onCanPlay={() => setIsVideoLoaded(true)}
@@ -226,17 +226,12 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
             transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          {/* Eyebrow Label: NATIONAL LEVEL HACKATHON · 2026 */}
-          <div className="hero-animate-1 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#07131C]/85 backdrop-blur-md border border-[#00C8E8]/30 text-[11px] sm:text-xs font-mono tracking-wider text-[#8DEBFF] mb-2.5 sm:mb-3 shadow-[0_0_16px_rgba(0,200,232,0.12)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
-            <span className="font-bold tracking-widest text-[#F3F8FA]">
-              NATIONAL LEVEL HACKATHON
-            </span>
-            <span className="text-[#00C8E8]/40">·</span>
-            <span className="tracking-widest text-[#8DEBFF]">
-              2026
-            </span>
-          </div>
+          {/* Editorial Eyebrow */}
+          <p className="hero-animate-1 text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] mb-3 sm:mb-4 font-['Space_Grotesk'] flex items-center gap-2">
+            <span>National Level Hackathon</span>
+            <span className="text-white/20">·</span>
+            <span className="text-[#A4B6BF]">2026</span>
+          </p>
 
           {/* Main Heading: THE FUTURE ISN'T BUILT. IT'S INVENTED. */}
           <h1 className="hero-animate-2 font-['Space_Grotesk'] font-bold text-[31px] xs:text-[33px] sm:text-[38px] lg:text-6xl xl:text-[4.75rem] tracking-tight text-[#F3F8FA] uppercase leading-[1.12] lg:leading-[1.08] mb-3 sm:mb-4 lg:mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
@@ -251,7 +246,7 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
           </p>
 
           {/* Event Dates & Venue: 12–13 DECEMBER 2026 • JCET, HUBBALLI */}
-          <div className="hero-animate-4 flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-5 text-xs sm:text-sm text-[#A4B6BF] font-mono mb-6 sm:mb-7 lg:mb-9">
+          <div className="hero-animate-4 flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-5 text-xs sm:text-sm text-[#A4B6BF] font-['Inter',sans-serif] mb-6 sm:mb-7 lg:mb-9">
             <div className="flex items-center gap-2 shrink-0">
               <Calendar className="w-4 h-4 text-[#00C8E8] shrink-0" />
               <span className="text-[#F3F8FA] font-semibold tracking-wide uppercase">
@@ -294,11 +289,11 @@ export default function HeroSection({ onOpenRegister }: HeroSectionProps) {
       {autoplayBlocked && (
         <button
           onClick={handleManualPlay}
-          className="absolute bottom-4 right-4 z-30 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#07131C]/90 backdrop-blur-md border border-[#00C8E8]/40 text-xs font-mono text-[#8DEBFF] hover:bg-[#09232B] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.25)] cursor-pointer"
+          className="absolute bottom-4 right-4 z-30 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#07131C]/90 backdrop-blur-md border border-[#00C8E8]/40 text-xs font-['Space_Grotesk'] font-medium text-[#8DEBFF] hover:bg-[#09232B] hover:text-white transition-all shadow-[0_0_15px_rgba(0,200,232,0.25)] cursor-pointer"
           aria-label="Play background cinematic video"
         >
           <Play className="w-3.5 h-3.5 text-[#00C8E8] fill-[#00C8E8]" />
-          <span>PLAY CINEMATIC</span>
+          <span>Play Video</span>
         </button>
       )}
     </section>

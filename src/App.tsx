@@ -9,13 +9,14 @@ import EventSchedule from "./components/EventSchedule";
 import MissionSection from "./components/MissionSection";
 import WhyHackIgnite from "./components/WhyHackIgnite";
 import RegistrationSection from "./components/RegistrationSection";
-import VenueMapSection from "./components/VenueMapSection";
-import FaqSection from "./components/FaqSection";
 import SponsorsOrganizers from "./components/SponsorsOrganizers";
 import SponsorsSection from "./components/SponsorsSection";
 import Footer from "./components/Footer";
-import AiEventAssistant from "./components/AiEventAssistant";
 
+// Lazy-loaded components below the fold for fast initial paint and low mobile memory overhead
+const VenueMapSection = lazy(() => import("./components/VenueMapSection"));
+const FaqSection = lazy(() => import("./components/FaqSection"));
+const AiEventAssistant = lazy(() => import("./components/AiEventAssistant"));
 const RegistrationModal = lazy(() => import("./components/RegistrationModal"));
 
 export default function App() {
@@ -24,15 +25,18 @@ export default function App() {
   const [selectedTrackId, setSelectedTrackId] = useState<string>("open-innovation");
 
   useEffect(() => {
-    // Preload registration chunk during idle time for instantaneous open
+    // Preload below-the-fold chunks during browser idle time
     const preloader = () => {
       import("./components/RegistrationModal");
+      import("./components/VenueMapSection");
+      import("./components/FaqSection");
+      import("./components/AiEventAssistant");
     };
     if (typeof window !== "undefined" && "requestIdleCallback" in window) {
       const handle = (window as any).requestIdleCallback(preloader);
       return () => (window as any).cancelIdleCallback(handle);
     } else {
-      const timer = setTimeout(preloader, 2000);
+      const timer = setTimeout(preloader, 2500);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -85,10 +89,14 @@ export default function App() {
         <RegistrationSection onOpenRegister={() => handleOpenRegister()} />
 
         {/* Feature 1: Interactive JCET Campus Venue Map */}
-        <VenueMapSection />
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <VenueMapSection />
+        </Suspense>
 
         {/* Section H: Verified FAQ */}
-        <FaqSection />
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <FaqSection />
+        </Suspense>
 
         {/* Section G: Organizing Institution & Coordinator Contact */}
         <SponsorsOrganizers />
@@ -101,7 +109,9 @@ export default function App() {
       <Footer />
 
       {/* Feature 5: AI Event Assistant (Floating Intelligent Assistant) */}
-      <AiEventAssistant />
+      <Suspense fallback={null}>
+        <AiEventAssistant />
+      </Suspense>
 
       {/* Interactive Registration Portal / Modal (Code-split for performance) */}
       <Suspense fallback={null}>

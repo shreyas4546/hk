@@ -115,7 +115,7 @@ function calculateCardTransform(d: number, isMobile: boolean): CardTransform {
     transform: `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateZ(${rZ.toFixed(2)}deg) rotateY(${rY.toFixed(2)}deg) scale(${scale.toFixed(3)})`,
     opacity: Math.max(0, Math.min(1, opacity)),
     zIndex,
-    filter: `brightness(${brightness.toFixed(2)})`,
+    filter: isMobile ? "none" : `brightness(${brightness.toFixed(2)})`,
     pointerEvents: absD <= 1.2 ? "auto" : "none",
   };
 }
@@ -178,7 +178,9 @@ export default function EventOverview() {
 
       if (roundedIndex !== activeIndexRef.current) {
         activeIndexRef.current = roundedIndex;
-        setActiveIndex(roundedIndex);
+        React.startTransition(() => {
+          setActiveIndex(roundedIndex);
+        });
       }
 
       cardRefs.current.forEach((cardEl, idx) => {
@@ -312,11 +314,10 @@ export default function EventOverview() {
         {/* Glow backdrop behind intro */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-gradient-to-b from-[#00C8E8]/10 via-[#8A2BE2]/08 to-transparent blur-[120px] pointer-events-none rounded-full -z-10" />
 
-        {/* Subtle Section Tag */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#07131C]/80 backdrop-blur-md border border-[#00C8E8]/30 text-xs font-mono text-[#8DEBFF] mb-5 shadow-[0_0_20px_rgba(0,200,232,0.15)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
-          <span className="tracking-widest uppercase">ABOUT THE EVENT // MISSION BRIEFING</span>
-        </div>
+        {/* Section Kicker */}
+        <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] mb-4 font-['Space_Grotesk']">
+          About HackIgnite
+        </p>
 
         {/* Sleek Geometric Sans-Serif Header */}
         <NorrisHeadline className="font-['Space_Grotesk'] font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight uppercase leading-[1.12] mb-6">
@@ -332,22 +333,22 @@ export default function EventOverview() {
           Bring ideas, collaborate, and engineer solutions for real-world impact.
         </p>
 
-        {/* Aerospace Mission Telemetry Chips */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 text-xs font-mono text-[#8DEBFF]">
-          <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-            DURATION // 24 HOURS NON-STOP
+        {/* Key Event Details */}
+        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-['Inter',sans-serif]">
+          <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-[#8DEBFF]">
+            24 Hours Non-Stop
           </span>
-          <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-            VENUE // JCET HUBBALLI
+          <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-[#A4B6BF]">
+            JCET, Hubballi
           </span>
-          <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-            ENTRY // ₹2,000 PER TEAM
+          <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-[#8DEBFF]">
+            ₹2,000 per team
           </span>
         </div>
 
         {/* Scroll Invitation Cue */}
-        <div className="mt-10 sm:mt-12 flex items-center justify-center gap-2 text-xs font-mono text-[#A4B6BF]/80 tracking-widest uppercase">
-          <span>EXPLORE 3D EVENT ARCHITECTURE</span>
+        <div className="mt-10 sm:mt-12 flex items-center justify-center gap-2 text-xs sm:text-sm font-['Inter',sans-serif] text-[#A4B6BF]/80 tracking-wide">
+          <span>Scroll to explore event details</span>
           <ArrowDown className="w-4 h-4 text-[#00C8E8] animate-bounce" />
         </div>
       </div>
@@ -361,14 +362,13 @@ export default function EventOverview() {
           {/* Subtle Ambient Radial Glow */}
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[750px] h-[400px] bg-gradient-to-b from-[#00C8E8]/10 via-[#8A2BE2]/08 to-transparent blur-[140px] pointer-events-none rounded-full -z-10" />
 
-          {/* Minimal HUD Header for the 3D Stage (Takes only ~50px, zero clutter) */}
+          {/* Section Header for the 3D Stage */}
           <div className="text-center z-10 w-full pt-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#07131C]/60 backdrop-blur-md border border-[#00C8E8]/30 text-[11px] font-mono text-[#8DEBFF] mb-1 shadow-[0_0_15px_rgba(0,200,232,0.15)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
-              <span className="tracking-widest uppercase">EVENT CORE // 3D TIMELINE & VENUE</span>
-            </div>
+            <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] mb-1 font-['Space_Grotesk']">
+              Timeline & Highlights
+            </p>
             <h3 className="font-['Space_Grotesk'] font-bold text-lg sm:text-2xl text-[#F3F8FA] tracking-tight uppercase">
-              EXPLORE EVENT DETAILS
+              Explore the Event
             </h3>
           </div>
 
@@ -406,14 +406,11 @@ export default function EventOverview() {
 
               {/* Card Header */}
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-[#00C8E8] animate-ping" />
-                  <span className="text-[11px] font-mono tracking-widest text-[#8DEBFF] uppercase">
-                    MISSION CORE // 24-HOUR SPRINT
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/15 text-[#00C8E8] border border-[#00C8E8]/35 font-semibold shadow-[0_0_10px_rgba(0,200,232,0.2)]">
-                  NON-STOP
+                <span className="text-xs font-semibold font-['Space_Grotesk'] text-[#8DEBFF] tracking-wider uppercase">
+                  24-Hour Marathon
+                </span>
+                <span className="text-[11px] font-['Inter',sans-serif] px-2.5 py-0.5 rounded-full bg-[#00C8E8]/10 text-[#8DEBFF] border border-[#00C8E8]/25 font-medium">
+                  Non-Stop
                 </span>
               </div>
 
@@ -481,13 +478,13 @@ export default function EventOverview() {
                 </div>
               </div>
 
-              {/* Telemetry Footer */}
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
+              {/* Card Footer */}
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-['Inter',sans-serif] text-[#8DEBFF]">
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-[#00C8E8]" />
-                  DURATION // 24 HOURS
+                  24 Hours Non-Stop
                 </span>
-                <span className="text-[#C2D7E5] font-semibold">ROUND-THE-CLOCK</span>
+                <span className="text-[#C2D7E5] font-medium">Sprint Mode</span>
               </div>
             </div>
 
@@ -514,12 +511,12 @@ export default function EventOverview() {
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-[#00C8E8]" />
-                  <span className="text-[11px] font-mono tracking-widest text-[#8DEBFF] uppercase">
-                    EVENT // EDITION 01
+                  <span className="text-xs font-semibold font-['Space_Grotesk'] text-[#8DEBFF] tracking-wider uppercase">
+                    Inaugural Edition
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/15 text-[#00C8E8] border border-[#00C8E8]/35 font-semibold shadow-[0_0_10px_rgba(0,200,232,0.2)]">
-                  OFFICIAL
+                <span className="text-[11px] font-['Inter',sans-serif] px-2.5 py-0.5 rounded-full bg-[#00C8E8]/10 text-[#8DEBFF] border border-[#00C8E8]/25 font-medium">
+                  HackIgnite 1.0
                 </span>
               </div>
 
@@ -530,17 +527,17 @@ export default function EventOverview() {
                 <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-[#FFFFFF] tracking-tight uppercase mb-1 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                   {EVENT_DETAILS.name}
                 </h3>
-                <p className="text-xs sm:text-sm text-[#8DEBFF] font-mono mb-2 uppercase tracking-wider font-semibold">
-                  Inaugural National Innovation Sprint
+                <p className="text-xs sm:text-sm text-[#8DEBFF] font-['Space_Grotesk'] mb-2 uppercase tracking-wider font-semibold">
+                  National Innovation Sprint
                 </p>
                 <p className="text-xs text-[#C2D7E5] font-['Inter',sans-serif] leading-relaxed max-w-xs sm:max-w-sm line-clamp-2">
                   Presented by {EVENT_DETAILS.department} at {EVENT_DETAILS.institution}.
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
-                <span>STATUS // REGISTRATION OPEN</span>
-                <span className="text-[#C2D7E5] font-semibold">TIER-1 ARENA</span>
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-['Inter',sans-serif] text-[#8DEBFF]">
+                <span>Registration Open</span>
+                <span className="text-[#C2D7E5] font-medium">National Level</span>
               </div>
             </div>
 
@@ -567,12 +564,12 @@ export default function EventOverview() {
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-[#8A2BE2]" />
-                  <span className="text-[11px] font-mono tracking-widest text-[#8DEBFF] uppercase">
-                    PODIUM // 5 RANKS
+                  <span className="text-xs font-semibold font-['Space_Grotesk'] text-[#8DEBFF] tracking-wider uppercase">
+                    Podium Awards
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#8A2BE2]/25 text-[#DDD6FE] border border-[#8A2BE2]/50 font-semibold shadow-[0_0_10px_rgba(138,43,226,0.25)]">
-                  AWARDS
+                <span className="text-[11px] font-['Inter',sans-serif] px-2.5 py-0.5 rounded-full bg-[#8A2BE2]/15 text-[#DDD6FE] border border-[#8A2BE2]/30 font-medium">
+                  5 Places
                 </span>
               </div>
 
@@ -581,11 +578,11 @@ export default function EventOverview() {
                   {["#01", "#02", "#03", "#04", "#05"].map((rank, i) => (
                     <span
                       key={rank}
-                      className={`px-2 py-1 rounded-md text-[11px] sm:text-xs font-mono font-bold border ${i === 0
-                          ? "bg-[#00C8E8]/25 border-[#00C8E8] text-[#FFFFFF] shadow-[0_0_15px_rgba(0,200,232,0.4)]"
-                          : i === 1
-                            ? "bg-[#8A2BE2]/25 border-[#8A2BE2] text-[#F3F8FA] shadow-[0_0_15px_rgba(138,43,226,0.35)]"
-                            : "bg-[#0B1E2E]/85 border-[#00C8E8]/30 text-[#8DEBFF]"
+                      className={`px-2 py-1 rounded-md text-[11px] sm:text-xs font-['Space_Grotesk'] font-bold border ${i === 0
+                        ? "bg-[#00C8E8]/25 border-[#00C8E8] text-[#FFFFFF] shadow-[0_0_15px_rgba(0,200,232,0.4)]"
+                        : i === 1
+                          ? "bg-[#8A2BE2]/25 border-[#8A2BE2] text-[#F3F8FA] shadow-[0_0_15px_rgba(138,43,226,0.35)]"
+                          : "bg-[#0B1E2E]/85 border-[#00C8E8]/30 text-[#8DEBFF]"
                         }`}
                     >
                       {rank}
@@ -595,7 +592,7 @@ export default function EventOverview() {
                 <h3 className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl text-[#FFFFFF] tracking-tight uppercase mb-1 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                   {EVENT_DETAILS.competitionHighlight}
                 </h3>
-                <p className="text-xs sm:text-sm text-[#00C8E8] font-mono mb-2 uppercase tracking-wider font-bold drop-shadow-[0_0_12px_rgba(0,200,232,0.4)]">
+                <p className="text-xs sm:text-sm text-[#00C8E8] font-['Space_Grotesk'] mb-2 uppercase tracking-wider font-bold drop-shadow-[0_0_12px_rgba(0,200,232,0.4)]">
                   {EVENT_DETAILS.prizePool} Total Prize Pool
                 </p>
                 <p className="text-xs text-[#C2D7E5] font-['Inter',sans-serif] leading-relaxed max-w-xs sm:max-w-sm line-clamp-2">
@@ -603,9 +600,9 @@ export default function EventOverview() {
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
-                <span>HONORS // {EVENT_DETAILS.prizePool} PRIZE POOL</span>
-                <span className="text-[#C2D7E5] font-semibold">RIGOROUS JURY</span>
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-['Inter',sans-serif] text-[#8DEBFF]">
+                <span>{EVENT_DETAILS.prizePool} Shared Prize Pool</span>
+                <span className="text-[#C2D7E5] font-medium">Expert Jury</span>
               </div>
             </div>
 
@@ -632,12 +629,12 @@ export default function EventOverview() {
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-[#00C8E8]" />
-                  <span className="text-[11px] font-mono tracking-widest text-[#8DEBFF] uppercase">
-                    TIMELINE // 2-DAY SPRINT
+                  <span className="text-xs font-semibold font-['Space_Grotesk'] text-[#8DEBFF] tracking-wider uppercase">
+                    Event Dates
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/15 text-[#00C8E8] border border-[#00C8E8]/35 font-semibold shadow-[0_0_10px_rgba(0,200,232,0.2)]">
-                  DECEMBER 2026
+                <span className="text-[11px] font-['Inter',sans-serif] px-2.5 py-0.5 rounded-full bg-[#00C8E8]/10 text-[#8DEBFF] border border-[#00C8E8]/25 font-medium">
+                  Dec 2026
                 </span>
               </div>
 
@@ -649,21 +646,21 @@ export default function EventOverview() {
                 {/* Dual Day Timeline Chips */}
                 <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
                   <div className="p-2.5 rounded-xl bg-[#0A2033]/85 border border-[#00C8E8]/35 shadow-[0_4px_16px_rgba(0,0,0,0.4)] text-left">
-                    <div className="text-[10px] font-mono text-[#00C8E8] font-bold mb-0.5">DAY 01 // 12 DEC</div>
+                    <div className="text-[11px] font-['Space_Grotesk'] text-[#00C8E8] font-bold mb-0.5">Day 1 · 12 Dec</div>
                     <div className="text-xs font-semibold text-[#FFFFFF]">Sprint Launch</div>
                     <div className="text-[10px] text-[#C2D7E5] mt-0.5">Kickoff & Architecture</div>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[#0A2033]/85 border border-[#8A2BE2]/40 shadow-[0_4px_16px_rgba(0,0,0,0.4)] text-left">
-                    <div className="text-[10px] font-mono text-[#A78BFA] font-bold mb-0.5">DAY 02 // 13 DEC</div>
+                    <div className="text-[11px] font-['Space_Grotesk'] text-[#A78BFA] font-bold mb-0.5">Day 2 · 13 Dec</div>
                     <div className="text-xs font-semibold text-[#FFFFFF]">Grand Finale</div>
                     <div className="text-[10px] text-[#C2D7E5] mt-0.5">Demos & Valedictory</div>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
-                <span>WEEKEND // SAT & SUN</span>
-                <span className="text-[#C2D7E5] font-semibold">48H IMMERSION</span>
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-['Inter',sans-serif] text-[#8DEBFF]">
+                <span>Saturday & Sunday</span>
+                <span className="text-[#C2D7E5] font-medium">In-Person Event</span>
               </div>
             </div>
 
@@ -690,12 +687,12 @@ export default function EventOverview() {
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-[#00C8E8]" />
-                  <span className="text-[11px] font-mono tracking-widest text-[#8DEBFF] uppercase">
-                    GROUND STATION // VENUE
+                  <span className="text-xs font-semibold font-['Space_Grotesk'] text-[#8DEBFF] tracking-wider uppercase">
+                    Venue Location
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C8E8]/15 text-[#00C8E8] border border-[#00C8E8]/35 font-semibold shadow-[0_0_10px_rgba(0,200,232,0.2)]">
-                  HUBBALLI
+                <span className="text-[11px] font-['Inter',sans-serif] px-2.5 py-0.5 rounded-full bg-[#00C8E8]/10 text-[#8DEBFF] border border-[#00C8E8]/25 font-medium">
+                  Hubballi
                 </span>
               </div>
 
@@ -704,7 +701,6 @@ export default function EventOverview() {
                   <div className="w-12 h-12 rounded-full bg-[#00C8E8]/20 border border-[#00C8E8]/50 flex items-center justify-center text-[#8DEBFF] shadow-[0_0_20px_rgba(0,200,232,0.3)]">
                     <MapPin className="w-6 h-6 text-[#00C8E8]" />
                   </div>
-                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#00C8E8] animate-ping" />
                 </div>
 
                 <h3 className="font-['Space_Grotesk'] font-bold text-xl sm:text-2xl text-[#FFFFFF] tracking-tight uppercase mb-1 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
@@ -717,7 +713,7 @@ export default function EventOverview() {
                 {/* Interactive Copy Address Button */}
                 <button
                   onClick={handleCopyAddress}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2033]/90 hover:bg-[#00C8E8]/20 border border-[#00C8E8]/35 hover:border-[#00C8E8]/60 text-xs font-mono text-[#8DEBFF] shadow-[0_0_12px_rgba(0,200,232,0.15)] transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0A2033]/90 hover:bg-[#00C8E8]/20 border border-[#00C8E8]/35 hover:border-[#00C8E8]/60 text-xs font-['Inter',sans-serif] text-[#8DEBFF] shadow-[0_0_12px_rgba(0,200,232,0.15)] transition-all cursor-pointer"
                 >
                   {copied ? (
                     <>
@@ -733,9 +729,9 @@ export default function EventOverview() {
                 </button>
               </div>
 
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
-                <span>COORDS // 15.3647° N, 75.1240° E</span>
-                <span className="text-[#C2D7E5] font-semibold">KARNATAKA</span>
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-['Inter',sans-serif] text-[#8DEBFF]">
+                <span>Hubballi, Karnataka</span>
+                <span className="text-[#C2D7E5] font-medium">JCET Campus</span>
               </div>
             </div>
 
@@ -762,12 +758,12 @@ export default function EventOverview() {
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-[#00C8E8]" />
-                  <span className="text-[11px] font-mono tracking-widest text-[#8DEBFF] uppercase">
-                    REGISTRATION // ACCESS PASS
+                  <span className="text-xs font-semibold font-['Space_Grotesk'] text-[#8DEBFF] tracking-wider uppercase">
+                    Registration
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-semibold shadow-[0_0_10px_rgba(16,185,129,0.25)]">
-                  TEAM PASS
+                <span className="text-[11px] font-['Inter',sans-serif] px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
+                  Team Pass
                 </span>
               </div>
 
@@ -776,8 +772,8 @@ export default function EventOverview() {
                   <span className="font-['Space_Grotesk'] font-black text-4xl sm:text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-[#00C8E8] via-[#8DEBFF] to-[#A78BFA] drop-shadow-[0_0_30px_rgba(0,200,232,0.4)]">
                     {EVENT_DETAILS.registrationFeeAmount}
                   </span>
-                  <span className="font-mono text-sm sm:text-base text-[#00C8E8] font-bold">
-                    / TEAM
+                  <span className="font-['Space_Grotesk'] text-sm sm:text-base text-[#00C8E8] font-bold uppercase">
+                    / team
                   </span>
                 </div>
                 <p className="text-xs text-[#C2D7E5] mb-3">Flat fee for up to 4 innovators</p>
@@ -803,9 +799,9 @@ export default function EventOverview() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#8DEBFF]">
-                <span>PASS // ALL-INCLUSIVE</span>
-                <span className="text-emerald-400 font-semibold">NO HIDDEN CHARGES</span>
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-['Inter',sans-serif] text-[#8DEBFF]">
+                <span>All-Inclusive Pass</span>
+                <span className="text-emerald-400 font-medium">No Hidden Fees</span>
               </div>
             </div>
           </div>
@@ -837,8 +833,8 @@ export default function EventOverview() {
                       onClick={() => goToCard(idx)}
                       aria-label={`Go to card ${idx + 1}`}
                       className={`transition-all duration-300 ${isActive
-                          ? "w-7 sm:w-8 h-2 sm:h-2.5 rounded-full bg-gradient-to-r from-[#00C8E8] to-[#8A2BE2] shadow-[0_0_12px_rgba(0,200,232,0.6)]"
-                          : "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white/20 hover:bg-white/40"
+                        ? "w-7 sm:w-8 h-2 sm:h-2.5 rounded-full bg-gradient-to-r from-[#00C8E8] to-[#8A2BE2] shadow-[0_0_12px_rgba(0,200,232,0.6)]"
+                        : "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white/20 hover:bg-white/40"
                         }`}
                     />
                   );
@@ -856,14 +852,14 @@ export default function EventOverview() {
               </button>
             </div>
 
-            {/* Micro Telemetry Cue */}
-            <div className="flex items-center justify-between w-full px-6 sm:px-10 text-[10px] sm:text-xs font-mono text-[#A4B6BF]/70">
-              <span>[ 0{activeIndex + 1} // 06 ]</span>
-              <span className="hidden sm:inline-block tracking-wider uppercase">
-                SCROLL DOWN TO ADVANCE CARDS • DRAG OR TAP TO NAVIGATE
+            {/* Micro Navigation Cue */}
+            <div className="flex items-center justify-between w-full px-6 sm:px-10 text-xs text-[#A4B6BF]/80 font-['Inter',sans-serif]">
+              <span className="font-['Space_Grotesk'] font-semibold text-[#8DEBFF]">{activeIndex + 1} of {totalCards}</span>
+              <span className="hidden sm:inline-block tracking-wide">
+                Scroll to advance cards • Tap to navigate
               </span>
-              <span className="sm:hidden tracking-wider uppercase">
-                SWIPE TO BROWSE
+              <span className="sm:hidden tracking-wide">
+                Swipe to browse
               </span>
             </div>
           </div>

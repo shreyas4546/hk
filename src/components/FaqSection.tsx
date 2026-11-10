@@ -18,17 +18,16 @@ export default function FaqSection() {
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-14 sm:mb-16 pb-6 border-b border-white/10">
         <div>
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#07131C]/85 border border-[#00C8E8]/30 text-xs font-mono text-[#8DEBFF] mb-3 shadow-[0_0_15px_rgba(0,200,232,0.15)]">
-            <HelpCircle className="w-3.5 h-3.5 text-[#00C8E8]" />
-            <span>VERIFIED INFORMATION</span>
-          </div>
+          <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] mb-3 font-['Space_Grotesk']">
+            FAQ
+          </p>
           <NorrisHeadline className="font-['Space_Grotesk'] font-bold text-3xl sm:text-4xl lg:text-5xl text-[#F3F8FA]">
             FREQUENTLY ASKED <br className="hidden sm:inline" />
             <span className="cyan-turquoise-text">QUESTIONS</span>
           </NorrisHeadline>
         </div>
         <p className="text-sm sm:text-base text-[#A4B6BF] font-['Inter',sans-serif] max-w-md text-left md:text-right">
-          Official, verified answers derived directly from the HackIgnite 1.0 announcement.
+          Clear answers to common questions about HackIgnite 1.0.
         </p>
       </div>
 
@@ -39,14 +38,14 @@ export default function FaqSection() {
             <div className="w-14 h-14 rounded-2xl bg-[#07131C] border border-[#00C8E8]/30 flex items-center justify-center text-[#8DEBFF] mb-4 shadow-[0_0_20px_rgba(0,200,232,0.2)]">
               <Phone className="w-7 h-7 text-[#00C8E8]" />
             </div>
-            <div className="text-xs font-mono text-[#8DEBFF] mb-1">EVENT COORDINATION</div>
+            <div className="text-xs font-semibold text-[#8DEBFF] mb-1 font-['Space_Grotesk'] uppercase tracking-wider">Event Coordination</div>
             <h4 className="font-['Space_Grotesk'] font-bold text-lg text-[#F3F8FA] mb-2">Have Direct Questions?</h4>
             <p className="text-xs text-[#A4B6BF] leading-relaxed mb-5 font-['Inter',sans-serif]">
               Connect directly with Coordinator {EVENT_DETAILS.coordinator} for official event assistance.
             </p>
             <a
               href={`tel:${EVENT_DETAILS.contactPhone}`}
-              className="w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold text-[#F3F8FA] bg-[#07131C] border border-[#00C8E8]/40 hover:border-[#00C8E8] hover:text-[#8DEBFF] transition-colors flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-xl text-xs font-['Space_Grotesk'] font-bold text-[#F3F8FA] bg-[#07131C] border border-[#00C8E8]/40 hover:border-[#00C8E8] hover:text-[#8DEBFF] transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               <Phone className="w-3.5 h-3.5 text-[#00C8E8]" />
               <span>Call {EVENT_DETAILS.contactPhoneFormatted}</span>
@@ -85,8 +84,8 @@ export default function FaqSection() {
                 {isOpen && (
                   <div className="mt-3.5 pr-8 text-sm text-[#A4B6BF] font-['Inter',sans-serif] leading-relaxed animate-in fade-in slide-in-from-top-1 duration-200">
                     <p>{faq.answer}</p>
-                    <div className="mt-2.5 inline-block text-[10px] font-mono text-[#8DEBFF]/80">
-                      CATEGORY // {faq.category.toUpperCase()}
+                    <div className="mt-2.5 inline-block text-xs font-['Inter',sans-serif] text-[#8DEBFF]/80 font-medium">
+                      {faq.category}
                     </div>
                   </div>
                 )}

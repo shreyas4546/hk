@@ -62,7 +62,7 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
       label: "Winner",
       subtitle: "Pinnacle Achievement",
       icon: Trophy,
-      badge: "WINNER // CHAMPION",
+      badge: "Winner",
       image: "/assets/cards/place-1-gold.webp",
       desc: "The supreme honor of HackIgnite 1.0. Awarded to the team delivering the most exceptional technological engineering, viable product architecture, and captivating pitch demonstration.",
       cta: "Aim For Winner",
@@ -118,10 +118,9 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
     >
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#07131C]/80 backdrop-blur-md border border-[#00C8E8]/30 text-xs font-mono text-[#8DEBFF] mb-3 shadow-[0_0_20px_rgba(0,200,232,0.15)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-pulse" />
-          <span>COMPETITION HIGHLIGHT // PODIUM AWARDS</span>
-        </div>
+        <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] mb-3 font-['Space_Grotesk']">
+          Awards & Recognition
+        </p>
         <NorrisHeadline className="font-['Space_Grotesk'] font-bold text-3xl sm:text-4xl lg:text-5xl text-[#F3F8FA] mb-3 uppercase tracking-tight">
           5 PLACES TO <span className="cyan-turquoise-text">CONQUER</span>
         </NorrisHeadline>
@@ -210,15 +209,14 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
                     {/* Top Header with Badge & Rank */}
                     <div className="w-full flex items-center justify-between mb-3 pb-2 border-b border-white/10">
                       <span
-                        className={`text-[10px] font-mono tracking-wider px-2 py-0.5 rounded-full border ${
-                          place.isApex
+                        className={`text-[10px] font-['Space_Grotesk'] font-medium tracking-wider px-2 py-0.5 rounded-full border ${place.isApex
                             ? "bg-[#00C8E8]/15 border-[#00C8E8]/40 text-[#8DEBFF]"
                             : "bg-white/5 border-white/10 text-white/70"
-                        }`}
+                          }`}
                       >
                         {place.badge}
                       </span>
-                      <span className="font-mono text-xs font-bold text-[#00C8E8]">{place.num}</span>
+                      <span className="font-['Space_Grotesk'] text-xs font-bold text-[#00C8E8]">{place.num}</span>
                     </div>
 
                     {/* Thematic Header Visual with Overlay & Icon */}
@@ -232,11 +230,10 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#04080D]/40 via-transparent to-transparent pointer-events-none" />
                       <div
-                        className={`absolute bottom-3 left-3 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg backdrop-blur-md ${
-                          place.isApex
+                        className={`absolute bottom-3 left-3 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg backdrop-blur-md ${place.isApex
                             ? "bg-[#00C8E8]/20 border border-[#00C8E8] text-[#8DEBFF] shadow-[0_0_15px_rgba(0,200,232,0.4)]"
                             : "bg-[#07131C]/90 border border-white/20 text-[#00C8E8]"
-                        }`}
+                          }`}
                       >
                         <Icon className="w-5 h-5 text-[#00C8E8]" />
                       </div>
@@ -295,9 +292,8 @@ export default function WhyHackIgnite({ onOpenRegister }: WhyHackIgniteProps) {
               <ChevronLeft className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2 font-mono text-xs text-[#8DEBFF]">
-              <span className="w-2 h-2 rounded-full bg-[#00C8E8] animate-pulse" />
-              <span>POSITION // 0{activeIndex + 1} OF 05</span>
+            <div className="text-xs font-semibold font-['Space_Grotesk'] text-[#8DEBFF] tracking-wider">
+              {activeIndex + 1} of 5
             </div>
 
             <button

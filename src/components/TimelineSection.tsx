@@ -28,9 +28,8 @@ export default function TimelineSection() {
 
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 px-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full cosmic-glass border border-[#20CFFF]/25 text-[11px] sm:text-xs font-mono text-[#8DEBFF] mb-3">
-          <Flag className="w-3.5 h-3.5 text-[#20CFFF] shrink-0" />
-          <span>MISSION CHRONOLOGY // 24-HOUR COUNTDOWN</span>
+        <div className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] font-['Space_Grotesk'] mb-3">
+          Event Timeline
         </div>
         <h2 className="font-display font-black text-2xl sm:text-4xl lg:text-5xl text-white mb-3 sm:mb-4">
           EVENT <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#20CFFF] to-[#8DEBFF]">TIMELINE</span>
@@ -88,7 +87,7 @@ export default function TimelineSection() {
                 <span className="text-[10px] sm:text-[11px] font-mono text-[#20CFFF] uppercase tracking-wider">
                   {item.phase}
                 </span>
-                <span className="text-[11px] font-mono text-[#9AAFC1]/60">STEP // {item.step}</span>
+                <span className="text-xs text-[#9AAFC1]/60 font-['Space_Grotesk']">Step {item.step}</span>
               </div>
 
               <h3 className="font-display font-bold text-base sm:text-lg text-white mb-2 group-hover:text-[#8DEBFF] transition-colors flex flex-wrap items-center gap-2">

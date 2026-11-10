@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Calendar,
   MapPin,
@@ -8,23 +8,21 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import { DETERMINISTIC_BUBBLES } from "./bubblesData";
+
 export default function Footer() {
   const footerRef = useRef<HTMLElement | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
 
   useEffect(() => {
-    const el = footerRef.current;
-    if (!el) return;
-
-    // Viewport-aware visibility observer: pause 128 bubble calculations when footer is offscreen
+    if (!footerRef.current || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
+      (entries) => {
+        setIsFooterVisible(entries[0].isIntersecting);
       },
-      { rootMargin: "300px 0px" }
+      { rootMargin: "400px 0px" }
     );
-
-    observer.observe(el);
+    observer.observe(footerRef.current);
     return () => observer.disconnect();
   }, []);
 
@@ -39,23 +37,12 @@ export default function Footer() {
     }
   };
 
-  // 128 Bubbles exactly as in the original reference Codepen:
-  // - for (var i = 0; i < 128; i++)
-  // style=`--size:${2+Math.random()*4}rem; --distance:${6+Math.random()*4}rem; --position:${-5+Math.random()*110}%; --time:${2+Math.random()*2}s; --delay:${-1*(2+Math.random()*2)}s;`
-  // PROTECTED WAVE/BLOB EFFECT IMPLEMENTATION - UNTOUCHED
-  const bubbles = useMemo(() => {
-    return Array.from({ length: 128 }, () => ({
-      size: `${2 + Math.random() * 4}rem`,
-      distance: `${6 + Math.random() * 4}rem`,
-      position: `${-5 + Math.random() * 110}%`,
-      time: `${2 + Math.random() * 2}s`,
-      delay: `${-1 * (2 + Math.random() * 2)}s`,
-    }));
-  }, []);
-
   return (
-    <footer ref={footerRef} className="blob-footer">
-      {/* SVG Gooey Filter for Liquid Metaball Physics (PROTECTED - UNTOUCHED) */}
+    <footer
+      ref={footerRef}
+      className={`blob-footer mt-16 sm:mt-24 lg:mt-28 ${!isFooterVisible ? "bubbles-paused" : ""}`}
+    >
+      {/* SVG Gooey Filter for Liquid Metaball Physics */}
       <svg
         style={{ position: "fixed", top: "100vh", pointerEvents: "none", width: 0, height: 0, opacity: 0 }}
         aria-hidden="true"
@@ -73,23 +60,32 @@ export default function Footer() {
         </defs>
       </svg>
 
-      {/* Bubbles Layer for Liquid Wave Upper Boundary (PROTECTED - UNTOUCHED, Viewport-paused) */}
-      <div className={`bubbles ${isVisible ? "bubbles-active" : "bubbles-paused"}`}>
-        {bubbles.map((b, i) => (
-          <div
-            key={i}
-            className="bubble"
-            style={
-              {
-                "--size": b.size,
-                "--distance": b.distance,
-                "--position": b.position,
-                "--time": b.time,
-                "--delay": b.delay,
-              } as React.CSSProperties
-            }
-          />
-        ))}
+      {/* Bubbles Layer for Liquid Wave Upper Boundary (Direct CodePen Implementation) */}
+      <div className="bubbles" aria-hidden="true">
+        {DETERMINISTIC_BUBBLES.map((b) => {
+          const tierClass =
+            b.tier === "tablet"
+              ? "hidden sm:block"
+              : b.tier === "desktop"
+              ? "hidden lg:block"
+              : "block";
+
+          return (
+            <div
+              key={b.id}
+              className={`bubble ${tierClass}`}
+              style={
+                {
+                  "--size": b.size,
+                  "--distance": b.distance,
+                  "--position": b.position,
+                  "--time": b.time,
+                  "--delay": b.delay,
+                } as React.CSSProperties
+              }
+            />
+          );
+        })}
       </div>
 
       {/* Balanced, Connected & Refined Footer Content */}
@@ -119,7 +115,7 @@ export default function Footer() {
                   <span className="font-['Space_Grotesk'] font-bold text-base sm:text-lg text-[#04080D] tracking-tight block leading-tight">
                     HACKIGNITE 1.0
                   </span>
-                  <span className="text-[11px] font-mono font-semibold text-[#04080D]/85 block leading-tight">
+                  <span className="text-[11px] font-['Space_Grotesk'] font-semibold text-[#04080D]/85 block leading-tight">
                     24-Hour Innovation Challenge
                   </span>
                 </div>
@@ -129,17 +125,15 @@ export default function Footer() {
                 Think. Build. Innovate. Impact.
               </p>
 
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#04080D]/10 text-[9.5px] font-mono font-bold text-[#04080D] tracking-wider uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#04080D]" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#04080D]/10 text-[10px] font-['Space_Grotesk'] font-bold text-[#04080D] tracking-wider uppercase">
                 <span>National Level Hackathon</span>
               </div>
             </div>
 
             {/* COLUMN 2 — QUICK NAVIGATION (Desktop: 3 cols | Mobile: Order 2) */}
             <div className="md:col-span-3 lg:col-span-3 space-y-2 md:border-r border-[#04080D]/12 md:pr-4">
-              <div className="text-[10.5px] font-mono font-bold tracking-wider text-[#04080D] uppercase flex items-center gap-1.5 mb-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#04080D]" />
-                <span>Quick Navigation</span>
+              <div className="text-xs font-['Space_Grotesk'] font-bold tracking-wider text-[#04080D] uppercase mb-1.5">
+                Quick Navigation
               </div>
 
               {/* Mobile: 2-column compact grid | Desktop: Clean vertical stack */}
@@ -165,16 +159,15 @@ export default function Footer() {
 
             {/* COLUMN 3 — EVENT INFORMATION (Desktop: 5 cols | Mobile: Order 3) */}
             <div className="md:col-span-4 lg:col-span-5 space-y-2">
-              <div className="text-[10.5px] font-mono font-bold tracking-wider text-[#04080D] uppercase flex items-center gap-1.5 mb-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#04080D]" />
-                <span>Event Information</span>
+              <div className="text-xs font-['Space_Grotesk'] font-bold tracking-wider text-[#04080D] uppercase mb-1.5">
+                Event Information
               </div>
 
               <div className="space-y-1.5 text-xs text-[#04080D]/90 font-['Inter',sans-serif]">
                 <div className="flex items-start gap-2">
                   <Calendar className="w-3.5 h-3.5 text-[#04080D] shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Date</span>
+                    <span className="font-['Space_Grotesk'] text-[10px] uppercase font-bold text-[#04080D]/75 block leading-tight">Date</span>
                     <span className="font-semibold text-[#04080D]">12–13 December 2026</span>
                   </div>
                 </div>
@@ -182,7 +175,7 @@ export default function Footer() {
                 <div className="flex items-start gap-2">
                   <MapPin className="w-3.5 h-3.5 text-[#04080D] shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Venue</span>
+                    <span className="font-['Space_Grotesk'] text-[10px] uppercase font-bold text-[#04080D]/75 block leading-tight">Venue</span>
                     <span className="font-semibold text-[#04080D] leading-tight block">
                       Jain College of Engineering and Technology, Hubballi
                     </span>
@@ -192,7 +185,7 @@ export default function Footer() {
                 <div className="flex items-start gap-2">
                   <CreditCard className="w-3.5 h-3.5 text-[#04080D] shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Entry & Prize Pool</span>
+                    <span className="font-['Space_Grotesk'] text-[10px] uppercase font-bold text-[#04080D]/75 block leading-tight">Entry & Prize Pool</span>
                     <span className="font-semibold text-[#04080D]">₹2,000 / team · ₹40,000 Pool</span>
                   </div>
                 </div>
@@ -200,13 +193,13 @@ export default function Footer() {
                 <div className="flex items-start gap-2">
                   <User className="w-3.5 h-3.5 text-[#04080D] shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-mono text-[9px] uppercase font-bold text-[#04080D]/70 block leading-tight">Coordinator & Contact</span>
+                    <span className="font-['Space_Grotesk'] text-[10px] uppercase font-bold text-[#04080D]/75 block leading-tight">Coordinator & Contact</span>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-[#04080D]">Aditya R H</span>
                       <span className="text-[#04080D]/40">·</span>
                       <a
                         href="tel:+917022951232"
-                        className="font-mono font-bold text-[#04080D] hover:text-white underline underline-offset-2 decoration-[#04080D]/40 transition-colors inline-flex items-center gap-1"
+                        className="font-['Space_Grotesk'] font-bold text-[#04080D] hover:text-white underline underline-offset-2 decoration-[#04080D]/40 transition-colors inline-flex items-center gap-1"
                         title="Call Coordinator Aditya R H"
                       >
                         <Phone className="w-3 h-3 inline" />
@@ -234,7 +227,7 @@ export default function Footer() {
                 href="https://www.linkedin.com/in/shreyas-ugargol-69a2762b6/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-bold text-[#04080D] hover:text-white underline underline-offset-2 decoration-[#04080D]/40 hover:decoration-white inline-flex items-center gap-1 transition-all group font-mono"
+                className="font-bold text-[#04080D] hover:text-white underline underline-offset-2 decoration-[#04080D]/40 hover:decoration-white inline-flex items-center gap-1 transition-all group font-['Space_Grotesk']"
                 title="Shreyas Ugargol LinkedIn Profile"
               >
                 <span>SHREYAS UGARGOL</span>

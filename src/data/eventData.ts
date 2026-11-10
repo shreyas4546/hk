@@ -121,7 +121,7 @@ export const UNSTOP_REGISTRATION = {
   url: "https://unstop.com/o/ozT1RUD?utm_medium=Share&utm_source=adityhan33581&utm_campaign=Online_coding_challenge",
   qrImage: "/assets/unstop-qr.jpg",
   platform: "Unstop",
-  badge: "OFFICIAL PARTNER // UNSTOP POWERED",
+  badge: "Official Partner · Powered by Unstop",
   headline: "CLAIM YOUR SEAT BEFORE SLOTS CLOSE",
   subheadline:
     "Official 24-Hour Innovation Challenge at JCET Hubballi. Limited physical slots remaining for national teams.",

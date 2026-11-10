@@ -20,13 +20,13 @@ export default function LiveCountdown({ className = "" }: LiveCountdownProps) {
     <div
       className={`relative rounded-2xl bg-[#07131C]/85 border border-[#00C8E8]/35 p-5 sm:p-7 backdrop-blur-xl shadow-[0_0_35px_rgba(0,200,232,0.18)] ${className}`}
     >
-      {/* Top Telemetry Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-white/10 text-xs font-mono">
+      {/* Top Header */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-white/10 text-xs font-['Space_Grotesk']">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#00C8E8] animate-pulse shadow-[0_0_8px_#00C8E8]" />
-          <span className="text-[#8DEBFF] font-bold tracking-wider">{state.statusBadge}</span>
+          <span className="w-2 h-2 rounded-full bg-[#00C8E8] shadow-[0_0_8px_#00C8E8]" />
+          <span className="text-[#8DEBFF] font-bold tracking-wider uppercase">{state.statusBadge}</span>
         </div>
-        <span className="text-[#A4B6BF]/70 text-[11px]">TARGET: 12 DEC 2026 // 09:30 AM IST</span>
+        <span className="text-[#A4B6BF] text-xs font-['Inter',sans-serif]">12 Dec 2026 · 09:30 AM IST</span>
       </div>
 
       {/* Main Headline */}
@@ -47,7 +47,7 @@ export default function LiveCountdown({ className = "" }: LiveCountdownProps) {
             <div className="font-['Space_Grotesk'] font-extrabold text-2xl sm:text-4xl md:text-5xl text-[#F3F8FA] tabular-nums tracking-tight">
               {String(state.days).padStart(2, "0")}
             </div>
-            <div className="text-[9px] sm:text-xs font-mono text-[#8DEBFF] mt-1 tracking-wider uppercase">
+            <div className="text-[10px] sm:text-xs font-['Space_Grotesk'] font-medium text-[#8DEBFF] mt-1 tracking-wider uppercase">
               Days
             </div>
           </div>
@@ -57,7 +57,7 @@ export default function LiveCountdown({ className = "" }: LiveCountdownProps) {
             <div className="font-['Space_Grotesk'] font-extrabold text-2xl sm:text-4xl md:text-5xl text-[#F3F8FA] tabular-nums tracking-tight">
               {String(state.hours).padStart(2, "0")}
             </div>
-            <div className="text-[9px] sm:text-xs font-mono text-[#8DEBFF] mt-1 tracking-wider uppercase">
+            <div className="text-[10px] sm:text-xs font-['Space_Grotesk'] font-medium text-[#8DEBFF] mt-1 tracking-wider uppercase">
               Hours
             </div>
           </div>
@@ -67,7 +67,7 @@ export default function LiveCountdown({ className = "" }: LiveCountdownProps) {
             <div className="font-['Space_Grotesk'] font-extrabold text-2xl sm:text-4xl md:text-5xl text-[#F3F8FA] tabular-nums tracking-tight">
               {String(state.minutes).padStart(2, "0")}
             </div>
-            <div className="text-[9px] sm:text-xs font-mono text-[#8DEBFF] mt-1 tracking-wider uppercase">
+            <div className="text-[10px] sm:text-xs font-['Space_Grotesk'] font-medium text-[#8DEBFF] mt-1 tracking-wider uppercase">
               Minutes
             </div>
           </div>
@@ -77,7 +77,7 @@ export default function LiveCountdown({ className = "" }: LiveCountdownProps) {
             <div className="font-['Space_Grotesk'] font-extrabold text-2xl sm:text-4xl md:text-5xl text-[#00C8E8] tabular-nums tracking-tight drop-shadow-[0_0_12px_rgba(0,200,232,0.6)]">
               {String(state.seconds).padStart(2, "0")}
             </div>
-            <div className="text-[9px] sm:text-xs font-mono text-[#8DEBFF] mt-1 tracking-wider uppercase">
+            <div className="text-[10px] sm:text-xs font-['Space_Grotesk'] font-medium text-[#8DEBFF] mt-1 tracking-wider uppercase">
               Seconds
             </div>
           </div>
@@ -85,9 +85,9 @@ export default function LiveCountdown({ className = "" }: LiveCountdownProps) {
       ) : (
         /* Event In-Session / Concluded Banner */
         <div className="max-w-md mx-auto p-4 rounded-xl bg-[#00C8E8]/10 border border-[#00C8E8]/40 text-center">
-          <div className="inline-flex items-center gap-2 text-sm font-mono font-bold text-[#8DEBFF]">
-            <Radio className="w-4 h-4 text-[#00C8E8] animate-pulse" />
-            <span>CAMPUS ARENA SYNCHRONIZED</span>
+          <div className="inline-flex items-center gap-2 text-sm font-['Space_Grotesk'] font-semibold text-[#8DEBFF]">
+            <Radio className="w-4 h-4 text-[#00C8E8]" />
+            <span>HackIgnite Arena Synchronized</span>
           </div>
         </div>
       )}

@@ -77,7 +77,9 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
         const scrolled = window.scrollY > 20;
         if (scrolled !== lastScrolled) {
           lastScrolled = scrolled;
-          setIsScrolled(scrolled);
+          React.startTransition(() => {
+            setIsScrolled(scrolled);
+          });
         }
 
         // Check if user has scrolled near bottom of page (activate #sponsors)
@@ -86,7 +88,9 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
         if (scrollBottom >= docHeight - 100) {
           if (lastActive !== "#sponsors") {
             lastActive = "#sponsors";
-            setActiveSection("#sponsors");
+            React.startTransition(() => {
+              setActiveSection("#sponsors");
+            });
           }
           return;
         }
@@ -104,7 +108,9 @@ export default function Navbar({ onOpenRegister }: NavbarProps) {
 
         if (currentActive !== lastActive) {
           lastActive = currentActive;
-          setActiveSection(currentActive);
+          React.startTransition(() => {
+            setActiveSection(currentActive);
+          });
         }
       });
     };

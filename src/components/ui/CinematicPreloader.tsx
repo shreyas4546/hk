@@ -1,103 +1,101 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface CinematicPreloaderProps {
   onComplete: () => void;
 }
 
-// Lightweight 3D drifting cosmic particles with varied Z-depths
-const PARTICLES_3D = [
-  { top: "25%", left: "30%", z: 40, size: 3, delay: "0.1s", dur: "2.4s" },
-  { top: "68%", left: "24%", z: -30, size: 2.5, delay: "0.3s", dur: "2.1s" },
-  { top: "22%", left: "68%", z: 60, size: 2, delay: "0.2s", dur: "2.6s" },
-  { top: "74%", left: "72%", z: -40, size: 3, delay: "0.15s", dur: "2.2s" },
-  { top: "42%", left: "18%", z: 20, size: 2, delay: "0.4s", dur: "2.5s" },
-  { top: "54%", left: "82%", z: 50, size: 2.5, delay: "0.25s", dur: "2.3s" },
-  { top: "18%", left: "48%", z: -20, size: 3, delay: "0.05s", dur: "2.7s" },
-  { top: "82%", left: "46%", z: 30, size: 2, delay: "0.35s", dur: "2.0s" },
-  { top: "34%", left: "76%", z: -50, size: 2, delay: "0.2s", dur: "2.4s" },
-  { top: "62%", left: "15%", z: 40, size: 2.5, delay: "0.3s", dur: "2.5s" },
-  { top: "28%", left: "20%", z: -10, size: 1.5, delay: "0.45s", dur: "2.2s" },
-  { top: "78%", left: "80%", z: 70, size: 2, delay: "0.1s", dur: "2.8s" },
+// 12 Lightweight ambient cosmic stars
+const STARS = [
+  { top: "18%", left: "22%", size: 2, delay: "0s", duration: "2.4s" },
+  { top: "28%", left: "75%", size: 2.5, delay: "0.4s", duration: "2.8s" },
+  { top: "72%", left: "18%", size: 1.8, delay: "0.2s", duration: "2.1s" },
+  { top: "80%", left: "78%", size: 2.2, delay: "0.6s", duration: "2.6s" },
+  { top: "38%", left: "15%", size: 2, delay: "0.3s", duration: "2.3s" },
+  { top: "60%", left: "85%", size: 1.5, delay: "0.5s", duration: "2.5s" },
+  { top: "15%", left: "55%", size: 2.5, delay: "0.1s", duration: "2.7s" },
+  { top: "85%", left: "45%", size: 2, delay: "0.7s", duration: "2.2s" },
 ];
 
 export default function CinematicPreloader({ onComplete }: CinematicPreloaderProps) {
-  // Stage state: 1 (awakening), 2 (3d materialization), 3 (power-up & sweep), 4 (portal reveal)
-  const [stage, setStage] = useState<number>(1);
-  const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
-  const [progressPercent, setProgressPercent] = useState<number>(0);
-
-  // Damped 3D mouse tilt coordinates
-  const [mouseTilt, setMouseTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const percentTextRef = useRef<HTMLSpanElement>(null);
+  const statusTextRef = useRef<HTMLSpanElement>(null);
+  const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
 
   useEffect(() => {
-    // Lock page scroll during the 2.8s cinematic sequence
+    // Lock scroll during the swift cinematic sequence
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    // Progress bar animation ticker (0 to 100% across 2100ms)
+    // Direct DOM progress animation (Zero React re-renders = 100% 60-120fps smoothness)
     const startTime = performance.now();
-    const durationMs = 2100;
+    const durationMs = 1350; // Progress completes smoothly in 1.35s
     let animId = 0;
 
-    const tickProgress = (now: number) => {
+    const tick = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(100, Math.round((elapsed / durationMs) * 100));
-      setProgressPercent(progress);
+
+      if (progressBarRef.current) {
+        progressBarRef.current.style.width = `${progress}%`;
+      }
+      if (percentTextRef.current) {
+        percentTextRef.current.textContent = `${progress}%`;
+      }
+      if (statusTextRef.current) {
+        if (progress < 35) {
+          statusTextRef.current.textContent = "INITIALIZING CORE SYSTEMS";
+        } else if (progress < 70) {
+          statusTextRef.current.textContent = "CALIBRATING NEURAL PROTOCOLS";
+        } else if (progress < 98) {
+          statusTextRef.current.textContent = "IGNITION SEQUENCE PRIMED";
+        } else {
+          statusTextRef.current.textContent = "ACCESS GRANTED // LAUNCHING";
+        }
+      }
+
       if (progress < 100) {
-        animId = requestAnimationFrame(tickProgress);
+        animId = requestAnimationFrame(tick);
       }
     };
-    animId = requestAnimationFrame(tickProgress);
 
-    // Timeline Schedule:
-    // Stage 1 (0ms - 400ms): 3D space, grid & gyro rings awaken
-    // Stage 2 (400ms - 1100ms): 3D logo levitation & materialization into center
-    const tStage2 = setTimeout(() => {
-      setStage(2);
-    }, 400);
+    animId = requestAnimationFrame(tick);
 
-    // Stage 3 (1100ms - 2200ms): Kinetic energy overcharge, 3D laser sweep, plasma bloom
-    const tStage3 = setTimeout(() => {
-      setStage(3);
-    }, 1100);
-
-    // Stage 4 (2200ms - 2750ms): Smooth cinematic portal dissolve reveal (550ms ease-out)
-    const tStage4 = setTimeout(() => {
-      setStage(4);
+    // Smooth exit transition at 1.45s
+    const fadeTimer = setTimeout(() => {
       setIsFadingOut(true);
-    }, 2200);
+    }, 1450);
 
-    // Complete & unmount from DOM (2800ms total - comfortably under 3.0s max)
-    const tComplete = setTimeout(() => {
+    // Complete & unmount at 1.75s (swift, exhilarating, never laggy or stuck)
+    const completeTimer = setTimeout(() => {
       document.body.style.overflow = originalOverflow;
       onComplete();
-    }, 2800);
+    }, 1750);
 
-    // Strict safety timeout fallback at 3000ms max
-    const tSafety = setTimeout(() => {
+    // Safety fallback at 2.0s max
+    const safetyTimer = setTimeout(() => {
       document.body.style.overflow = originalOverflow;
       onComplete();
-    }, 3000);
+    }, 2000);
 
     return () => {
       cancelAnimationFrame(animId);
-      clearTimeout(tStage2);
-      clearTimeout(tStage3);
-      clearTimeout(tStage4);
-      clearTimeout(tComplete);
-      clearTimeout(tSafety);
+      clearTimeout(fadeTimer);
+      clearTimeout(completeTimer);
+      clearTimeout(safetyTimer);
       document.body.style.overflow = originalOverflow;
     };
   }, [onComplete]);
 
-  // Subtle interactive 3D mouse parallax response
+  // Zero-rerender mouse tilt using CSS Custom Properties directly on DOM
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setMouseTilt({ x: x * 14, y: -y * 14 });
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 16;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -16;
+    containerRef.current.style.setProperty("--tilt-x", `${x.toFixed(2)}deg`);
+    containerRef.current.style.setProperty("--tilt-y", `${y.toFixed(2)}deg`);
   };
 
   return (
@@ -105,201 +103,177 @@ export default function CinematicPreloader({ onComplete }: CinematicPreloaderPro
       ref={containerRef}
       onMouseMove={handleMouseMove}
       role="status"
-      aria-label="HackIgnite 1.0 3D Cinematic Loading"
-      className={`fixed inset-0 z-[99999] bg-[#030609] flex items-center justify-center overflow-hidden transition-all duration-550 ease-out select-none ${
+      aria-label="HackIgnite 1.0 Loading"
+      className={`fixed inset-0 z-[99999] bg-[#030608] flex items-center justify-center overflow-hidden select-none transition-all duration-400 ease-out ${
         isFadingOut
-          ? "opacity-0 scale-[1.04] pointer-events-none"
+          ? "opacity-0 scale-[1.03] pointer-events-none filter blur-[2px]"
           : "opacity-100 scale-100 pointer-events-auto"
       }`}
-      style={{
-        perspective: "1200px",
-      }}
+      style={
+        {
+          "--tilt-x": "0deg",
+          "--tilt-y": "0deg",
+          perspective: "1000px",
+        } as React.CSSProperties
+      }
     >
-      {/* =========================================================================
-          1. 3D PERSPECTIVE FLOOR GRID & HORIZON DEPTH
-          ========================================================================= */}
-      <div className="absolute inset-x-0 bottom-0 h-[55vh] pointer-events-none overflow-hidden opacity-45">
-        <div
-          className="w-full h-full grid-3d-perspective-floor"
-          style={{
-            transform: `rotateX(78deg) translateZ(-80px) translateY(40px) rotateY(${mouseTilt.x * 0.3}deg)`,
-            maskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)",
-          }}
-        />
-      </div>
+      {/* Scoped CSS animations for smooth 60-120fps hardware-accelerated motion */}
+      <style>{`
+        @keyframes preloaderOrbitCw {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes preloaderOrbitCcw {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        @keyframes preloaderAuraPulse {
+          0%, 100% { transform: scale(0.95); opacity: 0.55; }
+          50% { transform: scale(1.15); opacity: 0.85; }
+        }
+        @keyframes preloaderFlameFloat {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-6px) scale(1.02); }
+        }
+        @keyframes preloaderStarBlink {
+          0%, 100% { opacity: 0.25; transform: scale(0.8); }
+          50% { opacity: 0.9; transform: scale(1.2); }
+        }
+        .preloader-orbit-cw {
+          animation: preloaderOrbitCw 14s linear infinite;
+          will-change: transform;
+        }
+        .preloader-orbit-ccw {
+          animation: preloaderOrbitCcw 18s linear infinite;
+          will-change: transform;
+        }
+        .preloader-aura-pulse {
+          animation: preloaderAuraPulse 3s ease-in-out infinite;
+          will-change: transform, opacity;
+        }
+        .preloader-flame-float {
+          animation: preloaderFlameFloat 3.5s ease-in-out infinite;
+          will-change: transform;
+        }
+      `}</style>
 
       {/* =========================================================================
-          2. DEEP NEBULA ATMOSPHERIC LIGHTING
+          1. DEEP AMBIENT COSMIC ATMOSPHERE (Lightweight Radial Glow)
           ========================================================================= */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
-        {/* Outer radial cyan atmosphere */}
-        <div
-          className={`w-[520px] h-[520px] sm:w-[750px] sm:h-[750px] rounded-full bg-gradient-to-tr from-[#00C8E8]/16 via-[#19D8E8]/10 to-transparent blur-[120px] sm:blur-[150px] transition-all duration-1000 ease-out ${
-            stage >= 2 ? "opacity-100 scale-100" : "opacity-35 scale-75"
-          }`}
-        />
-        {/* Deep electric core glow */}
-        <div
-          className={`absolute w-[260px] h-[260px] sm:w-[380px] sm:h-[380px] rounded-full bg-[#00C8E8]/20 blur-[75px] transition-all duration-700 ${
-            stage >= 3 ? "opacity-100 scale-110" : stage === 2 ? "opacity-75 scale-100" : "opacity-0 scale-85"
-          }`}
-        />
+        {/* Core cyan nebula halo */}
+        <div className="preloader-aura-pulse w-[420px] h-[420px] sm:w-[560px] sm:h-[560px] rounded-full bg-gradient-to-tr from-[#00C8E8]/18 via-[#19D8E8]/10 to-transparent blur-[90px] sm:blur-[110px]" />
+        {/* Deep electric core spark */}
+        <div className="absolute w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] rounded-full bg-[#00C8E8]/20 blur-[50px]" />
       </div>
 
       {/* =========================================================================
-          3. 3D FLOATING COSMIC PARTICLES (Multi-Depth Z-Layers)
+          2. LIGHTWEIGHT DRIFTING STARS
           ========================================================================= */}
-      <div
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ transformStyle: "preserve-3d" }}
-      >
-        {PARTICLES_3D.map((p, i) => (
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        {STARS.map((s, i) => (
           <div
             key={i}
-            className="absolute rounded-full bg-[#8DEBFF] shadow-[0_0_10px_#00C8E8] pointer-events-none transition-opacity duration-500"
+            className="absolute rounded-full bg-[#8DEBFF] shadow-[0_0_8px_#00C8E8]"
             style={{
-              top: p.top,
-              left: p.left,
-              width: `${p.size}px`,
-              height: `${p.size}px`,
-              transform: `translateZ(${p.z}px)`,
-              opacity: stage >= 2 ? 0.8 : 0.25,
+              top: s.top,
+              left: s.left,
+              width: `${s.size}px`,
+              height: `${s.size}px`,
+              animation: `preloaderStarBlink ${s.duration} ease-in-out infinite ${s.delay}`,
             }}
           />
         ))}
       </div>
 
       {/* =========================================================================
-          4. 3D GYROSCOPIC CONCENTRIC ORBITAL RINGS
+          3. MAIN EMBLEM & TYPOGRAPHY SHOWCASE (NO SQUARES, NO APP-ICON BOXES)
           ========================================================================= */}
       <div
-        className={`absolute pointer-events-none transition-opacity duration-700 ${
-          stage >= 2 ? "opacity-100" : "opacity-25"
-        }`}
+        className="relative z-10 flex flex-col items-center justify-center px-4 max-w-md w-full"
         style={{
+          transform: "rotateY(var(--tilt-x)) rotateX(var(--tilt-y))",
           transformStyle: "preserve-3d",
-          transform: `rotateY(${mouseTilt.x * 0.5}deg) rotateX(${mouseTilt.y * 0.5}deg)`,
+          transition: "transform 0.15s ease-out",
         }}
       >
-        {/* Outer 3D Gyro Ring */}
-        <div
-          className="gyro-ring-outer w-[340px] h-[340px] sm:w-[500px] sm:h-[500px] md:w-[580px] md:h-[580px] rounded-full border border-dashed border-[#00C8E8]/35 flex items-center justify-center relative shadow-[0_0_30px_rgba(0,200,232,0.25)]"
-        >
-          {/* Luminous Waypoint Beads on Outer Ring */}
-          <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-[#8DEBFF] border border-[#00C8E8] shadow-[0_0_12px_#00C8E8]" />
-          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-[#8DEBFF] border border-[#00C8E8] shadow-[0_0_12px_#00C8E8]" />
-        </div>
+        {/* Free-Floating Central Reactor Node */}
+        <div className="relative w-44 h-44 sm:w-52 sm:h-52 flex items-center justify-center">
+          {/* Outer Dashed Orbit Ring */}
+          <div className="preloader-orbit-cw absolute inset-0 rounded-full border border-dashed border-[#00C8E8]/40 shadow-[0_0_25px_rgba(0,200,232,0.2)] flex items-center justify-center pointer-events-none">
+            {/* Luminous Waypoint Beads */}
+            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-[#8DEBFF] border border-[#00C8E8] shadow-[0_0_10px_#00C8E8]" />
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-[#8DEBFF] border border-[#00C8E8] shadow-[0_0_10px_#00C8E8]" />
+          </div>
 
-        {/* Inner 3D Counter-Rotating Gyro Ring */}
-        <div
-          className="gyro-ring-inner absolute inset-0 m-auto w-[270px] h-[270px] sm:w-[390px] sm:h-[390px] md:w-[460px] md:h-[460px] rounded-full border border-[#19D8E8]/40 shadow-[0_0_20px_rgba(25,216,232,0.3)] flex items-center justify-center"
-        >
-          {/* Accent tick notches */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#00C8E8] shadow-[0_0_8px_#00C8E8]" />
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#00C8E8] shadow-[0_0_8px_#00C8E8]" />
-        </div>
-      </div>
+          {/* Inner Dotted Counter-Rotating Orbit Ring */}
+          <div className="preloader-orbit-ccw absolute inset-3 sm:inset-4 rounded-full border border-dotted border-[#19D8E8]/35 pointer-events-none">
+            <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 rounded-full bg-[#00C8E8] shadow-[0_0_8px_#00C8E8]" />
+            <div className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 rounded-full bg-[#00C8E8] shadow-[0_0_8px_#00C8E8]" />
+          </div>
 
-      {/* =========================================================================
-          5. 3D CENTRAL OFFICIAL HACKIGNITE LOGO BADGE
-          ========================================================================= */}
-      <div
-        className="relative z-10 flex flex-col items-center justify-center px-4 max-w-[280px] xs:max-w-[320px] sm:max-w-[380px] md:max-w-[440px] w-full"
-        style={{
-          transformStyle: "preserve-3d",
-          transform: `rotateY(${mouseTilt.x}deg) rotateX(${mouseTilt.y}deg)`,
-        }}
-      >
-        {/* 3D Floating & Levitation Logo Container */}
-        <div
-          className={`relative w-full aspect-square flex items-center justify-center transition-all duration-700 ease-out ${
-            stage >= 3
-              ? "logo-3d-levitate opacity-100"
-              : stage === 2
-              ? "opacity-100 scale-100"
-              : "opacity-0 scale-[0.82]"
-          }`}
-          style={{
-            transformStyle: "preserve-3d",
-            transform:
-              stage >= 2
-                ? "translateZ(40px) rotateX(0deg) rotateY(0deg)"
-                : "translateZ(-160px) rotateX(24deg) rotateY(-20deg)",
-          }}
-        >
-          {/* Refined 3D Multi-Layer Radial Plasma Bloom */}
-          <div
-            className={`absolute -inset-8 sm:-inset-14 rounded-full bg-gradient-to-tr from-[#00C8E8]/35 via-[#19D8E8]/20 to-transparent blur-3xl sm:blur-4xl pointer-events-none transition-all duration-800 ${
-              stage >= 3
-                ? "opacity-100 scale-115"
-                : stage === 2
-                ? "opacity-75 scale-100"
-                : "opacity-0 scale-85"
-            }`}
-          />
+          {/* Soft Atmospheric Core Glow (Pure Organic Radial Aura - Zero Box, Zero Hard Borders) */}
+          <div className="absolute inset-4 rounded-full bg-[#00C8E8]/10 blur-xl pointer-events-none" />
 
-          {/* 3D Glass Holographic Backplate Accent */}
-          <div className="absolute inset-2 sm:inset-4 rounded-[28px] sm:rounded-[36px] bg-[#07131C]/60 border border-[#00C8E8]/30 backdrop-blur-xl shadow-[0_15px_40px_rgba(0,0,0,0.85)] pointer-events-none" />
-
-          {/* Official HackIgnite Logo Artwork */}
-          <picture className="relative z-10 block w-full h-full flex items-center justify-center p-3 sm:p-5">
-            <source srcSet="/assets/logo/hackignite-badge.webp" type="image/webp" />
-            <img
-              src="/assets/logo/hackignite-badge.png"
-              alt="HackIgnite 1.0"
-              className={`w-full h-full object-contain transition-all duration-700 ${
-                stage >= 3
-                  ? "filter drop-shadow-[0_0_30px_rgba(0,200,232,0.95)] drop-shadow-[0_0_55px_rgba(25,216,232,0.65)]"
-                  : stage === 2
-                  ? "filter drop-shadow-[0_0_18px_rgba(0,200,232,0.7)]"
-                  : "filter drop-shadow-[0_0_6px_rgba(0,200,232,0.3)]"
-              }`}
-              loading="eager"
-              decoding="sync"
-            />
-          </picture>
-
-          {/* Stage 3: 3D High-Velocity Laser Sheen Across the Flame & Orbit */}
-          {stage >= 3 && (
-            <div className="absolute inset-3 sm:inset-5 rounded-[26px] sm:rounded-[34px] overflow-hidden pointer-events-none z-20">
-              <div className="absolute inset-0 w-3/4 h-[250%] -top-3/4 bg-gradient-to-r from-transparent via-[#8DEBFF]/45 to-transparent laser-sweep-3d-active" />
-            </div>
-          )}
+          {/* The Pure Official HackIgnite Emblem (Flame 'H' with Orbit) - 100% Transparent, No Square Borders */}
+          <div className="preloader-flame-float relative z-10 w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
+            <picture>
+              <source srcSet="/assets/logo/hackignite-emblem.webp" type="image/webp" />
+              <img
+                src="/assets/logo/hackignite-emblem.png"
+                alt="HackIgnite 1.0 Emblem"
+                className="w-full h-full object-contain filter drop-shadow-[0_0_20px_rgba(0,200,232,0.85)] drop-shadow-[0_0_45px_rgba(25,216,232,0.45)]"
+                loading="eager"
+                decoding="sync"
+              />
+            </picture>
+          </div>
         </div>
 
         {/* =========================================================================
-            6. FUTURISTIC 3D TELEMETRY & ENERGY PROGRESS BAR
+            4. SLEEK BRAND TYPOGRAPHY
             ========================================================================= */}
-        <div
-          className={`mt-4 sm:mt-6 w-full max-w-[280px] sm:max-w-[320px] flex flex-col items-center transition-all duration-600 ${
-            stage >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-          style={{ transform: "translateZ(50px)" }}
-        >
-          {/* Telemetry Status Line */}
-          <div className="w-full flex items-center justify-between text-[10px] sm:text-xs font-mono font-bold tracking-widest text-[#8DEBFF] uppercase mb-2">
+        <div className="text-center mt-3 sm:mt-4">
+          <h1 className="font-['Space_Grotesk'] font-bold text-xl sm:text-2xl tracking-[0.25em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-[#8DEBFF] to-[#00C8E8] drop-shadow-[0_0_15px_rgba(0,200,232,0.4)]">
+            HACKIGNITE 1.0
+          </h1>
+          <p className="font-mono text-[9px] sm:text-[10px] tracking-[0.28em] text-[#A4B6BF] uppercase mt-1">
+            24-HOUR INNOVATION CHALLENGE
+          </p>
+        </div>
+
+        {/* =========================================================================
+            5. ULTRA-SLIM CYBER ENERGY TELEMETRY & PROGRESS BAR
+            ========================================================================= */}
+        <div className="mt-5 sm:mt-6 w-full max-w-[260px] sm:max-w-[300px] flex flex-col items-center">
+          {/* Status readout with pulse bead & dynamic percentage */}
+          <div className="w-full flex items-center justify-between text-[10px] sm:text-[11px] font-mono font-bold tracking-wider text-[#8DEBFF] uppercase mb-1.5">
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] shadow-[0_0_8px_#00C8E8] animate-pulse" />
-              <span>{progressPercent >= 100 ? "IGNITION PROTOCOL ONLINE" : "SYSTEM INITIALIZING"}</span>
+              <span ref={statusTextRef} className="truncate">
+                INITIALIZING CORE SYSTEMS
+              </span>
             </span>
-            <span className="text-[#00C8E8]">{progressPercent}%</span>
+            <span ref={percentTextRef} className="text-[#00C8E8] font-mono font-bold ml-2">
+              0%
+            </span>
           </div>
 
-          {/* Ultra-Slim 2px Cyber Energy Progress Track */}
-          <div className="w-full h-1 sm:h-1.5 rounded-full bg-white/10 p-[1px] overflow-hidden relative border border-[#00C8E8]/30 shadow-[0_0_12px_rgba(0,200,232,0.2)]">
+          {/* Ultra-Slim 2px Cyber Progress Track */}
+          <div className="w-full h-1 sm:h-1.5 rounded-full bg-white/10 p-[1px] overflow-hidden relative border border-[#00C8E8]/35 shadow-[0_0_12px_rgba(0,200,232,0.25)]">
             <div
-              className="h-full bg-gradient-to-r from-[#00C8E8] via-[#19D8E8] to-[#8DEBFF] rounded-full transition-all duration-100 ease-out shadow-[0_0_12px_#00C8E8] relative"
-              style={{ width: `${progressPercent}%` }}
+              ref={progressBarRef}
+              className="h-full bg-gradient-to-r from-[#00C8E8] via-[#19D8E8] to-[#8DEBFF] rounded-full shadow-[0_0_10px_#00C8E8] relative"
+              style={{ width: "0%" }}
             >
-              {/* Traveling light bead at progress tip */}
+              {/* Traveling spark light on bar tip */}
               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#FFFFFF]" />
             </div>
           </div>
 
-          {/* Subtitle Protocol Label */}
-          <span className="mt-2 text-[9px] sm:text-[10px] font-mono text-[#A4B6BF]/70 tracking-widest uppercase">
-            HACKIGNITE 1.0 // 24-HOUR RUN
+          {/* Campus Host Sub-Tag */}
+          <span className="mt-2 text-[8.5px] sm:text-[9.5px] font-mono text-[#A4B6BF]/60 tracking-widest uppercase">
+            JCET HUBBALLI // 12-13 DEC 2026
           </span>
         </div>
       </div>

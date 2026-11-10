@@ -175,21 +175,19 @@ export default function AiEventAssistant() {
         {!isOpen && (
           <button
             onClick={() => setIsOpen(true)}
-            className="group relative flex items-center gap-3 px-4 py-3 rounded-full bg-[#07131C]/95 border border-[#00C8E8]/50 hover:border-[#00C8E8] text-white shadow-[0_0_25px_rgba(0,200,232,0.35)] backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-            aria-label="Open Ignite Assistant"
+            className="group relative flex items-center gap-3 px-4 py-3 rounded-full bg-[#07131C]/95 border border-[#00C8E8]/40 hover:border-[#00C8E8] text-white shadow-[0_0_25px_rgba(0,200,232,0.3)] backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+            aria-label="Open HackIgnite Assistant"
           >
             <div className="relative">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#00C8E8] absolute -top-1 -right-1 animate-ping" />
               <div className="w-8 h-8 rounded-full bg-[#00C8E8]/20 flex items-center justify-center text-[#8DEBFF]">
                 <Bot className="w-5 h-5 text-[#00C8E8]" />
               </div>
             </div>
             <div className="text-left hidden sm:block pr-1">
-              <div className="text-xs font-mono font-bold text-white tracking-wider flex items-center gap-1.5">
-                <span>IGNITE ASSISTANT</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8]" />
+              <div className="text-xs font-['Space_Grotesk'] font-bold text-white tracking-wide flex items-center gap-1.5">
+                <span>HackIgnite Assistant</span>
               </div>
-              <div className="text-[10px] text-[#8DEBFF]/80 font-mono">Ask about HackIgnite 1.0</div>
+              <div className="text-[11px] text-[#A4B6BF] font-['Inter',sans-serif]">Ask a question</div>
             </div>
           </button>
         )}
@@ -205,11 +203,11 @@ export default function AiEventAssistant() {
                 <Bot className="w-4 h-4 text-[#00C8E8]" />
               </div>
               <div>
-                <div className="font-mono text-xs font-bold text-white tracking-wider flex items-center gap-2">
-                  <span>IGNITE ASSISTANT</span>
-                  <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 text-[9px]">LIVE</span>
+                <div className="font-['Space_Grotesk'] text-xs font-bold text-white tracking-wide flex items-center gap-2">
+                  <span>HackIgnite Assistant</span>
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-medium">Online</span>
                 </div>
-                <div className="text-[10.5px] text-[#A4B6BF] font-mono">Official Event Copilot</div>
+                <div className="text-[11px] text-[#A4B6BF] font-['Inter',sans-serif]">Event Information Guide</div>
               </div>
             </div>
 
@@ -245,7 +243,7 @@ export default function AiEventAssistant() {
                   >
                     <div className="whitespace-pre-wrap">{m.text}</div>
                     <div
-                      className={`text-[9px] mt-1.5 font-mono ${isBot ? "text-[#A4B6BF]/60 text-right" : "text-[#050708]/60 text-right"
+                      className={`text-[9px] mt-1.5 font-['Space_Grotesk'] ${isBot ? "text-[#A4B6BF]/60 text-right" : "text-[#050708]/60 text-right"
                         }`}
                     >
                       {m.timestamp}
@@ -257,11 +255,11 @@ export default function AiEventAssistant() {
 
             {/* Typing Indicator */}
             {isTyping && (
-              <div className="flex items-center gap-2 text-xs text-[#8DEBFF] font-mono pl-8">
+              <div className="flex items-center gap-2 text-xs text-[#8DEBFF] font-['Inter',sans-serif] pl-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-bounce" />
                 <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-bounce [animation-delay:0.2s]" />
                 <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8] animate-bounce [animation-delay:0.4s]" />
-                <span className="text-[10px] text-[#A4B6BF] ml-1">Analyzing event knowledge base...</span>
+                <span className="text-[10px] text-[#A4B6BF] ml-1">Looking up event details...</span>
               </div>
             )}
 
@@ -274,7 +272,7 @@ export default function AiEventAssistant() {
               <button
                 key={idx}
                 onClick={() => handleSendMessage(q)}
-                className="px-2.5 py-1 rounded-full bg-[#07131C] hover:bg-[#00C8E8]/20 border border-white/10 hover:border-[#00C8E8]/40 text-[10.5px] font-mono text-[#8DEBFF] whitespace-nowrap transition-colors cursor-pointer shrink-0"
+                className="px-2.5 py-1 rounded-full bg-[#07131C] hover:bg-[#00C8E8]/20 border border-white/10 hover:border-[#00C8E8]/40 text-[11px] font-['Space_Grotesk'] text-[#8DEBFF] whitespace-nowrap transition-colors cursor-pointer shrink-0"
               >
                 {q}
               </button>

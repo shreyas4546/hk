@@ -93,7 +93,9 @@ export default function EventSchedule() {
 
     if (cardChanged) {
       reachedCardsRef.current = newCards;
-      setReachedCards(newCards);
+      React.startTransition(() => {
+        setReachedCards(newCards);
+      });
     }
 
     let nodeChanged = false;
@@ -105,7 +107,9 @@ export default function EventSchedule() {
 
     if (nodeChanged) {
       reachedNodesRef.current = newNodes;
-      setReachedNodes(newNodes);
+      React.startTransition(() => {
+        setReachedNodes(newNodes);
+      });
     }
   };
 
@@ -123,7 +127,7 @@ export default function EventSchedule() {
       svgGlowCoreRef.current.style.strokeDashoffset = dashOffset;
     }
 
-    if (beadGroupRef.current && cachedLengthRef.current > 0) {
+    if (window.innerWidth >= 768 && beadGroupRef.current && cachedLengthRef.current > 0) {
       if (progress > 0.02) {
         try {
           const pt = svgPathRef.current?.getPointAtLength(progress * cachedLengthRef.current);
@@ -338,12 +342,9 @@ export default function EventSchedule() {
 
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#07131C]/80 border border-[#00C8E8]/30 backdrop-blur-md mb-3 shadow-[0_0_15px_rgba(0,200,232,0.15)]">
-            <Clock className="w-3.5 h-3.5 text-[#00C8E8]" />
-            <span className="text-xs font-mono tracking-widest text-[#8DEBFF] uppercase">
-              TIMELINE PROTOCOL // 24-HOUR RUN
-            </span>
-          </div>
+          <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] mb-3 font-['Space_Grotesk']">
+            Event Schedule
+          </p>
 
           <NorrisHeadline
             as="h2"
@@ -366,14 +367,14 @@ export default function EventSchedule() {
                   <button
                     key={day.dayNumber}
                     onClick={() => setSelectedDay(day.dayNumber)}
-                    className={`px-5 py-2.5 rounded-xl font-mono text-xs sm:text-sm font-bold transition-all duration-300 flex items-center gap-2 cursor-pointer ${
+                    className={`px-5 py-2.5 rounded-xl font-['Space_Grotesk'] text-xs sm:text-sm font-bold transition-all duration-300 flex items-center gap-2 cursor-pointer ${
                       isSelected
                         ? "bg-[#00C8E8]/20 text-[#8DEBFF] border border-[#00C8E8]/60 shadow-[0_0_20px_rgba(0,200,232,0.3)]"
                         : "text-[#A4B6BF] hover:text-white hover:bg-white/5 border border-transparent"
                     }`}
                   >
                     <Calendar className="w-4 h-4 text-[#00C8E8]" />
-                    <span>{day.dayLabel} // {day.dateStr}</span>
+                    <span>{day.dayLabel} · {day.dateStr}</span>
                   </button>
                 );
               })}
@@ -383,23 +384,23 @@ export default function EventSchedule() {
             <div className="flex flex-wrap items-center justify-center gap-2.5">
               <button
                 onClick={generateSchedulePdf}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#00C8E8]/20 to-[#19D8E8]/20 hover:from-[#00C8E8]/30 hover:to-[#19D8E8]/30 border border-[#00C8E8]/50 hover:border-[#00C8E8] text-[#8DEBFF] hover:text-white font-mono text-xs font-bold transition-all duration-300 flex items-center gap-2 shadow-[0_0_15px_rgba(0,200,232,0.2)] hover:shadow-[0_0_25px_rgba(0,200,232,0.4)] cursor-pointer group"
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#00C8E8]/20 to-[#19D8E8]/20 hover:from-[#00C8E8]/30 hover:to-[#19D8E8]/30 border border-[#00C8E8]/50 hover:border-[#00C8E8] text-[#8DEBFF] hover:text-white font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-2 shadow-[0_0_15px_rgba(0,200,232,0.2)] hover:shadow-[0_0_25px_rgba(0,200,232,0.4)] cursor-pointer group"
                 title="Download Official HackIgnite 1.0 Timetable (PDF)"
               >
                 <Download className="w-3.5 h-3.5 text-[#00C8E8] group-hover:scale-110 group-hover:-translate-y-0.5 transition-transform" />
-                <span>DOWNLOAD SCHEDULE (PDF)</span>
+                <span>Download Schedule (PDF)</span>
               </button>
 
               <a
                 href={googleCalendarUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3.5 py-2.5 rounded-xl bg-[#07131C]/80 hover:bg-[#07131C] border border-white/10 hover:border-[#00C8E8]/50 text-[#A4B6BF] hover:text-white font-mono text-xs transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                className="px-3.5 py-2.5 rounded-xl bg-[#07131C]/80 hover:bg-[#07131C] border border-white/10 hover:border-[#00C8E8]/50 text-[#A4B6BF] hover:text-white font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                 title="Add to Google Calendar"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-[#00C8E8]" />
-                <span className="hidden sm:inline">GOOGLE CALENDAR</span>
-                <span className="sm:hidden">GCAL</span>
+                <span className="hidden sm:inline">Google Calendar</span>
+                <span className="sm:hidden">GCal</span>
               </a>
             </div>
           </div>
@@ -613,15 +614,15 @@ export default function EventSchedule() {
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-white/10 relative z-10">
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-[#00C8E8]" />
-                          <span className="font-mono text-xs sm:text-sm font-bold text-[#8DEBFF]">
+                          <span className="font-['Space_Grotesk'] text-xs sm:text-sm font-bold text-[#8DEBFF]">
                             {event.timeRange}
                           </span>
-                          <span className="text-[#A4B6BF]/40 text-xs hidden sm:inline">| IST</span>
+                          <span className="text-[#A4B6BF]/60 text-xs hidden sm:inline font-['Inter',sans-serif]">· IST</span>
                         </div>
 
                         {/* Calculated Live Activity State Badge */}
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[10px] font-mono font-bold tracking-wider ${status.color}`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[10px] font-['Space_Grotesk'] font-bold tracking-wider uppercase ${status.color}`}
                         >
                           <StatusIcon className="w-3 h-3" />
                           <span>{status.label}</span>
@@ -649,7 +650,7 @@ export default function EventSchedule() {
 
                           {/* Organizer Note Badge if present */}
                           {event.note && (
-                            <div className="mt-3 inline-flex items-center gap-1.5 text-[10.5px] font-mono text-cyan-300/90 bg-[#09232B]/80 px-2.5 py-1 rounded-md border border-[#00C8E8]/40">
+                            <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-['Inter',sans-serif] text-cyan-300/90 bg-[#09232B]/80 px-2.5 py-1 rounded-md border border-[#00C8E8]/40">
                               <AlertCircle className="w-3 h-3 text-[#00C8E8] shrink-0" />
                               <span>{event.note}</span>
                             </div>

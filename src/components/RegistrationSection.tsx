@@ -18,11 +18,10 @@ export default function RegistrationSection({ onOpenRegister }: RegistrationSect
 
       {/* Main Conversion Frame */}
       <div className="relative rounded-2xl sm:rounded-3xl cosmic-glass border border-[#00C8E8]/30 p-6 sm:p-10 md:p-14 lg:p-16 overflow-hidden text-center shadow-[0_0_50px_rgba(0,200,232,0.15)]">
-        {/* Top Kicker */}
-        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 py-1.5 rounded-full bg-[#07131C]/90 border border-[#00C8E8]/30 text-[11px] sm:text-xs font-mono text-[#8DEBFF] mb-5 sm:mb-6 shadow-[0_0_15px_rgba(0,200,232,0.15)]">
-          <Sparkles className="w-3.5 h-3.5 text-[#00C8E8] shrink-0" />
-          <span>OFFICIAL REGISTRATION PORTAL // {EVENT_DETAILS.prizePool} PRIZE POOL</span>
-        </div>
+        {/* Section Kicker */}
+        <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] mb-4 sm:mb-5 font-['Space_Grotesk']">
+          One Hackathon · One Shared Prize Pool
+        </p>
 
         {/* Section 4 F Heading: YOUR IDEAS CAN CHANGE TOMORROW. */}
         <NorrisHeadline className="font-['Space_Grotesk'] font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#F3F8FA] tracking-tight uppercase mb-4 max-w-4xl mx-auto leading-tight">
@@ -39,12 +38,12 @@ export default function RegistrationSection({ onOpenRegister }: RegistrationSect
 
         {/* SECTION 4 F: PROMINENT ENTRY FEE DISPLAY */}
         <div className="max-w-md mx-auto mb-8 sm:mb-10 p-5 sm:p-6 rounded-2xl bg-[#07131C]/85 border border-[#00C8E8]/40 shadow-[0_0_25px_rgba(0,200,232,0.2)]">
-          <div className="text-xs font-mono uppercase tracking-widest text-[#8DEBFF] mb-1">
-            OFFICIAL ENTRY FEE
+          <div className="text-xs font-semibold uppercase tracking-widest text-[#8DEBFF] mb-1 font-['Space_Grotesk']">
+            Entry Fee
           </div>
           <div className="font-['Space_Grotesk'] font-bold text-4xl sm:text-5xl text-[#F3F8FA] tracking-tight my-1">
             <span className="cyan-turquoise-text">{EVENT_DETAILS.registrationFeeAmount}</span>
-            <span className="text-base sm:text-lg text-[#A4B6BF] font-normal font-mono ml-2">PER TEAM</span>
+            <span className="text-base sm:text-lg text-[#A4B6BF] font-normal font-['Space_Grotesk'] ml-2">per team</span>
           </div>
           <p className="text-xs text-[#A4B6BF] mt-2 font-['Inter',sans-serif]">
             This is the complete registration fee per participating team.
@@ -54,23 +53,23 @@ export default function RegistrationSection({ onOpenRegister }: RegistrationSect
         {/* Live Countdown Component */}
         <LiveCountdown className="max-w-xl mx-auto mb-8 sm:mb-10" />
 
-        {/* Verified Event Facts Badges */}
+        {/* Event Key Facts */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 max-w-4xl mx-auto mb-8 sm:mb-10 text-left">
           <div className="p-3 sm:p-3.5 rounded-xl bg-[#07131C]/90 border border-white/10">
-            <div className="text-[9px] sm:text-[10px] font-mono text-[#A4B6BF]">EVENT DATES</div>
-            <div className="text-xs sm:text-sm font-bold text-[#F3F8FA] mt-0.5">{EVENT_DETAILS.dates}</div>
+            <div className="text-xs text-[#A4B6BF] font-['Inter',sans-serif]">Event Dates</div>
+            <div className="text-xs sm:text-sm font-bold text-[#F3F8FA] mt-0.5 font-['Space_Grotesk']">{EVENT_DETAILS.dates}</div>
           </div>
           <div className="p-3 sm:p-3.5 rounded-xl bg-[#07131C]/90 border border-white/10">
-            <div className="text-[9px] sm:text-[10px] font-mono text-[#A4B6BF]">DURATION</div>
-            <div className="text-xs sm:text-sm font-bold text-[#F3F8FA] mt-0.5">{EVENT_DETAILS.duration}</div>
+            <div className="text-xs text-[#A4B6BF] font-['Inter',sans-serif]">Duration</div>
+            <div className="text-xs sm:text-sm font-bold text-[#F3F8FA] mt-0.5 font-['Space_Grotesk']">{EVENT_DETAILS.duration}</div>
           </div>
           <div className="p-3 sm:p-3.5 rounded-xl bg-[#07131C]/90 border border-white/10">
-            <div className="text-[9px] sm:text-[10px] font-mono text-[#A4B6BF]">VENUE</div>
-            <div className="text-xs sm:text-sm font-bold text-[#F3F8FA] mt-0.5">{EVENT_DETAILS.shortVenue}</div>
+            <div className="text-xs text-[#A4B6BF] font-['Inter',sans-serif]">Venue</div>
+            <div className="text-xs sm:text-sm font-bold text-[#F3F8FA] mt-0.5 font-['Space_Grotesk']">{EVENT_DETAILS.shortVenue}</div>
           </div>
           <div className="p-3 sm:p-3.5 rounded-xl bg-[#07131C]/90 border border-white/10">
-            <div className="text-[9px] sm:text-[10px] font-mono text-[#A4B6BF]">ENTRY FEE</div>
-            <div className="text-xs sm:text-sm font-bold text-[#00C8E8] mt-0.5">{EVENT_DETAILS.registrationFee}</div>
+            <div className="text-xs text-[#A4B6BF] font-['Inter',sans-serif]">Entry Fee</div>
+            <div className="text-xs sm:text-sm font-bold text-[#00C8E8] mt-0.5 font-['Space_Grotesk']">{EVENT_DETAILS.registrationFee}</div>
           </div>
         </div>
 
@@ -86,9 +85,8 @@ export default function RegistrationSection({ onOpenRegister }: RegistrationSect
         </div>
 
         {/* Sponsor Endorsement & Quick QR Micro-Hint */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs font-mono text-[#A4B6BF]">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs font-['Inter',sans-serif] text-[#A4B6BF]">
           <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C8E8]" />
             <span>Official Platform:</span>
             <strong className="text-white">Unstop</strong>
           </span>
@@ -97,7 +95,7 @@ export default function RegistrationSection({ onOpenRegister }: RegistrationSect
             onClick={onOpenRegister}
             className="text-[#8DEBFF] hover:underline underline-offset-4 cursor-pointer inline-flex items-center gap-1"
           >
-            <span>Click to View Mobile QR Scanner & Direct Link</span>
+            <span>Scan QR Code or Open Direct Link</span>
             <ArrowRight className="w-3 h-3 inline" />
           </button>
         </div>

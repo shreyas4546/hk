@@ -114,11 +114,11 @@ export const AntiGravityCanvas: React.FC<{
 
     // Responsive density cap
     const isMobile = width < 768;
-    const baseParticleDensity = isMobile ? 0.00006 : PARTICLE_DENSITY;
-    const baseBgDensity = isMobile ? 0.00004 : BG_PARTICLE_DENSITY;
+    const baseParticleDensity = isMobile ? 0.00004 : PARTICLE_DENSITY;
+    const baseBgDensity = isMobile ? 0.00003 : BG_PARTICLE_DENSITY;
 
     // 1. Main Interactive Foreground Particles
-    const maxInteractive = isMobile ? 35 : 220;
+    const maxInteractive = isMobile ? 22 : 220;
     const particleCount = Math.min(Math.floor(width * height * baseParticleDensity), maxInteractive);
     const newParticles: Particle[] = [];
 
@@ -161,7 +161,7 @@ export const AntiGravityCanvas: React.FC<{
     particlesRef.current = newParticles;
 
     // 2. Background Ambient Particles (Drifting Stars/Dust)
-    const maxBg = isMobile ? 35 : 100;
+    const maxBg = isMobile ? 18 : 100;
     const bgCount = Math.min(Math.floor(width * height * baseBgDensity), maxBg);
     const newBgParticles: BackgroundParticle[] = [];
 
@@ -208,7 +208,17 @@ export const AntiGravityCanvas: React.FC<{
     const { width, height } = dimensionsRef.current;
     if (width === 0 || height === 0) return;
 
-    const delta = time - lastTimeRef.current;
+    const isMobile = width < 768;
+    const rawDelta = time - lastTimeRef.current;
+
+    // Mobile FPS pacing: Cap background particle rendering to 30 FPS on mobile
+    // This halves GPU draw overhead and eliminates thermal throttling on entry-level Android devices
+    if (isMobile && rawDelta < 31) {
+      frameIdRef.current = requestAnimationFrame(animate);
+      return;
+    }
+
+    const delta = Math.min(Math.max(rawDelta, 0), 50); // Clamp delta to 50ms to prevent physics explosions
     lastTimeRef.current = time;
     if (delta > 0 && !isBackground) {
       setDebugInfo((prev) => ({ ...prev, fps: Math.round(1000 / delta) }));
@@ -216,8 +226,6 @@ export const AntiGravityCanvas: React.FC<{
 
     // Clear Canvas
     ctx.clearRect(0, 0, width, height);
-
-    const isMobile = width < 768;
 
     // 1. Pulsating Radial Glow (Desktop only for 0 fillrate pressure on mobile GPUs)
     if (!isMobile && gradientRef.current) {
