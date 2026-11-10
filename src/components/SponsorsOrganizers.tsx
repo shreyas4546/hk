@@ -173,7 +173,7 @@ export default function SponsorsOrganizers() {
                     Event Coordination Team
                   </h3>
                 </div>
-                <span className="text-[10px] font-['Space_Grotesk'] text-[#8DEBFF] uppercase tracking-wider shrink-0 hidden xs:inline-block">
+                <span className="text-[10px] font-['Space_Grotesk'] text-[#8DEBFF] uppercase tracking-wider shrink-0 hidden sm:inline-block">
                   Direct Helplines
                 </span>
               </div>
@@ -257,7 +257,7 @@ export default function SponsorsOrganizers() {
                     Academic Leadership
                   </h3>
                 </div>
-                <span className="text-[10px] font-['Space_Grotesk'] text-[#A4B6BF] uppercase tracking-wider shrink-0">
+                <span className="text-[10px] font-['Space_Grotesk'] text-[#A4B6BF] uppercase tracking-wider shrink-0 hidden sm:inline-block">
                   JCET Hubballi
                 </span>
               </div>
@@ -289,11 +289,11 @@ export default function SponsorsOrganizers() {
                       </div>
 
                       {/* Role Pill */}
-                      <span className="shrink-0 text-[8.5px] xs:text-[9.5px] sm:text-[10px] md:text-[11px] font-['Space_Grotesk'] font-semibold uppercase tracking-wider text-[#8DEBFF] bg-[#19D8E8]/10 px-1.5 xs:px-2 sm:px-2.5 py-0.5 rounded-full border border-[#19D8E8]/20 whitespace-nowrap">
+                      <span className="shrink-0 text-[9px] sm:text-[10px] md:text-[11px] font-['Space_Grotesk'] font-semibold uppercase tracking-wider text-[#8DEBFF] bg-[#19D8E8]/10 px-2 sm:px-2.5 py-0.5 rounded-full border border-[#19D8E8]/20 whitespace-nowrap">
                         {faculty.role === "Faculty Coordinator" ? (
                           <>
-                            <span className="xs:hidden">FACULTY COORD</span>
-                            <span className="hidden xs:inline">FACULTY COORDINATOR</span>
+                            <span className="sm:hidden">Faculty Coord</span>
+                            <span className="hidden sm:inline">Faculty Coordinator</span>
                           </>
                         ) : (
                           faculty.role
@@ -317,15 +317,15 @@ export default function SponsorsOrganizers() {
             </div>
 
             <div className="min-w-0 flex-1">
-              <div className="flex items-baseline gap-1.5 flex-wrap min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2 min-w-0">
                 <span className="font-['Space_Grotesk'] font-bold text-xs sm:text-sm text-[#F3F8FA] break-words">
                   {EVENT_DETAILS.institution}
                 </span>
-                <span className="text-[10px] text-[#00C8E8] font-['Space_Grotesk'] uppercase font-medium shrink-0">
-                  • {EVENT_DETAILS.department}
+                <span className="text-[10px] sm:text-xs text-[#00C8E8] font-['Space_Grotesk'] uppercase font-medium truncate">
+                  <span className="hidden sm:inline">• </span>CSE &amp; AI/ML Departments
                 </span>
               </div>
-              <div className="text-[10px] sm:text-[11px] text-[#A4B6BF] font-['Inter',sans-serif] flex items-center gap-1 mt-0.5 min-w-0">
+              <div className="text-[10px] sm:text-[11px] text-[#A4B6BF] font-['Inter',sans-serif] flex items-center gap-1 mt-0.5 sm:mt-1 min-w-0">
                 <MapPin className="w-3 h-3 text-[#00C8E8] shrink-0" />
                 <span className="truncate">{EVENT_DETAILS.address}</span>
               </div>
