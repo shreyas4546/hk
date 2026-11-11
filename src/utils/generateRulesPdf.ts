@@ -162,3 +162,4 @@ export function generateRulesPdf(): void {
   document.body.removeChild(a);
   URL.revokeObjectURL(downloadUrl);
 }
+

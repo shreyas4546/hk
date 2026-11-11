@@ -14,6 +14,7 @@ import {
   Flame,
   Zap,
   ArrowRight,
+  ArrowLeft,
   Phone,
   Link2,
 } from "lucide-react";
@@ -37,13 +38,19 @@ export default function RegistrationModal({
 
     soundEffects.playCrack(0.6);
 
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -62,26 +69,37 @@ export default function RegistrationModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="unstop-portal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-5 md:p-6 bg-black/90 backdrop-blur-2xl overflow-y-auto animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       {/* Modal Container */}
-      <div className="relative w-full max-w-4xl my-auto rounded-3xl bg-[#050B11]/95 border border-[#00C8E8]/40 shadow-[0_0_80px_rgba(0,200,232,0.3)] overflow-hidden text-left flex flex-col max-h-[94vh]">
+      <div className="relative w-full max-w-4xl my-auto rounded-2xl sm:rounded-3xl bg-[#050B11]/98 border border-[#00C8E8]/45 shadow-[0_0_80px_rgba(0,200,232,0.35)] text-left flex flex-col max-h-[92vh] sm:max-h-[88vh] overflow-hidden">
         {/* Ambient Top Glow Bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00C8E8] to-transparent shadow-[0_0_20px_#00C8E8]" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00C8E8] to-transparent shadow-[0_0_20px_#00C8E8] z-10" />
 
-        {/* Modal Header */}
-        <div className="relative px-5 pt-5 pb-4 sm:px-8 sm:pt-7 sm:pb-5 border-b border-white/10 flex items-start justify-between gap-4 bg-gradient-to-b from-[#071724]/90 to-transparent">
-          <div>
-            {/* Sponsor / Platform Indicator */}
-            <div className="flex flex-wrap items-center gap-2.5 mb-2 sm:mb-2.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#8DEBFF] font-['Space_Grotesk']">
+        {/* Modal Header (Sticky shrink-0) */}
+        <div className="relative px-4 py-3.5 sm:px-8 sm:py-5 border-b border-white/10 shrink-0 bg-gradient-to-b from-[#071724] to-[#050B11]/95 flex flex-col gap-2.5">
+          {/* Top Bar: Back Action, Partner Brand, Close Button */}
+          <div className="flex items-center justify-between gap-3">
+            {/* Left: Prominent Back Button */}
+            <button
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-[#00C8E8]/20 border border-white/15 hover:border-[#00C8E8]/60 text-xs font-['Space_Grotesk'] font-bold text-[#F3F8FA] hover:text-[#8DEBFF] transition-all cursor-pointer group shadow-sm shrink-0"
+              aria-label="Go back to hackathon website"
+            >
+              <ArrowLeft className="w-4 h-4 text-[#00C8E8] group-hover:-translate-x-1 transition-transform" />
+              <span>Back to Website</span>
+            </button>
+
+            {/* Middle: Sponsor / Platform Indicator */}
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8DEBFF] font-['Space_Grotesk'] hidden sm:inline">
                 Official Registration
               </span>
-              <span className="text-white/30 text-xs">·</span>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-white/95 text-[#1C4980] text-[11px] font-semibold tracking-tight shadow-sm">
+              <span className="text-white/30 text-xs hidden sm:inline">·</span>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-white/95 text-[#1C4980] text-[11px] font-semibold tracking-tight shadow-sm shrink-0">
                 <img
                   src="/assets/sponsors/unstop.svg"
                   alt="Unstop Logo"
@@ -93,30 +111,35 @@ export default function RegistrationModal({
               </div>
             </div>
 
-            {/* Modal Title */}
+            {/* Right: Close Button */}
+            <button
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-500/20 border border-white/15 hover:border-rose-500/50 text-[#A4B6BF] hover:text-white transition-all cursor-pointer shrink-0"
+              aria-label="Close registration modal"
+              title="Close modal (Esc)"
+            >
+              <span className="text-xs font-['Space_Grotesk'] font-medium hidden sm:inline">Close</span>
+              <X className="w-4 h-4" />
+              <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded border border-white/15 text-[#A4B6BF]">ESC</kbd>
+            </button>
+          </div>
+
+          {/* Title and Subtitle */}
+          <div>
             <h2
               id="unstop-portal-title"
-              className="font-['Space_Grotesk'] font-bold text-2xl sm:text-3xl md:text-4xl text-[#F3F8FA] tracking-tight uppercase leading-tight"
+              className="font-['Space_Grotesk'] font-bold text-xl sm:text-2xl md:text-3xl text-[#F3F8FA] tracking-tight uppercase leading-tight"
             >
               REGISTER ON <span className="cyan-turquoise-text">UNSTOP</span>
             </h2>
-            <p className="text-xs sm:text-sm text-[#A4B6BF] font-['Inter',sans-serif] mt-1 max-w-xl">
-              Official registration for <strong className="text-white">HackIgnite 1.0</strong> (12–13 Dec 2026 at JCET Hubballi). Click the buttons or QR code below to open the official Unstop portal.
+            <p className="text-xs sm:text-sm text-[#A4B6BF] font-['Inter',sans-serif] mt-0.5 max-w-xl leading-relaxed">
+              Official registration for <strong className="text-white">HackIgnite 1.0</strong> (12–13 Dec 2026 at JCET Hubballi). Scan the QR code or click below to launch the Unstop portal.
             </p>
           </div>
-
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="p-2.5 rounded-xl bg-white/5 hover:bg-[#00C8E8]/20 border border-white/10 hover:border-[#00C8E8]/60 text-[#A4B6BF] hover:text-[#8DEBFF] transition-all cursor-pointer shrink-0"
-            aria-label="Close registration modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Scrollable Modal Body */}
-        <div className="px-5 py-5 sm:px-8 sm:py-6 overflow-y-auto space-y-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-8 sm:py-6 space-y-6">
           {/* Main Registration Grid: Mobile Action First on small screens, QR side-by-side on desktop */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             {/* Desktop Left / Mobile Bottom: Interactive Cyber QR Scanner (5 Cols) */}
@@ -362,28 +385,40 @@ export default function RegistrationModal({
           </div>
         </div>
 
-        {/* Modal Footer Bar */}
-        <div className="px-5 py-3.5 sm:px-8 sm:py-4 border-t border-white/10 bg-[#03070B] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#A4B6BF]">
+        {/* Modal Footer Bar (Sticky shrink-0) */}
+        <div className="px-4 py-3 sm:px-8 sm:py-3.5 border-t border-white/10 bg-[#03070B] shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#A4B6BF]">
           <div className="flex items-center gap-2 text-[11px] sm:text-xs">
             <span>Registration query?</span>
             <a
               href="tel:+917022951232"
               className="text-[#8DEBFF] hover:underline font-['Space_Grotesk'] font-bold inline-flex items-center gap-1"
             >
-              <Phone className="w-3 h-3 inline" />
+              <Phone className="w-3 h-3 inline text-[#00C8E8]" />
               <span>Aditya R H (+91 70229 51232)</span>
             </a>
           </div>
 
-          <a
-            href={UNSTOP_REGISTRATION.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#00C8E8]/20 hover:bg-[#00C8E8]/30 border border-[#00C8E8]/50 text-[#8DEBFF] font-['Space_Grotesk'] text-xs font-semibold tracking-wider transition-all cursor-pointer no-underline uppercase"
-          >
-            <span>Open Unstop Challenge</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            {/* Secondary Go Back Button */}
+            <button
+              onClick={onClose}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-[#F3F8FA] hover:text-white font-['Space_Grotesk'] text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-[#00C8E8]" />
+              <span>Back to Website</span>
+            </button>
+
+            {/* Primary Action Button */}
+            <a
+              href={UNSTOP_REGISTRATION.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-[#00C8E8] to-[#19D8E8] hover:from-[#19D8E8] hover:to-[#8DEBFF] text-[#050708] font-['Space_Grotesk'] text-xs font-bold tracking-wider transition-all shadow-[0_0_20px_rgba(0,200,232,0.4)] cursor-pointer no-underline uppercase"
+            >
+              <span>Open Unstop Challenge</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
         </div>
       </div>
     </div>
