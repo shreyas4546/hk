@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { calculateEventCountdownState, CountdownStateResult } from "../utils/countdownState";
-import { Clock, Radio, Sparkles } from "lucide-react";
+import { Radio } from "lucide-react";
 
 interface LiveCountdownProps {
   className?: string;
@@ -18,7 +18,8 @@ export default function LiveCountdown({ className = "" }: LiveCountdownProps) {
 
   return (
     <div
-      className={`relative rounded-2xl bg-[#07131C]/85 border border-[#00C8E8]/35 p-5 sm:p-7 backdrop-blur-xl shadow-[0_0_35px_rgba(0,200,232,0.18)] ${className}`}
+      id="live-countdown"
+      className={`relative rounded-2xl bg-[#07131C]/85 border border-[#00C8E8]/35 p-3.5 sm:p-6 md:p-7 backdrop-blur-xl shadow-[0_0_35px_rgba(0,200,232,0.18)] ${className}`}
     >
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-white/10 text-xs font-['Space_Grotesk']">
@@ -29,56 +30,49 @@ export default function LiveCountdown({ className = "" }: LiveCountdownProps) {
         <span className="text-[#A4B6BF] text-xs font-['Inter',sans-serif]">12 Dec 2026 · 09:30 AM IST</span>
       </div>
 
-      {/* Main Headline */}
-      <div className="text-center mb-5">
-        <h3 className="font-['Space_Grotesk'] font-bold text-lg sm:text-2xl md:text-3xl text-white uppercase tracking-tight">
-          {state.statusHeadline}
-        </h3>
-        <p className="text-xs sm:text-sm text-[#A4B6BF] mt-1 font-['Inter',sans-serif]">
-          {state.targetDescription}
-        </p>
-      </div>
-
       {/* Digits Grid (When countdown is active) */}
       {state.isCountdownActive ? (
-        <div className="grid grid-cols-4 gap-2 sm:gap-4 max-w-lg mx-auto text-center">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-3 md:gap-4 max-w-lg mx-auto text-center w-full">
           {/* Days */}
-          <div className="relative p-2.5 sm:p-4 rounded-xl bg-[#050708]/90 border border-[#00C8E8]/25 shadow-inner group">
-            <div className="font-['Space_Grotesk'] font-extrabold text-2xl sm:text-4xl md:text-5xl text-[#F3F8FA] tabular-nums tracking-tight">
+          <div className="relative py-2.5 px-1 sm:p-4 rounded-xl bg-[#050708]/90 border border-[#00C8E8]/25 shadow-inner group min-w-0 flex flex-col items-center justify-center overflow-hidden">
+            <div className="font-['Space_Grotesk'] font-extrabold text-xl sm:text-4xl md:text-5xl text-[#F3F8FA] tabular-nums tracking-tight leading-none">
               {String(state.days).padStart(2, "0")}
             </div>
-            <div className="text-[10px] sm:text-xs font-['Space_Grotesk'] font-medium text-[#8DEBFF] mt-1 tracking-wider uppercase">
-              Days
+            <div className="text-[9px] sm:text-xs font-['Space_Grotesk'] font-semibold text-[#8DEBFF] mt-1.5 uppercase truncate max-w-full tracking-normal sm:tracking-wider">
+              <span>DAYS</span>
             </div>
           </div>
 
           {/* Hours */}
-          <div className="relative p-2.5 sm:p-4 rounded-xl bg-[#050708]/90 border border-[#00C8E8]/25 shadow-inner group">
-            <div className="font-['Space_Grotesk'] font-extrabold text-2xl sm:text-4xl md:text-5xl text-[#F3F8FA] tabular-nums tracking-tight">
+          <div className="relative py-2.5 px-1 sm:p-4 rounded-xl bg-[#050708]/90 border border-[#00C8E8]/25 shadow-inner group min-w-0 flex flex-col items-center justify-center overflow-hidden">
+            <div className="font-['Space_Grotesk'] font-extrabold text-xl sm:text-4xl md:text-5xl text-[#F3F8FA] tabular-nums tracking-tight leading-none">
               {String(state.hours).padStart(2, "0")}
             </div>
-            <div className="text-[10px] sm:text-xs font-['Space_Grotesk'] font-medium text-[#8DEBFF] mt-1 tracking-wider uppercase">
-              Hours
+            <div className="text-[9px] sm:text-xs font-['Space_Grotesk'] font-semibold text-[#8DEBFF] mt-1.5 uppercase truncate max-w-full tracking-normal sm:tracking-wider">
+              <span className="sm:hidden">HRS</span>
+              <span className="hidden sm:inline">HOURS</span>
             </div>
           </div>
 
           {/* Minutes */}
-          <div className="relative p-2.5 sm:p-4 rounded-xl bg-[#050708]/90 border border-[#00C8E8]/25 shadow-inner group">
-            <div className="font-['Space_Grotesk'] font-extrabold text-2xl sm:text-4xl md:text-5xl text-[#F3F8FA] tabular-nums tracking-tight">
+          <div className="relative py-2.5 px-1 sm:p-4 rounded-xl bg-[#050708]/90 border border-[#00C8E8]/25 shadow-inner group min-w-0 flex flex-col items-center justify-center overflow-hidden">
+            <div className="font-['Space_Grotesk'] font-extrabold text-xl sm:text-4xl md:text-5xl text-[#F3F8FA] tabular-nums tracking-tight leading-none">
               {String(state.minutes).padStart(2, "0")}
             </div>
-            <div className="text-[10px] sm:text-xs font-['Space_Grotesk'] font-medium text-[#8DEBFF] mt-1 tracking-wider uppercase">
-              Minutes
+            <div className="text-[9px] sm:text-xs font-['Space_Grotesk'] font-semibold text-[#8DEBFF] mt-1.5 uppercase truncate max-w-full tracking-normal sm:tracking-wider">
+              <span className="sm:hidden">MINS</span>
+              <span className="hidden sm:inline">MINUTES</span>
             </div>
           </div>
 
           {/* Seconds */}
-          <div className="relative p-2.5 sm:p-4 rounded-xl bg-[#050708]/90 border border-[#00C8E8]/50 shadow-[0_0_15px_rgba(0,200,232,0.2)] group">
-            <div className="font-['Space_Grotesk'] font-extrabold text-2xl sm:text-4xl md:text-5xl text-[#00C8E8] tabular-nums tracking-tight drop-shadow-[0_0_12px_rgba(0,200,232,0.6)]">
+          <div className="relative py-2.5 px-1 sm:p-4 rounded-xl bg-[#050708]/90 border border-[#00C8E8]/50 shadow-[0_0_15px_rgba(0,200,232,0.2)] group min-w-0 flex flex-col items-center justify-center overflow-hidden">
+            <div className="font-['Space_Grotesk'] font-extrabold text-xl sm:text-4xl md:text-5xl text-[#00C8E8] tabular-nums tracking-tight drop-shadow-[0_0_12px_rgba(0,200,232,0.6)] leading-none">
               {String(state.seconds).padStart(2, "0")}
             </div>
-            <div className="text-[10px] sm:text-xs font-['Space_Grotesk'] font-medium text-[#8DEBFF] mt-1 tracking-wider uppercase">
-              Seconds
+            <div className="text-[9px] sm:text-xs font-['Space_Grotesk'] font-semibold text-[#8DEBFF] mt-1.5 uppercase truncate max-w-full tracking-normal sm:tracking-wider">
+              <span className="sm:hidden">SECS</span>
+              <span className="hidden sm:inline">SECONDS</span>
             </div>
           </div>
         </div>

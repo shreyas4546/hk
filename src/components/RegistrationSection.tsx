@@ -12,12 +12,12 @@ interface RegistrationSectionProps {
 export default function RegistrationSection({ onOpenRegister }: RegistrationSectionProps) {
 
   return (
-    <section id="register" className="relative py-20 sm:py-28 px-5 sm:px-6 lg:px-8 max-w-7xl mx-auto z-10 overflow-hidden">
+    <section id="register" className="relative py-20 sm:py-28 px-3.5 sm:px-6 lg:px-8 max-w-7xl mx-auto z-10 overflow-hidden">
       {/* Background radial atmospheric lighting */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[850px] h-[500px] bg-gradient-to-r from-[#00C8E8]/12 via-[#19D8E8]/08 to-transparent blur-[160px] pointer-events-none rounded-full" />
 
       {/* Main Conversion Frame */}
-      <div className="relative rounded-2xl sm:rounded-3xl cosmic-glass border border-[#00C8E8]/30 p-6 sm:p-10 md:p-14 lg:p-16 overflow-hidden text-center shadow-[0_0_50px_rgba(0,200,232,0.15)]">
+      <div className="relative rounded-2xl sm:rounded-3xl cosmic-glass border border-[#00C8E8]/30 p-4 sm:p-10 md:p-14 lg:p-16 overflow-hidden text-center shadow-[0_0_50px_rgba(0,200,232,0.15)]">
         {/* Section Kicker */}
         <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#8DEBFF] mb-4 sm:mb-5 font-['Space_Grotesk']">
           One Hackathon · One Shared Prize Pool
