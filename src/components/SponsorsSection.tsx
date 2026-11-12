@@ -218,7 +218,7 @@ export default function SponsorsSection() {
                     <img
                       src={sponsor.logoSrc}
                       alt={`${sponsor.name} Logo`}
-                      loading="lazy"
+                      loading="eager"
                       decoding="async"
                       className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 ${
                         isUnstop
