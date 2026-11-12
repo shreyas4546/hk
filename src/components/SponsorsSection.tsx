@@ -40,7 +40,7 @@ const SPONSORS: Sponsor[] = [
     url: "#sponsors",
     ariaLabel: "Developers Club JCET Hubballi",
     logoSrc: "/assets/sponsors/developers-club.png",
-    isLightLogo: true,
+    isLightLogo: false,
     accentBorder: "group-hover:border-[#00C8E8]",
   },
   {
