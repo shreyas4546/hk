@@ -61,7 +61,7 @@ interface FacultyMember {
 
 const ACADEMIC_LEADERSHIP: FacultyMember[] = [
   {
-    name: "Dr. Prashanth Bankar",
+    name: "Dr. Prashanth Banakar",
     role: "Principal",
     department: "JCET Hubballi",
     monogram: "PB",
