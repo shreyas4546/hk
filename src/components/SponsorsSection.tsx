@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { MapPin, ExternalLink, ArrowUpRight, Handshake } from "lucide-react";
+import { MapPin, ExternalLink, ArrowUpRight, Handshake, Code2 } from "lucide-react";
 import NorrisHeadline from "./ui/norris-headline";
 
 interface Sponsor {
@@ -28,6 +28,18 @@ const SPONSORS: Sponsor[] = [
     url: "https://unstop.com/o/ozT1RUD?utm_medium=Share&utm_source=adityhan33581&utm_campaign=Online_coding_challenge",
     ariaLabel: "Visit Unstop official platform",
     logoSrc: "/assets/sponsors/unstop.svg",
+    isLightLogo: true,
+    accentBorder: "group-hover:border-[#00C8E8]",
+  },
+  {
+    id: "developers-club",
+    name: "Developers Club",
+    tag: "Community Partner",
+    description: "Official Student Developer Community · JCET Hubballi",
+    ctaText: "Student Developer Community",
+    url: "#sponsors",
+    ariaLabel: "Developers Club JCET Hubballi",
+    logoSrc: "/assets/sponsors/developers-club.png",
     isLightLogo: true,
     accentBorder: "group-hover:border-[#00C8E8]",
   },
@@ -108,12 +120,20 @@ export default function SponsorsSection() {
           0%, 100% { transform: translateY(-7px); }
           50% { transform: translateY(1px); }
         }
+        @keyframes sponsorFloat3 {
+          0%, 100% { transform: translateY(-3px); }
+          50% { transform: translateY(6px); }
+        }
         .sponsor-orb-float-1 {
           animation: sponsorFloat1 4.5s ease-in-out infinite;
           will-change: transform;
         }
         .sponsor-orb-float-2 {
           animation: sponsorFloat2 4.5s ease-in-out infinite;
+          will-change: transform;
+        }
+        .sponsor-orb-float-3 {
+          animation: sponsorFloat3 5.2s ease-in-out infinite;
           will-change: transform;
         }
         .sponsor-orbit-cw {
@@ -146,24 +166,30 @@ export default function SponsorsSection() {
       {/* Living Circular Orbs — Clean, Alive, Compact */}
       <div
         ref={orbsContainerRef}
-        className="flex items-center justify-center gap-10 sm:gap-16 md:gap-20 w-full pt-2 pb-6"
+        className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 md:gap-16 w-full pt-2 pb-6"
       >
-        {SPONSORS.map((sponsor) => {
+        {SPONSORS.map((sponsor, idx) => {
           const isUnstop = sponsor.id === "unstop";
           const isPhoenix = sponsor.id === "phoenix";
+          const isDevelopersClub = sponsor.id === "developers-club";
+
+          const floatClass =
+            idx === 0
+              ? "sponsor-orb-float-1"
+              : idx === 1
+              ? "sponsor-orb-float-2"
+              : "sponsor-orb-float-3";
 
           return (
             <div
               key={sponsor.id}
-              className={`sponsor-circle-orb relative flex flex-col items-center ${
-                isUnstop ? "sponsor-orb-float-1" : "sponsor-orb-float-2"
-              }`}
+              className={`sponsor-circle-orb relative flex flex-col items-center ${floatClass}`}
             >
-              {/* Entire Partner Node is a Direct External Link */}
+              {/* Entire Partner Node is a Direct Link */}
               <a
                 href={sponsor.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={sponsor.url.startsWith("http") ? "_blank" : undefined}
+                rel={sponsor.url.startsWith("http") ? "noopener noreferrer" : undefined}
                 aria-label={sponsor.ariaLabel}
                 title={sponsor.ariaLabel}
                 className="group relative flex flex-col items-center cursor-pointer text-center no-underline focus:outline-none"
@@ -195,14 +221,22 @@ export default function SponsorsSection() {
                       loading="lazy"
                       decoding="async"
                       className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 ${
-                        sponsor.isLightLogo ? "max-h-10 sm:max-h-12" : "rounded-full"
+                        isUnstop
+                          ? "max-h-10 sm:max-h-12"
+                          : isDevelopersClub
+                          ? "max-h-20 sm:max-h-24 scale-110"
+                          : "rounded-full"
                       }`}
                     />
                   </div>
 
                   {/* Floating Action Badge Icon */}
                   <div className="absolute -bottom-1 -right-1 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#07131C] border border-[#00C8E8]/40 group-hover:border-[#00C8E8] group-hover:bg-[#00C8E8]/20 flex items-center justify-center text-[#8DEBFF] shadow-md transition-all duration-300 group-hover:scale-110">
-                    <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#00C8E8] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    {isDevelopersClub ? (
+                      <Code2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#00C8E8]" />
+                    ) : (
+                      <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#00C8E8] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    )}
                   </div>
                 </div>
 
@@ -211,6 +245,8 @@ export default function SponsorsSection() {
                   <span>{sponsor.name}</span>
                   {isPhoenix ? (
                     <MapPin className="w-3 h-3 text-[#00C8E8]" />
+                  ) : isDevelopersClub ? (
+                    <Code2 className="w-3 h-3 text-[#00C8E8]" />
                   ) : (
                     <ExternalLink className="w-3 h-3 text-[#00C8E8]" />
                   )}
@@ -221,6 +257,8 @@ export default function SponsorsSection() {
                   <div className="inline-flex items-center gap-1 text-[10px] font-['Space_Grotesk'] font-bold uppercase tracking-wider text-[#00C8E8] bg-[#00C8E8]/10 px-2 py-0.5 rounded-full border border-[#00C8E8]/30 mb-1">
                     {isPhoenix ? (
                       <MapPin className="w-3 h-3 text-[#00C8E8]" />
+                    ) : isDevelopersClub ? (
+                      <Code2 className="w-3 h-3 text-[#00C8E8]" />
                     ) : (
                       <Handshake className="w-3 h-3 text-[#00C8E8]" />
                     )}
@@ -232,7 +270,13 @@ export default function SponsorsSection() {
                   </p>
 
                   <div className="inline-flex items-center gap-1 text-[10px] font-['Space_Grotesk'] font-semibold text-[#8DEBFF]">
-                    <span>{isPhoenix ? "Open Google Maps" : "Visit Platform"}</span>
+                    <span>
+                      {isPhoenix
+                        ? "Open Google Maps"
+                        : isDevelopersClub
+                        ? "JCET Community"
+                        : "Visit Platform"}
+                    </span>
                     <ArrowUpRight className="w-3 h-3 text-[#00C8E8]" />
                   </div>
                 </div>
