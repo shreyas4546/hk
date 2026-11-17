@@ -20,7 +20,7 @@ class SoundEffectsManager {
       }
     }
     if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume().catch(() => {});
+      this.ctx.resume().catch(() => { });
     }
     return this.ctx;
   }
@@ -178,6 +178,63 @@ class SoundEffectsManager {
       osc.start(start);
       osc.stop(start + 0.9);
     });
+  }
+
+  // 4. Subtle Interactive Button & Icon Pop Sound (Warm Organic Micro-Haptic)
+  public playPop(pitch: number = 1) {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(420 * pitch, now);
+      osc.frequency.exponentialRampToValueAtTime(840 * pitch, now + 0.05);
+      osc.frequency.exponentialRampToValueAtTime(320 * pitch, now + 0.09);
+
+      gain.gain.setValueAtTime(0.045, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.09);
+    } catch {
+      // Audio context safety catch
+    }
+  }
+
+  // 5. Gentle Cyber Living Hover Blip
+  public playHover(frequency: number = 720) {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(frequency, now);
+      osc.frequency.exponentialRampToValueAtTime(frequency * 1.25, now + 0.04);
+
+      gain.gain.setValueAtTime(0.02, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } catch {
+      // Audio context safety catch
+    }
   }
 }
 

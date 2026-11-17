@@ -786,7 +786,7 @@ export default function EventOverview() {
                   </div>
                   <div className="flex items-center gap-1.5 p-2 rounded-lg bg-[#0A2033]/85 border border-[#8A2BE2]/30 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
                     <Sparkles className="w-3.5 h-3.5 text-[#A78BFA] shrink-0" />
-                    <span className="font-medium">Mentorship & Swag</span>
+                    <span className="font-medium">Mentorship</span>
                   </div>
                   <div className="flex items-center gap-1.5 p-2 rounded-lg bg-[#0A2033]/85 border border-[#00C8E8]/25 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
                     <Clock className="w-3.5 h-3.5 text-[#00C8E8] shrink-0" />
